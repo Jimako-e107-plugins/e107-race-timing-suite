@@ -1,0 +1,15 @@
+{
+	"name": "racereg-qr-build",
+	"private": true,
+	"description": "Build sources for the racereg PAY by square QR browser bundle (issue #25). NOT used at runtime - the server only serves the committed ../racereg-qr.bundle.js. Run 'npm install && npm run build' to regenerate the bundle.",
+	"type": "module",
+	"scripts": {
+		"check": "node encode-check.mjs",
+		"build": "npm run check && esbuild racereg-qr.entry.js --bundle --format=iife --target=es2017 --minify --legal-comments=none --banner:js=\"/* racereg PAY-by-square QR bundle (issue #25) - generated, do not edit by hand. Vendored: bysquare@4.0.0 (MIT), qrcode-generator@2.0.4 (MIT). Rebuild: esbuild --bundle --format=iife --target=es2017 --minify src/racereg-qr.entry.js (see racereg/NOTES.md). */\" --outfile=../racereg-qr.bundle.js"
+	},
+	"devDependencies": {
+		"bysquare": "4.0.0",
+		"qrcode-generator": "2.0.4",
+		"esbuild": "0.28.1"
+	}
+}

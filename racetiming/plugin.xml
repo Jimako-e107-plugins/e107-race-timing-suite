@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Race timing" lan="LAN_GLOBAL_RACETIMING_001" version="1.0" date="2026-06-24" compatibility="2.4" installRequired="true" >
+	<author name="Jimako" url="e107sk.com" />
+	<summary lan="LAN_GLOBAL_RACETIMING_002">Checkpoint timing engine</summary>
+	<description lan="LAN_GLOBAL_RACETIMING_002">Checkpoint timing engine for the race-timing suite. Owns the race_time table only. Skeleton - the timing computation engine is extracted from timetracker in a later issue.</description>
+	<keywords>
+		<word>timing</word>
+		<word>checkpoint</word>
+		<word>race</word>
+	</keywords>
+	<category>content</category>
+	<copyright>e107sk.com</copyright>
+	<dependencies>
+		<plugin name="raceevent" />
+		<plugin name="racetrack" />
+		<plugin name="racers" />
+	</dependencies>
+	<adminLinks>
+		<link url="admin/admin_config.php" description="" primary="true"  icon="images/icon_64.png"  order="35"
+		iconSmall="images/icon_32.png" icon128="images/icon_128.png">LAN_CONFIGURE</link>
+	</adminLinks>
+</e107Plugin>

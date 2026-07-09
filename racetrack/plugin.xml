@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Trate" lan="LAN_GLOBAL_RACE_001" version="1.0" date="2025-01-28" compatibility="2.3" installRequired="true" >
+	<author name="Jimako" url="e107sk.com" />
+	<summary lan="LAN_GLOBAL_RACE_002">Tracks and checkpoints</summary>
+	<description lan="LAN_GLOBAL_RACE_002">Track setup and checkpoints</description>
+	<keywords>
+		<word>information</word>
+		<word>content</word>
+		<word>data</word>
+	</keywords>
+	<category>content</category>
+	<copyright>e107sk.com</copyright>
+	<dependencies>
+		<plugin name="raceevent" />
+	</dependencies>
+	<adminLinks>
+		<link url="admin/admin_config.php" description="" icon="images/icon_64.png" order="15"
+		iconSmall="images/icon_32.png" icon128="images/icon_128.png" primary="true" >LAN_CONFIGURE</link>
+	</adminLinks>
+	
+</e107Plugin>

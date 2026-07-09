@@ -1,0 +1,37 @@
+<?php
+if (!defined('e107_INIT')) { exit; }
+
+return array(
+    'LAN_RACERS_FRONT_001' => 'Manuálne zadávanie účastníkov nie je povolené.',
+    'LAN_RACERS_FRONT_002' => 'Pozor, manuálne zadávanie účastníkov bez kontroly prístupu je povolené.',
+    'LAN_RACERS_FRONT_003' => 'Odoslať',
+    'LAN_RACERS_FRONT_004' => 'Účastník úspešne odoslaný',
+    'LAN_RACERS_FRONT_005' => 'Zadané štartovacie číslo je už použité, údaje neboli vložené.',
+    'LAN_RACERS_FRONT_006' => 'Účastník úspešne odoslaný',
+    'LAN_RACERS_FRONT_007' => 'Chyba pri odoslaní: ',
+    'LAN_RACERS_FRONT_008' => 'Upraviť záznam',
+    'LAN_RACERS_FRONT_009' => 'Pridať ďalšieho účastníka',
+    // front-scoped duplicates of admin field labels reused by registracia.php
+    'LAN_RACERS_FRONT_010' => 'Krstné meno:',
+    'LAN_RACERS_FRONT_011' => 'Priezvisko:',
+    'LAN_RACERS_FRONT_012' => 'Dátum narodenia (d.m.yyyy):',
+    'LAN_RACERS_FRONT_013' => 'Typ (Jednotlivec/Štafeta):',
+    'LAN_RACERS_FRONT_014' => 'Muž',
+    'LAN_RACERS_FRONT_015' => 'Žena',
+    'LAN_RACERS_FRONT_016' => 'Národnosť',
+    'LAN_RACERS_FRONT_017' => 'Miestny',
+    'LAN_RACERS_FRONT_018' => 'Team/Klub',
+    'LAN_RACERS_FRONT_019' => 'Špeciálne štítky / Zoznam členov štafety',
+    'LAN_RACERS_FRONT_020' => 'Trať',
+    'LAN_RACERS_FRONT_021' => 'Na ktorej trati pobeží',
+    'LAN_RACERS_FRONT_022' => 'Ešte neurčené',
+    'LAN_RACERS_FRONT_023' => 'Štartovacie číslo',
+    'LAN_RACERS_STARTLIST_CAPTION'   => 'Štartovacia listina',
+    'LAN_RACERS_STARTLIST_ALL'       => 'Všetky',
+    'LAN_RACERS_STARTLIST_NUMBER'    => 'Štart.číslo',
+    'LAN_RACERS_STARTLIST_NAME'      => 'Meno',
+    'LAN_RACERS_STARTLIST_TYPE'      => 'Typ',
+    'LAN_RACERS_STARTLIST_NATION'    => 'Národnosť',
+    'LAN_RACERS_STARTLIST_TRACK'     => 'Trať',
+    'LAN_RACERS_STARTLIST_STARTTIME' => 'Čas štartu',
+);

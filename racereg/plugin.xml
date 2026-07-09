@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="racereg" lan="LAN_RACEREG_PLUGIN" version="1.1" date="2026-06-22" compatibility="2.3" installRequired="true" >
+	<author name="Jimako" url="e107sk.com" />
+	<summary lan="">Race registration and payments</summary>
+	<description lan="">Registration and payments for the race-timing suite. Depends on raceevent (the event base) and racetrack (the tracks/categories). Scaffold only - business tables, sign-up flow, QR and PII handling arrive in later issues.</description>
+	<keywords>
+		<word>registration</word>
+		<word>payment</word>
+		<word>race</word>
+	</keywords>
+	<category>content</category>
+	<copyright>e107sk.com</copyright>
+	<dependencies>
+		<plugin name="raceevent" />
+		<plugin name="racetrack" />
+	</dependencies>
+	<adminLinks>
+		<link url="admin/admin_config.php" description="" primary="true"  icon="images/icon_64.png" order="25"
+		iconSmall="images/icon_32.png" icon128="images/icon_128.png">LAN_CONFIGURE</link>
+	</adminLinks>
+</e107Plugin>

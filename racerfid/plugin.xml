@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="RFID import" lan="LAN_00" version="1.0" date="2025-03-11" compatibility="2.4" installRequired="true" >
+	<author name="Jimako" url="e107sk.com" />
+	<summary lan="">RFID import</summary>
+	<description lan="">Imports RFID chip-reader records from an external database into timetracker's race_time table, mapped via race's race_point table.</description>
+	<keywords>
+		<word>information</word>
+		<word>content</word>
+		<word>data</word>
+	</keywords>
+	<category>content</category>
+	<copyright>e107sk.com</copyright>
+	<adminLinks>
+		<link url="admin/admin_config.php" description="" order="30" icon='images/racerfid_64.jpg' iconSmall='images/racerfid_64.jpg' primary='true'>LAN_CONFIGURE</link>
+	</adminLinks>
+	<pluginPrefs>
+		<pref name='tracking_active'></pref>
+		<pref name='cron_disabled'></pref>
+		<pref name='refresh_interval'></pref>
+	</pluginPrefs>
+</e107Plugin>

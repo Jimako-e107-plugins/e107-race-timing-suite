@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Racers" lan="LAN_RACERS_GLOBAL_001" version="1.0" date="2025-01-28" compatibility="2.4" installRequired="true" >
+	<author name="Jimako" url="e107sk.com" />
+	<summary lan="">Racers</summary>
+	<description lan="">List of racers</description>
+	<keywords>
+		<word>information</word>
+		<word>content</word>
+		<word>data</word>
+	</keywords>
+	<category>content</category>
+	<copyright>e107sk.com</copyright>
+	<dependencies>
+		<plugin name="raceevent" />
+		<plugin name="racetrack" />
+	</dependencies>
+	<adminLinks>
+		<link url="admin/admin_config.php" description="" icon="images/icon_64.png" order="20"
+		iconSmall="images/icon_32.png" icon128="images/icon_128.png" primary="true" >LAN_CONFIGURE</link>
+	</adminLinks>
+	<siteLinks>
+		<link url="{e_PLUGIN}racers/index.php" sef='index' perm="everyone">Prehľad</link>
+	</siteLinks>
+	<pluginPrefs>
+		<pref name='name_hash'>1</pref>	
+		<pref name='display_team'>0</pref>	
+		<pref name='display_local'>0</pref>	
+		<pref name='states'>SVK,CZE,POL,HUN,RUS,AUS,USA,FRA,AUT,UKR</pref>	
+		<pref name='startforage'>today</pref>
+		<pref name='manualinput'>1</pref>
+	</pluginPrefs>
+</e107Plugin>
+ 

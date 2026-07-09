@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<e107Export version="2.4.0.2 (lite)" timestamp="1782550900" >
+	<database>
+	<dbTable name="racereg_registration">
+		<item>
+			<field name="registration_id">1</field>
+			<field name="track_id">1</field>
+			<field name="first_name">Janko</field>
+			<field name="last_name">Mrkvička</field>
+			<field name="birth_date">645408000</field>
+			<field name="street">Hlavná 12</field>
+			<field name="city">Bratislava</field>
+			<field name="postal_code">81101</field>
+			<field name="country">SK</field>
+			<field name="email">janko.mrkvicka@example.sk</field>
+			<field name="phone">+421901234567</field>
+			<field name="club">BK Bratislava</field>
+			<field name="registration_date">1782550095</field>
+			<field name="start_list_at">1782550300</field>
+			<field name="variable_symbol">1900001001</field>
+			<field name="amount_due">0.00</field>
+			<field name="approval_status">1</field>
+			<field name="pay_token">7d8821e738c485f01704e8d8c8495a01</field>
+			<field name="private_note"></field>
+		</item>
+		<item>
+			<field name="registration_id">2</field>
+			<field name="track_id">2</field>
+			<field name="first_name">Eva</field>
+			<field name="last_name">Nováková</field>
+			<field name="birth_date">501292800</field>
+			<field name="street">Štúrova 5</field>
+			<field name="city">Trnava</field>
+			<field name="postal_code">91701</field>
+			<field name="country">SK</field>
+			<field name="email">eva.novakova@example.sk</field>
+			<field name="phone">+421902345678</field>
+			<field name="club"></field>
+			<field name="registration_date">1782550400</field>
+			<field name="start_list_at">0</field>
+			<field name="variable_symbol">1900001002</field>
+			<field name="amount_due">15.00</field>
+			<field name="approval_status">0</field>
+			<field name="pay_token">a1b2c3d4e5f6a7b8c9d0e1f2a3b4c502</field>
+			<field name="private_note"></field>
+		</item>
+		<item>
+			<field name="registration_id">3</field>
+			<field name="track_id">1</field>
+			<field name="first_name">Peter</field>
+			<field name="last_name">Horváth</field>
+			<field name="birth_date">0</field>
+			<field name="street"></field>
+			<field name="city">Nitra</field>
+			<field name="postal_code"></field>
+			<field name="country">SK</field>
+			<field name="email">peter.horvath@example.sk</field>
+			<field name="phone"></field>
+			<field name="club">AK Nitra</field>
+			<field name="registration_date">1782550500</field>
+			<field name="start_list_at">0</field>
+			<field name="variable_symbol">1900001003</field>
+			<field name="amount_due">0.00</field>
+			<field name="approval_status">1</field>
+			<field name="pay_token">b2c3d4e5f6a7b8c9d0e1f2a3b4c5d603</field>
+			<field name="private_note">Náhradník - čaká na uvoľnenie miesta</field>
+		</item>
+		<item>
+			<field name="registration_id">4</field>
+			<field name="track_id">3</field>
+			<field name="first_name">Zuzana</field>
+			<field name="last_name">Kováčová</field>
+			<field name="birth_date">947462400</field>
+			<field name="street">Mierová 22</field>
+			<field name="city">Košice</field>
+			<field name="postal_code">04001</field>
+			<field name="country">SK</field>
+			<field name="email">zuzana.kovacova@example.sk</field>
+			<field name="phone">+421903456789</field>
+			<field name="club">ŠK Košice</field>
+			<field name="registration_date">1782550600</field>
+			<field name="start_list_at">0</field>
+			<field name="variable_symbol">1900001004</field>
+			<field name="amount_due">20.00</field>
+			<field name="approval_status">2</field>
+			<field name="pay_token">c3d4e5f6a7b8c9d0e1f2a3b4c5d6e704</field>
+			<field name="private_note">Duplicitná prihláška</field>
+		</item>
+		<item>
+			<field name="registration_id">5</field>
+			<field name="track_id">2</field>
+			<field name="first_name">Martin</field>
+			<field name="last_name">Tóth</field>
+			<field name="birth_date">270950400</field>
+			<field name="street">Záhradná 8</field>
+			<field name="city">Žilina</field>
+			<field name="postal_code">01001</field>
+			<field name="country">SK</field>
+			<field name="email">martin.toth@example.sk</field>
+			<field name="phone">+421904567890</field>
+			<field name="club">MBK Žilina</field>
+			<field name="registration_date">1782550700</field>
+			<field name="start_list_at">1782550800</field>
+			<field name="variable_symbol">1900001005</field>
+			<field name="amount_due">20.00</field>
+			<field name="approval_status">1</field>
+			<field name="pay_token">d4e5f6a7b8c9d0e1f2a3b4c5d6e7f805</field>
+			<field name="private_note"></field>
+		</item>
+	</dbTable>
+	</database>
+</e107Export>
