@@ -9,8 +9,7 @@
 
 if (!defined('e107_INIT')) { exit; }
 
-return [
-
+return array(
 	// ---- Page ----
 	'LAN_RACEREG_SIGNUP_TITLE'  => 'Prihláška na pretek',
 	'LAN_RACEREG_CONFIRM_TITLE' => 'Prihláška prijatá',
@@ -76,4 +75,4 @@ return [
 	'LAN_RACEREG_ERR_BIRTH'        => 'Zadajte platný dátum narodenia.',
 	'LAN_RACEREG_ERR_GDPR'         => 'Na registráciu je potrebný súhlas.',
 	'LAN_RACEREG_ERR_SAVE'         => 'Registráciu sa nepodarilo uložiť. Skúste to znova.',
-];
+);
