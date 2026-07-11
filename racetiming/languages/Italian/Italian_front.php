@@ -2,7 +2,7 @@
 /*
  * e107 website system
  *
- * racetiming plugin - English front language file.
+ * racetiming plugin - Italian front language file.
  *
  * racetiming's FIRST front LAN, added with the manual passing-entry "keypad app"
  * (vstup.php) + {TIMETRACKER_VSTUP} shortcode + `kontrola` route relocated here
@@ -22,10 +22,10 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Operator notices (manual passing entry).
-    'LAN_FRONT_RACETIMING_ALREADY_RECORDED' => 'Racer no. %1$s is already recorded at %2$s',
-    'LAN_FRONT_RACETIMING_ALREADY_ENDED'    => 'Racer %1$s has already ended early',
-    // Header caption.
-    'LAN_FRONT_RACETIMING_CAPTION_ORDER'    => 'order',
-    'LAN_FRONT_RACETIMING_CAPTION_PREV'     => 'previous number',
+    // Notifiche operatore (inserimento manuale passaggi).
+    'LAN_FRONT_RACETIMING_ALREADY_RECORDED' => 'Il corridore n. %1$s è già stato registrato a %2$s',
+    'LAN_FRONT_RACETIMING_ALREADY_ENDED'    => 'Il corridore %1$s ha già terminato anticipatamente',
+    // Didascalie intestazione.
+    'LAN_FRONT_RACETIMING_CAPTION_ORDER'    => 'ordine',
+    'LAN_FRONT_RACETIMING_CAPTION_PREV'     => 'numero precedente',
 );

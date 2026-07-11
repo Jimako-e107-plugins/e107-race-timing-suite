@@ -8,20 +8,24 @@
  * strings plus the welcome menu caption.
  */
 
-define('LAN_RACEEVENT_FRONT_EVENT', 'Event');
+if (!defined('e107_INIT')) { exit; }
 
-/* ---- Welcome menu -------------------------------------------------------- */
-define('LAN_RACEEVENT_WELCOME', 'Welcome');
+return array(
+    'LAN_RACEEVENT_FRONT_EVENT' => "Event",
 
-/* ---- Event overview (shared front + admin link directory) ---------------- */
-define('LAN_RACEEVENT_OV_CAPTION',    'Event overview');
-define('LAN_RACEEVENT_OV_TRACKS',     'Tracks');
-define('LAN_RACEEVENT_OV_POINTS',     'Checkpoints');
-define('LAN_RACEEVENT_OV_CATEGORIES', 'Categories');
-define('LAN_RACEEVENT_OV_STARTLISTS', 'Start lists');
-define('LAN_RACEEVENT_OV_RESULTS',    'Result lists');
-define('LAN_RACEEVENT_OV_KOMPLET',    'all');
-define('LAN_RACEEVENT_OV_EMPTY',      'Nothing here yet.');
-define('LAN_RACEEVENT_OV_ALIVE',      'OK');
-define('LAN_RACEEVENT_OV_DEAD',       'missing');
-define('LAN_RACEEVENT_OV_NO_ROUTE',   'route not registered');
+    /* ---- Welcome menu -------------------------------------------------------- */
+    'LAN_RACEEVENT_WELCOME' => "Welcome",
+
+    /* ---- Event overview (shared front + admin link directory) ---------------- */
+    'LAN_RACEEVENT_OV_CAPTION' => "Event overview",
+    'LAN_RACEEVENT_OV_TRACKS' => "Tracks",
+    'LAN_RACEEVENT_OV_POINTS' => "Checkpoints",
+    'LAN_RACEEVENT_OV_CATEGORIES' => "Categories",
+    'LAN_RACEEVENT_OV_STARTLISTS' => "Start lists",
+    'LAN_RACEEVENT_OV_RESULTS' => "Result lists",
+    'LAN_RACEEVENT_OV_KOMPLET' => "all",
+    'LAN_RACEEVENT_OV_EMPTY' => "Nothing here yet.",
+    'LAN_RACEEVENT_OV_ALIVE' => "OK",
+    'LAN_RACEEVENT_OV_DEAD' => "missing",
+    'LAN_RACEEVENT_OV_NO_ROUTE' => "route not registered",
+);

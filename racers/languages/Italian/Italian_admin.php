@@ -1,0 +1,62 @@
+<?php
+if (!defined('e107_INIT')) { exit; }
+
+return array(
+    'LAN_RACERS_ADMIN_001'      => 'Elenco',
+    'LAN_RACERS_ADMIN_002'      => 'Aggiungi concorrente',
+    'LAN_RACERS_ADMIN_003'      => 'Concorrenti',
+    'LAN_RACERS_ADMIN_004'      => 'Impostazioni',
+    'LAN_RACERS_ADMIN_005'      => 'Anonimizzare i nomi?',
+    'LAN_RACERS_ADMIN_005_HELP' => 'Sostituisce i dati personali (nomi) con caratteri illeggibili',
+    'LAN_RACERS_ADMIN_006'      => 'Mostrare la squadra accanto al nome?',
+    'LAN_RACERS_ADMIN_006_HELP' => 'Aggiunge la squadra al nome visualizzato',
+    'LAN_RACERS_ADMIN_007'      => 'Mostrare l\'indicatore locale accanto al nome?',
+    'LAN_RACERS_ADMIN_007_HELP' => 'Se un concorrente è contrassegnato come locale, il codice inserito di seguito verrà mostrato accanto al suo nome.',
+    'LAN_RACERS_ADMIN_008'      => 'Esempio di indicatore locale',
+    'LAN_RACERS_ADMIN_009'      => 'Nome:',
+    'LAN_RACERS_ADMIN_010'      => 'Cognome:',
+    'LAN_RACERS_ADMIN_011'      => 'Data di nascita (g.m.aaaa):',
+    'LAN_RACERS_ADMIN_011_HELP' => 'Inserisci la data di nascita nel formato G.M.AAAA o sceglila dal calendario',
+    'LAN_RACERS_ADMIN_012'      => 'Data di nascita non valida',
+    'LAN_RACERS_ADMIN_013'      => 'ID Esterno',
+    'LAN_RACERS_ADMIN_013_HELP' => 'ID dell\'applicazione esterna (terminovka.sk) per l\'API',
+    'LAN_RACERS_ADMIN_014'      => 'Tipo (Individuale/Staffetta):',
+    'LAN_RACERS_ADMIN_015'      => 'Uomo',
+    'LAN_RACERS_ADMIN_016'      => 'Donna',
+    'LAN_RACERS_ADMIN_017'      => 'Nazionalità',
+    'LAN_RACERS_ADMIN_018'      => 'Locale',
+    'LAN_RACERS_ADMIN_019'      => 'Squadra/Club',
+    'LAN_RACERS_ADMIN_020'      => 'Tag speciali / Elenco membri staffetta',
+    'LAN_RACERS_ADMIN_021'      => 'Testo per un concorrente locale',
+    'LAN_RACERS_ADMIN_022'      => 'Codici nazione (per le statistiche)',
+    'LAN_RACERS_ADMIN_023'      => 'Percorso',
+    'LAN_RACERS_ADMIN_023_HELP' => 'Su quale percorso gareggerà',
+    'LAN_RACERS_ADMIN_024'      => 'Non ancora assegnato',
+    'LAN_RACERS_ADMIN_025'      => 'Categoria',
+    'LAN_RACERS_ADMIN_026'      => 'Numero pettorale',
+    'LAN_RACERS_ADMIN_027'      => 'Metodo di calcolo dell\'età',
+    'LAN_RACERS_ADMIN_028'      => 'Oggi',
+    'LAN_RACERS_ADMIN_029'      => 'Al 1° gennaio',
+    'LAN_RACERS_ADMIN_030'      => 'Consenti l\'inserimento manuale dei partecipanti.',
+    // duplicati con ambito amministrativo di LAN_RACERS_FRONT_001/002 (admin_config.php renderHelp)
+    'LAN_RACERS_ADMIN_031'      => 'L\'inserimento manuale dei partecipanti non è consentito.',
+    'LAN_RACERS_ADMIN_032'      => 'Attenzione: è consentito l\'inserimento manuale dei partecipanti senza controllo degli accessi.',
+    // pagina elenco concorrenti (racers.php) intestazione tablerender
+    'LAN_RACERS_ADMIN_033'      => 'Elenco concorrenti',
+    // didascalie del menu amministrativo delle categorie (di proprietà di racers, precedentemente mutuate da timetracker)
+    // schermate liste di partenza (admin_startlists.php) + panoramica concorrenti (admin_racerlist.php)
+    'LAN_RACERS_ADMIN_034'      => 'Liste di partenza',
+    'LAN_RACERS_ADMIN_035'      => 'Panoramica concorrenti',
+    'LAN_RACERS_ADMIN_036'      => 'Tutti i percorsi (tutte le categorie)',
+    'LAN_RACERS_ADMIN_037'      => 'Lista di partenza — tutte le categorie',
+    'LAN_RACERS_ADMIN_038'      => 'Nessun percorso trovato.',
+    'LAN_RACERS_ADMIN_039'      => 'Nessuna categoria per questo percorso.',
+    'LAN_RACERS_ADMIN_040'      => 'Lista di partenza',
+    'LAN_RACERS_ADMIN_041'      => 'Liste di partenza per percorso e categoria',
+    'LAN_RACERS_ADMIN_042'      => 'Apri la panoramica dei concorrenti',
+    'LAN_RACERS_ADMIN_043'      => 'Iscrizione sul posto',
+    'LAN_RACERS_ADMIN_CATEGORIES'     => 'Elenco categorie',
+    'LAN_RACERS_ADMIN_CATEGORIES_ADD' => 'Aggiungi categoria',
+    // Scorciatoie del menu amministrativo cross-plugin spostate in raceevent_admin_links
+    // (didascalie: LAN_RACEEVENT_LINK_*).
+);

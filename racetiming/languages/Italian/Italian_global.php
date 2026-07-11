@@ -2,7 +2,7 @@
 /*
  * e107 website system
  *
- * racetiming plugin - English global language file.
+ * racetiming plugin - Italian global language file.
  *
  * Array-style LAN file loaded via e107::lan('racetiming', 'global', true).
  * Canonical, complete set; the Slovak file (languages/Slovak/Slovak_global.php)
@@ -14,8 +14,8 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Plugin display name (plugin.xml <e107Plugin lan="...">).
-    'LAN_GLOBAL_RACETIMING_001' => 'Race timing',
-    // Summary / dispatcher title (plugin.xml <summary>/<description> lan="...").
-    'LAN_GLOBAL_RACETIMING_002' => 'Checkpoint timing engine',
+    // Nome visualizzato del plugin (plugin.xml <e107Plugin lan="...">).
+    'LAN_GLOBAL_RACETIMING_001' => 'Cronometraggio gara',
+    // Titolo del sommario / dispatcher (plugin.xml <summary>/<description> lan="...").
+    'LAN_GLOBAL_RACETIMING_002' => 'Motore di cronometraggio dei punti di controllo',
 );

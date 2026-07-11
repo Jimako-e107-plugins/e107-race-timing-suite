@@ -2,7 +2,7 @@
 /*
  * e107 website system
  *
- * race plugin - English front language file (issue #37).
+ * race plugin - Italian front language file (issue #37).
  *
  * Array-style LAN file loaded via e107::lan('racetrack', '', true) by
  * race_points_menu.php. LAN_TC_ALL was used only by the deleted page_start.php
@@ -14,9 +14,9 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // pretek.php (race landing) - heading above the track's category list.
-    'LAN_RT_PRETEK_CATEGORIES' => 'List of categories',
+    'LAN_RT_PRETEK_CATEGORIES' => 'Elenco delle categorie',
 
     // page_archive.php (frozen archive front view).
-    'LAN_RT_ARCHIVE_TITLE'     => 'Archive',
-    'LAN_RT_ARCHIVE_NOT_FOUND' => 'Archive not found.',
+    'LAN_RT_ARCHIVE_TITLE'     => 'Archivio',
+    'LAN_RT_ARCHIVE_NOT_FOUND' => 'Archivio non trovato.',
 );

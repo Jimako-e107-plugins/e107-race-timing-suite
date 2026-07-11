@@ -2,7 +2,7 @@
 /*
  * e107 website system
  *
- * racereports plugin - English global language file.
+ * racereports plugin - Italian global language file.
  *
  * Array-style LAN file loaded via e107::lan('racereports', 'global', true).
  * Canonical, complete set; the Slovak file (languages/Slovak/Slovak_global.php)
@@ -14,8 +14,8 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Plugin display name (plugin.xml <e107Plugin lan="...">).
-    'LAN_GLOBAL_RACEREPORTS_001' => 'Race reports',
-    // Summary / dispatcher title (plugin.xml <summary>/<description> lan="...").
-    'LAN_GLOBAL_RACEREPORTS_002' => 'Result reports and archive',
+    // Nome visualizzato del plugin (plugin.xml <e107Plugin lan="...">).
+    'LAN_GLOBAL_RACEREPORTS_001' => 'Resoconti di gara',
+    // Titolo del sommario / dispatcher (plugin.xml <summary>/<description> lan="...").
+    'LAN_GLOBAL_RACEREPORTS_002' => 'Resoconti dei risultati e archivio',
 );
