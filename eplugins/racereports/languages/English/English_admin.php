@@ -17,7 +17,7 @@ if (!defined('e107_INIT')) { exit; }
 return array(
     // Admin landing screen (admin/admin_config.php).
     'LAN_ADMIN_RACEREPORTS_001' => 'Race reports',
-    'LAN_ADMIN_RACEREPORTS_002' => 'Race reports skeleton - this plugin owns the race_result and race_archive tables. The result-report, ranking and archive snapshot/freeze logic is not implemented yet.',
+    'LAN_ADMIN_RACEREPORTS_002' => 'Results and reports for the race-timing suite: live results board, overall and per-category rankings, one competitor\'s progression across all checkpoints, and all times at a single checkpoint. Reads times from racetiming and names/categories from racers; declares no tables of its own.',
     // Admin permission label.
     'LAN_ADMIN_RACEREPORTS_003' => 'Race reports administration',
 

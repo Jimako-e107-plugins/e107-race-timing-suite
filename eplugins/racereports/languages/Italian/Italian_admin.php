@@ -16,9 +16,8 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // Schermata principale amministratore (admin/admin_config.php).
-    'LAN_ADMIN_RACEREPORTS_001' => 'Resoconti di gara',
-    'LAN_ADMIN_RACEREPORTS_002' => 'Struttura dei resoconti di gara - questo plugin gestisce le tabelle race_result e race_archive. La logica dei resoconti delle classifiche, dei posizionamenti e del congelamento/istantanee d\'archivio non è ancora implementata.',
-    // Etichetta dei permessi amministratore.
+    'LAN_ADMIN_RACEREPORTS_001' => 'Report gara',
+    'LAN_ADMIN_RACEREPORTS_002' => 'Risultati e report per la suite di cronometraggio: tabellone dei risultati in diretta, classifica generale e per categoria, il percorso di un singolo concorrente attraverso tutti i punti di controllo e tutti i tempi rilevati in un singolo punto di controllo. Legge i tempi da racetiming e i nomi/categorie da racers; non dichiara tabelle proprie.',   // Etichetta dei permessi amministratore.
     'LAN_ADMIN_RACEREPORTS_003' => 'Amministrazione dei resoconti di gara',
 
     // Voci del menu di navigazione sinistro + intestazioni di pagina.

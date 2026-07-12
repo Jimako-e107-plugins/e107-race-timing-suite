@@ -17,5 +17,5 @@ return array(
     // Plugin display name (plugin.xml <e107Plugin lan="...">).
     'LAN_GLOBAL_RACEREPORTS_001' => 'Race reports',
     // Summary / dispatcher title (plugin.xml <summary>/<description> lan="...").
-    'LAN_GLOBAL_RACEREPORTS_002' => 'Result reports and archive',
+    'LAN_GLOBAL_RACEREPORTS_002' => 'Results and reports for the race-timing suite: live results board, overall and per-category rankings, one competitor\'s progression across all checkpoints, and all times at a single checkpoint. Reads times from racetiming and names/categories from racers; declares no tables of its own.',
 );

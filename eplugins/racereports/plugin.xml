@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e107Plugin name="Race reports" lan="LAN_GLOBAL_RACEREPORTS_001" version="1.0" date="2026-06-24" compatibility="2.4" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
-	<summary lan="LAN_GLOBAL_RACEREPORTS_002">Result reports and archive</summary>
-	<description lan="LAN_GLOBAL_RACEREPORTS_002">Reports and archive plugin for the race-timing suite. Owns the race_result and race_archive tables only. Skeleton - read-only result reports, ranking and the archive snapshot/freeze logic are extracted from timetracker in a later issue.</description>
+	<summary lan="LAN_GLOBAL_RACEREPORTS_002">Results and reports for the race-timing suite: live results board, overall and per-category rankings, one competitor\'s progression across all checkpoints, and all times at a single checkpoint. Reads times from racetiming and names/categories from racers; declares no tables of its own.</summary>
+	<description lan="LAN_GLOBAL_RACEREPORTS_002">Results and reports for the race-timing suite: live results board, overall and per-category rankings, one competitor\'s progression across all checkpoints, and all times at a single checkpoint. Reads times from racetiming and names/categories from racers; declares no tables of its own.</description>
 	<keywords>
 		<word>reports</word>
 		<word>archive</word>
