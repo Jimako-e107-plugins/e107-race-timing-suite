@@ -2,6 +2,7 @@
 
 The suite is open-source and lives at
 [github.com/Jimako-e107-plugins/e107-race-timing-suite](https://github.com/Jimako-e107-plugins/e107-race-timing-suite).
+It was developed by [JM Support s.r.o.](https://www.jmsupport.sk/).
 
 ## Reporting a problem
 
@@ -29,6 +30,12 @@ format rather than the array format the rest of the suite uses.
   per-key fallback to English.
 - Start numbers are **strings**, never integers. Leading zeros are significant.
 - Measured times are **millisecond datetime strings**, never Unix timestamps.
+
+## Supporting the project
+
+The suite is free and open-source, and was built in our own time. If it is useful to you, or you
+would like development to continue, [a donation](https://paypal.me/e107sk) is welcome — it is what
+makes further work on it possible.
 
 ## Documentation
 

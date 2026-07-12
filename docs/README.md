@@ -53,9 +53,39 @@ websites.
 Add **racereg** for registration and payments, **racerfid** for chip timing, **terminovka** for
 export to the Slovak race calendar.
 
-.
-
 ## Source code
 
 The suite is open-source:
 [github.com/Jimako-e107-plugins/e107-race-timing-suite](https://github.com/Jimako-e107-plugins/e107-race-timing-suite)
+
+## Who made this
+
+The Race Timing Suite was developed by **[JM Support](https://www.jmsupport.sk/)**.
+
+It is free and open-source, and it was built in our own time. If it saves you work — or if you would
+like it to keep improving — **[a donation](https://paypal.me/e107sk)** is genuinely welcome and is
+what makes further development possible.
+
+## Thanks
+
+This code is public because e107 itself became worth building on again.
+
+Without **[Deltik](https://github.com/Deltik)**, the current maintainer of e107, there would be no
+stable version of this CMS, and e107 Lite would never have reached the state it is in today. The
+Race Timing Suite is built against the upstream 2.4.0 release he maintains — and that is precisely
+what made it worth releasing.
+
+Publishing this suite and opening it to the whole community is our way of saying thank you for the
+changes of the past months.
+
+## Where it runs in practice
+
+The suite is used in production by **stopky.live**, a project run by **Eventour, s.r.o.**
+
+Eventour also provides the parts that lie beyond the software itself: **reading the RFID chips** and
+the **complete on-site management of the race**. A timing system is only half of what a race needs —
+someone still has to bring the readers, hand out the chips and run the finish area on the day.
+
+If you would like that kind of arrangement, contact **[Dušan Ďurčo](mailto:dusan.durco@eventour.sk)**
+(dusan.durco@eventour.sk) directly. You can either use their service as it is, or have the suite
+installed on your own website (for example on a subdomain).

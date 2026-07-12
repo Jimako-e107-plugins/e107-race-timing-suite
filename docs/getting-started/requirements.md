@@ -12,8 +12,11 @@
 ## e107 Lite or upstream e107?
 
 The suite was **developed and tested on [e107 Lite 2.4.x](https://github.com/Jimmi08/e107-2.4.x-Lite)**,
-a lighter fork of e107. It should also work on **upstream e107** — where the code differs, this is
-noted in the code itself.
+a lighter fork of e107.
+
+It is built against **upstream e107 2.4.0** and there is no technical reason it should not run there
+— but it has **never been tested on upstream**. If you run it on upstream e107 and hit a problem,
+please [report it](../reference/contributing.md); that is how it gets fixed.
 
 **Two things look different on e107 Lite**, so do not be surprised if your screen does not match a
 screenshot:
