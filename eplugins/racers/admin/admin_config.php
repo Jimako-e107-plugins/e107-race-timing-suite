@@ -206,7 +206,7 @@ class racer_ui extends e_admin_ui
 			'title' => LAN_RACERS_ADMIN_009,
 			'type' => 'text',
 			'data' => 'str',
-			'help' => LAN_RACERS_ADMIN_023_HELP,
+			'help' => '',
 			'writeParms' => []
 		),
 
