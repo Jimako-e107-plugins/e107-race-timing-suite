@@ -82,7 +82,7 @@ The competitor roster.
 | Field | LAN key | Admin help text | Notes |
 | --- | --- | --- | --- |
 | Bib number | `LAN_RACERS_ADMIN_026` | — | **A string.** Leading zeros matter. This is what the timing engine keys on. |
-| First name | `LAN_RACERS_ADMIN_009` | Which track they will run on | *(The help text on this field is wrong in the code — it belongs to the Track field.)* |
+| First name | `LAN_RACERS_ADMIN_009` | — | |
 | Surname | `LAN_RACERS_ADMIN_010` | — | |
 | Date of birth | `LAN_RACERS_ADMIN_011_HELP` | Enter the date of birth in D.M.YYYY format or pick it from the calendar | Used to place the competitor in an age-bounded category. |
 | Track | `LAN_RACERS_ADMIN_023_HELP` | Which track they will run on | One track per competitor. |
@@ -136,11 +136,7 @@ linking each category to its start list and result list.
 
 - **One track, one category per competitor.** Someone running two tracks is two competitor records
   with two bibs.
+- **The Categories screen is restricted to the main administrator.** A user with plugin-admin rights
+  cannot reach it. This is deliberate, not an oversight.
 - **Several admin labels are hardcoded in Slovak** (the Categories screen, three Settings fields,
   the "Nastúpil" column) and do not follow the site language.
-- **The help text on the "First name" field is wrong** — it says "Which track they will run on",
-  which belongs to the Track field.
-- **The Categories menu item is restricted to the main administrator**, not to plugin admins
-  (permission `0` instead of `P`). A user with plugin-admin rights cannot reach it.
-- **`plugin.xml` declares a site link to `racers/index.php`, which does not exist** — the file is
-  `racers.php`. That link is dead.
