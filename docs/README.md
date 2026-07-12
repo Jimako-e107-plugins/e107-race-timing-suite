@@ -29,6 +29,16 @@ websites.
 | [**racerfid**](plugins/racerfid.md) | RFID chip import | — (independent) | Optional |
 | [**terminovka**](plugins/terminovka.md) | Export to terminovka.sk | — (independent) | Optional |
 
+## Where to go next
+
+| I want to… | Go to |
+| --- | --- |
+| Understand what each plugin does | [Plugins at a glance](getting-started/plugins-at-a-glance.md) |
+| Check what I need before installing | [Requirements](getting-started/requirements.md) |
+| Install the suite | [Installation and install order](getting-started/installation.md) |
+| Find my way around the admin | [The admin area](getting-started/admin-area.md) |
+| Set up my first event | [Preparing an event](workflows/preparing-an-event.md) |
+
 ## Install order
 
 1. **raceevent** — the base, must be first
