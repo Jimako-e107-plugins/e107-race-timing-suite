@@ -184,7 +184,7 @@ class racetrack_point_form_ui extends e_admin_form_ui
 			$Data = $this->getController()->getListModel()->getData();
 			$Data['race_sef'] = "all";
 
-			$url1 = e107::url('racetrack', 'point', $Data, ['mode' => 'full']);
+			$url1 = e107::url('racereports', 'point', $Data, ['mode' => 'full']);
 			$url2 = e107::url('racetiming', 'kontrola', $Data, ['mode' => 'full']); // `kontrola` route moved to racetiming
 
 	 
