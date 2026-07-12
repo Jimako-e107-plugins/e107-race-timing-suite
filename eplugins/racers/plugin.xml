@@ -18,9 +18,6 @@
 		<link url="admin/admin_config.php" description="" icon="images/icon_64.png" order="20"
 		iconSmall="images/icon_32.png" icon128="images/icon_128.png" primary="true" >LAN_CONFIGURE</link>
 	</adminLinks>
-	<siteLinks>
-		<link url="{e_PLUGIN}racers/index.php" sef='index' perm="everyone">Prehľad</link>
-	</siteLinks>
 	<pluginPrefs>
 		<pref name='name_hash'>1</pref>	
 		<pref name='display_team'>0</pref>	
