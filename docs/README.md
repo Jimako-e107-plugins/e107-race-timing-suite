@@ -53,6 +53,8 @@ websites.
 Add **racereg** for registration and payments, **racerfid** for chip timing, **terminovka** for
 export to the Slovak race calendar.
 
+racereg is not finished yet.
+
 ## Source code
 
 The suite is open-source:
