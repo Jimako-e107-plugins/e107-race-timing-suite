@@ -3,6 +3,8 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     'LAN_RACERS_GLOBAL_001' => 'Racers',
+    'LAN_RACERS_GLOBAL_002' => 'Competitors, categories and start lists',
+    'LAN_RACERS_GLOBAL_003' => 'Competitors and categories for the race-timing suite. Manages the competitor roster (one competitor = one track + one category), the categories, and the start lists grouped by track and category. Includes an on-site registration screen for race-day check-in. Requires raceevent and racetrack.',
     'LAN_RACERS_GLOBAL_018' => 'No.',
     'LAN_RACERS_GLOBAL_019' => 'Nat.',
     'LAN_RACERS_GLOBAL_020' => 'DoB',

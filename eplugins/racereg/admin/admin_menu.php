@@ -98,7 +98,7 @@ class racereg_adminArea extends e_admin_dispatcher
 		'payments/edit' => 'payments/list',
 	);
 
-	protected $menuTitle = LAN_RACEREG_PLUGIN;
+	protected $menuTitle = LAN_GLOBAL_RACEREG_001;
 
 	/**
 	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical

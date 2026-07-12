@@ -9,7 +9,7 @@ include_once("admin_menu.php");
 class translation_ui extends e_admin_ui
 {
 	// Plugin configurations
-	protected $pluginTitle = LAN_RACEREG_PLUGIN;
+	protected $pluginTitle = LAN_GLOBAL_RACEREG_001;
 	protected $pluginName = 'racereg';
 	protected $table = ''; // No table defined
 	protected $pid = '';

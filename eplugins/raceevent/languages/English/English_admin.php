@@ -8,7 +8,6 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    'LAN_RACEEVENT_PLUGIN' => "Race event",
 
     /* ---- Admin menu ---------------------------------------------------------- */
     'LAN_RACEEVENT_CONFIG' => "Event configuration",

@@ -29,7 +29,7 @@ if (!getperms('P'))
 
 class racereg_payment_ui extends e_admin_ui
 {
-	protected $pluginTitle = LAN_RACEREG_PLUGIN;
+	protected $pluginTitle = LAN_GLOBAL_RACEREG_001;
 	protected $pluginName  = 'racereg';
 
 	protected $table = 'racereg_payment';

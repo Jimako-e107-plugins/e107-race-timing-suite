@@ -16,8 +16,6 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // Admin landing screen (admin/admin_config.php).
-    'LAN_ADMIN_RACEREPORTS_001' => 'Race reports',
-    'LAN_ADMIN_RACEREPORTS_002' => 'Results and reports for the race-timing suite: live results board, overall and per-category rankings, one competitor\'s progression across all checkpoints, and all times at a single checkpoint. Reads times from racetiming and names/categories from racers; declares no tables of its own.',
     // Admin permission label.
     'LAN_ADMIN_RACEREPORTS_003' => 'Race reports administration',
 
@@ -40,9 +38,6 @@ return array(
     'LAN_ADMIN_RACEREPORTS_021' => 'online - all categories',
     'LAN_ADMIN_RACEREPORTS_030' => 'Times after checkpoints',
     'LAN_ADMIN_RACEREPORTS_031' => 'online - all checkpoints',
-    'LAN_ADMIN_RACEREPORTS_040' => 'Parity test',
-    'LAN_ADMIN_RACEREPORTS_041' => 'Parity check (clean engine vs legacy comparator)',
-    'LAN_ADMIN_RACEREPORTS_042' => 'The parity comparator stays admin-gated. The companion engine self-test (parity/engine_selftest.php) is CLI-only and is not linked into the web.',
 
     // Overview screen: info-only list of the supported report types.
     'LAN_ADMIN_RACEREPORTS_050' => 'Supported result types',

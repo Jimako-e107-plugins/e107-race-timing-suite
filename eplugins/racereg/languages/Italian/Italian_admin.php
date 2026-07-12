@@ -8,7 +8,6 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    'LAN_RACEREG_PLUGIN' => "Registrazione alla gara",
 
     /* ---- Admin menu ---------------------------------------------------------- */
     'LAN_RACEREG_CONFIG' => "Configurazione",

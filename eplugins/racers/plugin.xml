@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e107Plugin name="Racers" lan="LAN_RACERS_GLOBAL_001" version="1.0" date="2025-01-28" compatibility="2.4" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
-	<summary lan="">Racers</summary>
-	<description lan="">List of racers</description>
+	<summary lan="LAN_RACERS_GLOBAL_002">Competitors, categories and start lists</summary>
+	<description lan="LAN_RACERS_GLOBAL_003">Competitors and categories for the race-timing suite. Manages the competitor roster (one competitor = one track + one category), the categories, and the start lists grouped by track and category. Includes an on-site registration screen for race-day check-in. Requires raceevent and racetrack.</description>
 	<keywords>
 		<word>information</word>
 		<word>content</word>

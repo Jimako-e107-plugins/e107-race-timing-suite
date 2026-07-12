@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e107Plugin name="raceevent" lan="LAN_RACEEVENT_PLUGIN" version="1.0" date="2026-06-18" compatibility="2.3" installRequired="true" >
+<e107Plugin name="Race event" lan="LAN_GLOBAL_RACEEVENT_001" version="1.0" date="2026-06-18" compatibility="2.3" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
-	<summary lan="">Race event (podujatie)</summary>
-	<description lan="">Base plugin for the race-timing suite. Owns the event (podujatie) entity plus the shared infrastructure (config, base DB/mapping layer, LAN) reused by the feature plugins. Has no dependencies - it is the base the other plugins depend on.</description>
+	<summary lan="LAN_GLOBAL_RACEEVENT_002">Event configuration</summary>
+	<description lan="LAN_GLOBAL_RACEEVENT_003">Base plugin of the race-timing suite. Holds the event configuration (single-event model: one website = one event) as plugin preferences, plus season maintenance and cross-suite diagnostics. Every other plugin depends on it; declares no tables of its own.</description>
 	<keywords>
 		<word>event</word>
 		<word>race</word>

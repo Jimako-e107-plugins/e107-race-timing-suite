@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e107Plugin name="Trate" lan="LAN_GLOBAL_RACE_001" version="1.0" date="2025-01-28" compatibility="2.3" installRequired="true" >
+<e107Plugin name="Tracks" lan="LAN_GLOBAL_RACE_001" version="1.0" date="2025-01-28" compatibility="2.3" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
-	<summary lan="LAN_GLOBAL_RACE_002">Tracks and checkpoints</summary>
-	<description lan="LAN_GLOBAL_RACE_002">Track setup and checkpoints</description>
+	<summary lan="LAN_GLOBAL_RACE_002">Overview and track settings</summary>
+	<description lan="LAN_GLOBAL_RACE_003">Tracks, checkpoints and entry prices for the race-timing suite. Defines the courses of the event, the checkpoints along each course (start, intermediate points, finish), date-tiered entry prices, and the archive of finished editions. Requires raceevent.</description>
 	<keywords>
 		<word>information</word>
 		<word>content</word>

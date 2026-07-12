@@ -3,6 +3,8 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     'LAN_RACERS_GLOBAL_001' => 'Pretekári',
+    'LAN_RACERS_GLOBAL_002' => 'Pretekári, kategórie a štartové listiny',
+    'LAN_RACERS_GLOBAL_003' => 'Pretekári a kategórie pre sadu pluginov na časomieru. Spravuje zoznam pretekárov (jeden pretekár = jedna trať + jedna kategória), kategórie a štartové listiny členené podľa tratí a kategórií. Obsahuje aj obrazovku na registráciu na mieste pri prezentácii. Vyžaduje raceevent a racetrack.',
     'LAN_RACERS_GLOBAL_018' => 'Číslo',
     'LAN_RACERS_GLOBAL_019' => 'Nár.',
     'LAN_RACERS_GLOBAL_020' => 'Dát.nar.',

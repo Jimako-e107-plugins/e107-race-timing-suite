@@ -168,7 +168,7 @@ class racereports_adminArea extends e_admin_dispatcher
 
 	protected $adminMenuAliases = array();
 
-	protected $menuTitle = LAN_ADMIN_RACEREPORTS_001;
+	protected $menuTitle = LAN_GLOBAL_RACEREPORTS_001;
 
 	/**
 	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical

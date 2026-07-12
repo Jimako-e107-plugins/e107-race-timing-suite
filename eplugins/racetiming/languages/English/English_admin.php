@@ -16,8 +16,6 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // Admin placeholder screen (admin/admin_config.php).
-    'LAN_ADMIN_RACETIMING_001' => 'Race timing',
-    'LAN_ADMIN_RACETIMING_002' => 'Race timing skeleton - this plugin owns the race_time checkpoint table. The timing computation engine is not implemented yet.',
     // Admin permission label.
     'LAN_ADMIN_RACETIMING_003' => 'Race timing administration',
 

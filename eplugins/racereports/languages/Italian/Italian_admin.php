@@ -16,8 +16,6 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // Schermata principale amministratore (admin/admin_config.php).
-    'LAN_ADMIN_RACEREPORTS_001' => 'Report gara',
-    'LAN_ADMIN_RACEREPORTS_002' => 'Risultati e report per la suite di cronometraggio: tabellone dei risultati in diretta, classifica generale e per categoria, il percorso di un singolo concorrente attraverso tutti i punti di controllo e tutti i tempi rilevati in un singolo punto di controllo. Legge i tempi da racetiming e i nomi/categorie da racers; non dichiara tabelle proprie.',   // Etichetta dei permessi amministratore.
     'LAN_ADMIN_RACEREPORTS_003' => 'Amministrazione dei resoconti di gara',
 
     // Voci del menu di navigazione sinistro + intestazioni di pagina.
@@ -39,9 +37,6 @@ return array(
     'LAN_ADMIN_RACEREPORTS_021' => 'online - tutte le categorie',
     'LAN_ADMIN_RACEREPORTS_030' => 'Tempi dopo i punti di controllo',
     'LAN_ADMIN_RACEREPORTS_031' => 'online - tutti i punti di controllo',
-    'LAN_ADMIN_RACEREPORTS_040' => 'Test di parità',
-    'LAN_ADMIN_RACEREPORTS_041' => 'Controllo di parità (motore pulito vs comparatore legacy)',
-    'LAN_ADMIN_RACEREPORTS_042' => 'Il comparatore di parità rimane limitato agli amministratori. Il test automatico del motore correlato (parity/engine_selftest.php) è eseguibile solo da CLI e non è collegato all\'interfaccia web.',
 
     // Schermata panoramica: elenco informativo dei tipi di resoconto supportati.
     'LAN_ADMIN_RACEREPORTS_050' => 'Tipi di risultati supportati',

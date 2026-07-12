@@ -12,6 +12,7 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-	'LAN_GLOBAL_RACEREPORTS_001' => 'Zostavy',
-	'LAN_GLOBAL_RACEREPORTS_002' => 'ýsledky a prehľady pre sadu pluginov na časomieru: živá výsledková tabuľka, celkové poradie aj poradie v kategóriách, priebeh jedného pretekára cez všetky kontrolné body a časy na jednom kontrolnom bode. Časy číta z racetiming, mená a kategórie z racers; nedeklaruje žiadne vlastné tabuľky.',
+	'LAN_GLOBAL_RACEREPORTS_001' => 'Výsledky pretekov',
+	'LAN_GLOBAL_RACEREPORTS_002' => 'Výsledkové listiny a poradie',
+	'LAN_GLOBAL_RACEREPORTS_003' => 'Výsledky a prehľady pre sadu pluginov na časomieru: živá výsledková tabuľka, celkové poradie aj poradie v kategóriách, priebeh jedného pretekára cez všetky kontrolné body a časy na jednom kontrolnom bode. Časy číta z racetiming, mená a kategórie z racers; nedeklaruje žiadne vlastné tabuľky.',
 );

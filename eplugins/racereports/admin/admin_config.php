@@ -50,7 +50,7 @@ if (!getperms('P'))
  */
 class racereports_main_ui extends e_admin_ui
 {
-	protected $pluginTitle = LAN_ADMIN_RACEREPORTS_001;
+	protected $pluginTitle = LAN_GLOBAL_RACEREPORTS_001;
 	protected $pluginName  = 'racereports';
 
 	// Prefs-only screen - no DB table.

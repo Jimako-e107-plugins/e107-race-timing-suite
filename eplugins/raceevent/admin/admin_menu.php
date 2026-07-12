@@ -90,7 +90,7 @@ class raceevent_adminArea extends e_admin_dispatcher
 
 	protected $adminMenuAliases = array();
 
-	protected $menuTitle = LAN_RACEEVENT_PLUGIN;
+	protected $menuTitle = LAN_GLOBAL_RACEEVENT_001;
 
 	/**
 	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical

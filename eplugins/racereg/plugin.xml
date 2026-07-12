@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e107Plugin name="racereg" lan="LAN_RACEREG_PLUGIN" version="1.1" date="2026-06-22" compatibility="2.3" installRequired="true" >
+<e107Plugin name="Race registration" lan="LAN_GLOBAL_RACEREG_001" version="1.1" date="2026-06-22" compatibility="2.3" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
-	<summary lan="">Race registration and payments</summary>
-	<description lan="">Registration and payments for the race-timing suite. Depends on raceevent (the event base) and racetrack (the tracks/categories). Scaffold only - business tables, sign-up flow, QR and PII handling arrive in later issues.</description>
+	<summary lan="LAN_GLOBAL_RACEREG_002">Online and on-site registration</summary>
+	<description lan="LAN_GLOBAL_RACEREG_003">Registration for the race-timing suite: online sign-up through the event website, track and category selection, and PAY by square QR payment. WORK IN PROGRESS - notifications and e-mail sending are not implemented; published as a reference implementation, not for production use.</description>
 	<keywords>
 		<word>registration</word>
 		<word>payment</word>

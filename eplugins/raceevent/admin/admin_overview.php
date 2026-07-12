@@ -31,7 +31,7 @@ if (!getperms('P'))
 
 class raceevent_overview_ui extends e_admin_ui
 {
-	protected $pluginTitle = LAN_RACEEVENT_PLUGIN;
+	protected $pluginTitle = LAN_GLOBAL_RACEEVENT_001;
 	protected $pluginName  = 'raceevent';
 
 	// Custom controller screen - no DB table.

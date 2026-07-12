@@ -11,8 +11,6 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-	'LAN_ADMIN_RACEREPORTS_001' => 'Výsledky pretekov',
-	'LAN_ADMIN_RACEREPORTS_002' => 'Výsledky a prehľady pre sadu pluginov na časomieru: živá výsledková tabuľka, celkové poradie aj poradie v kategóriách, priebeh jedného pretekára cez všetky kontrolné body a časy na jednom kontrolnom bode. Časy číta z racetiming, mená a kategórie z racers; nedeklaruje žiadne vlastné tabuľky.',	
 	'LAN_ADMIN_RACEREPORTS_003' => 'Nastavenie zostáv',
 
 	// Left admin-nav menu items + page captions.
@@ -34,9 +32,6 @@ return array(
 	'LAN_ADMIN_RACEREPORTS_021' => 'online - všetky kategórie',
 	'LAN_ADMIN_RACEREPORTS_030' => 'Časy po kontrolných bodoch',
 	'LAN_ADMIN_RACEREPORTS_031' => 'online - všetky kontrolné body',
-	'LAN_ADMIN_RACEREPORTS_040' => 'Parity test',
-	'LAN_ADMIN_RACEREPORTS_041' => 'Parity test (čistý engine vs. legacy komparátor)',
-	'LAN_ADMIN_RACEREPORTS_042' => 'Parity komparátor zostáva chránený admin oprávnením. Sprievodný engine self-test (parity/engine_selftest.php) je len pre CLI a nie je prelinkovaný do webu.',
 
 	// Overview screen: info-only list of the supported report types.
 	'LAN_ADMIN_RACEREPORTS_050' => 'Zoznam podporovaných výsledkov',

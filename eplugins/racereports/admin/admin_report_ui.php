@@ -40,7 +40,7 @@ if (!defined('e107_INIT')) { exit; }
  */
 abstract class racereports_reports_ui extends e_admin_ui
 {
-	protected $pluginTitle = LAN_ADMIN_RACEREPORTS_001;
+	protected $pluginTitle = LAN_GLOBAL_RACEREPORTS_001;
 	protected $pluginName  = 'racereports';
 
 	// Custom controller screens - no DB-table CRUD.

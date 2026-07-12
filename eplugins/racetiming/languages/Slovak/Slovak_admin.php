@@ -11,8 +11,6 @@
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-	'LAN_ADMIN_RACETIMING_001' => 'Meranie časov',
-	'LAN_ADMIN_RACETIMING_002' => 'Kostra merania časov - tento plugin vlastní tabuľku kontrolných časov race_time. Výpočtový engine merania ešte nie je implementovaný.',
 	'LAN_ADMIN_RACETIMING_003' => 'Správa merania časov',
 
 	// --- race_time CRUD admin (admin/admin_config.php) ---

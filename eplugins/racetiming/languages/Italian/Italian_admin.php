@@ -16,8 +16,6 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
     // Schermata segnaposto amministratore (admin/admin_config.php).
-    'LAN_ADMIN_RACETIMING_001' => 'Cronometraggio gara',
-    'LAN_ADMIN_RACETIMING_002' => 'Struttura di cronometraggio gara - questo plugin gestisce la tabella dei punti di controllo race_time. Il motore di calcolo dei tempi non è ancora implementato.',
     // Etichetta dei permessi amministratore.
     'LAN_ADMIN_RACETIMING_003' => 'Amministrazione cronometraggio gara',
 

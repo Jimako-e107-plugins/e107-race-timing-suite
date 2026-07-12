@@ -35,7 +35,7 @@ if (!getperms('P'))
 class race_time_ui extends e_admin_ui
 {
 
-	protected $pluginTitle		= LAN_ADMIN_RACETIMING_001;
+	protected $pluginTitle		= LAN_GLOBAL_RACETIMING_001;
 	protected $pluginName		= 'racetiming';
 	protected $table			= 'race_time';
 	protected $pid				= 'race_time_id';

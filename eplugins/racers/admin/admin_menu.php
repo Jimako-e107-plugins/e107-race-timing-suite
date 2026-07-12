@@ -162,8 +162,8 @@ class racers_adminArea extends e_admin_dispatcher
 		'main/list'			=> array('caption' => LAN_RACERS_ADMIN_001, 'perm' => 'P', 'url' => 'admin_config.php'),
 		'main/create'		=> array('caption' => LAN_RACERS_ADMIN_002, 'perm' => 'P', 'url' => 'admin_config.php'),
 
-		'cat/list'			=> array('caption' => LAN_RACERS_ADMIN_CATEGORIES, 'perm' => '0'),
-		'cat/create'		=> array('caption' => LAN_RACERS_ADMIN_CATEGORIES_ADD, 'perm' => '0'),
+		'cat/list'			=> array('caption' => LAN_RACERS_ADMIN_CATEGORIES, 'perm' => '0', 'url' => 'admin_config.php'),
+		'cat/create'		=> array('caption' => LAN_RACERS_ADMIN_CATEGORIES_ADD, 'perm' => '0', 'url' => 'admin_config.php'),
 
 		'startlists/startlists'	=> array('caption' => LAN_RACERS_ADMIN_034, 'perm' => 'P', 'url' => 'admin_startlists.php'),
 		'racerlist/racerlist'	=> array('caption' => LAN_RACERS_ADMIN_035, 'perm' => 'P', 'url' => 'admin_racerlist.php'),

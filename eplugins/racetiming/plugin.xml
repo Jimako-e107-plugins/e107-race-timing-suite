@@ -2,7 +2,7 @@
 <e107Plugin name="Race timing" lan="LAN_GLOBAL_RACETIMING_001" version="1.0" date="2026-06-24" compatibility="2.4" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
 	<summary lan="LAN_GLOBAL_RACETIMING_002">Checkpoint timing engine</summary>
-	<description lan="LAN_GLOBAL_RACETIMING_002">Checkpoint timing engine for the race-timing suite. Owns the race_time table only. Skeleton - the timing computation engine is extracted from timetracker in a later issue.</description>
+	<description lan="LAN_GLOBAL_RACETIMING_003">Timing engine of the race-timing suite. Records passing times at checkpoints - by hand on a mobile keypad, in bulk for a mass start, or fed in from RFID - and computes elapsed times and splits live during the race. Owns the race_time table; stores only raw passings, everything else is calculated on read.</description>
 	<keywords>
 		<word>timing</word>
 		<word>checkpoint</word>
