@@ -4,13 +4,13 @@
  *
  * racereports plugin - SUT report (clean equivalent of timetracker/stu.php).
  *
- * Per-TRACK FINISHERS-ONLY results list, produced for central reporting after a
- * race closes. ONE final time per racer = elapsed start->finish. Only racers with
- * a clean finish (status OK at the 'finish' checkpoint) are listed; DNF/DSQ/DNS
- * and any racer without a usable finish crossing are intentionally excluded
- * (FINISHERS ONLY - this is the documented scope difference from the legacy stu
- * page, which also printed DNF/DSQ blocks). Finishers are sorted by final time
- * ASCENDING.
+ * Per-TRACK results list, produced for central reporting after a race closes.
+ * ONE final time per racer = elapsed start->finish. Finishers (clean finish =
+ * engine status OK at the 'finish' checkpoint) are listed FIRST, sorted by final
+ * time ASCENDING and ranked 1..N. After them, the DNF and DSQ racers are appended
+ * (Time cell shows "DNF"/"DSQ" instead of a time), continuing the running rank -
+ * exactly like the legacy stu page. A racer with neither a clean finish nor a
+ * DNF/DSQ marker (e.g. DNS / no usable crossing) is not listed.
  *
  * Legacy contract mirrored: ?p selects a TRACK by race_id (timetracker/stu.php:36
  * `WHERE race_id=$_GET['p']`; timetracker/e_url.php 'stu' sef `{alias}/{race_id}/`).
@@ -64,6 +64,8 @@ if (!defined('LAN_RACEREPORTS_COL_NATIONALITY')) define('LAN_RACEREPORTS_COL_NAT
 if (!defined('LAN_RACEREPORTS_COL_BIB'))      define('LAN_RACEREPORTS_COL_BIB', 'Bibnumber');
 if (!defined('LAN_RACEREPORTS_EXPORT_CSV'))   define('LAN_RACEREPORTS_EXPORT_CSV', 'CSV');
 if (!defined('LAN_RACEREPORTS_EXPORT_XLS'))   define('LAN_RACEREPORTS_EXPORT_XLS', 'XLS');
+if (!defined('LAN_RACEREPORTS_NUM_DNF'))      define('LAN_RACEREPORTS_NUM_DNF', 'DNF');
+if (!defined('LAN_RACEREPORTS_NUM_DSQ'))      define('LAN_RACEREPORTS_NUM_DSQ', 'DSQ');
 
 $tp     = e107::getParser();
 $report = new race_report();
@@ -129,10 +131,11 @@ echo "<h2>" . $tp->toHTML($race['race_name'], false, 'TITLE')
 render_stu_list($built, $raceId);
 
 /**
- * Build the finishers-only results for one track as a NEUTRAL structure that both
- * the HTML table and the CSV/XLS export render from. Keep only racers with a clean
- * finish (engine status OK at 'finish' -> elapsedToPoint returns a float), sort by
- * that elapsed ASC, rank 1..N and format each cell EXACTLY as displayed.
+ * Build the per-track results for one track as a NEUTRAL structure that both the
+ * HTML table and the CSV/XLS export render from. Finishers (clean finish at
+ * 'finish' -> elapsedToPoint returns a float) come first, sorted by that elapsed
+ * ASC and ranked 1..N; then the DNF and DSQ racers are appended (Time cell = the
+ * "DNF"/"DSQ" marker), continuing the running rank - the legacy stu ordering.
  *
  * Returns:
  *   headers   : ordered display labels (the report's own column labels)
@@ -140,8 +143,10 @@ render_stu_list($built, $raceId);
  *               [rank, time, surname, firstname, gender, birthdate, nationality, bib]
  *   textCols  : indices of columns to force to TEXT on export (time + start number)
  *   meta      : per-row HTML-only decoration, parallel to rows:
- *                 order = raw elapsed seconds (DataTables numeric sort key)
- *                 color = per-category background ('' when colours off)
+ *                 order = raw elapsed seconds (DataTables numeric sort key; DNF/DSQ
+ *                         rows get a large sentinel so they sort AFTER finishers)
+ *                 color = per-category background ('' when colours off; always ''
+ *                         for DNF/DSQ - ended rows are never coloured, legacy rule)
  *   useColors : whether the per-category row background is on
  *
  * @param race_report $report
@@ -165,6 +170,7 @@ function stu_build_rows($report, $clock, $raceId)
 	$racers = $report->fetchRacers($raceId); // keyed by bib string
 
 	$finishers = array();
+	$finished  = array(); // bib-string set of clean finishers (to skip in the DNF/DSQ pass)
 
 	foreach ($racers as $number => $racer)
 	{
@@ -174,14 +180,18 @@ function stu_build_rows($report, $clock, $raceId)
 			continue;
 		}
 
-		// FINISHERS ONLY: the engine's ranking-safe total elapsed start->finish.
-		// null = no clean finish (no start, no finish crossing, or DNF/DSQ/DNS) ->
-		// excluded. NO new engine op is introduced (elapsedToPoint already exists).
+		// The engine's ranking-safe total elapsed start->finish. null = no clean
+		// finish (no start, no finish crossing, or DNF/DSQ/DNS). Clean finishers are
+		// collected here; DNF/DSQ racers are appended in a second pass below (they
+		// have no clean finish so they land here as null). NO new engine op is
+		// introduced (elapsedToPoint already exists).
 		$elapsed = $clock->elapsedToPoint($number, 'finish');
 		if ($elapsed === null)
 		{
 			continue;
 		}
+
+		$finished[(string) $number] = true;
 
 		// Time cell mirrors legacy stu byte-for-byte: legacy took
 		// substr(secondsToTime(elapsed), 0, 8) = "HH:MM:SS"
@@ -200,6 +210,43 @@ function stu_build_rows($report, $clock, $raceId)
 	{
 		return $a['stu_sort'] <=> $b['stu_sort'];
 	});
+
+	// SECOND PASS - DNF/DSQ. After the ranked finishers, the legacy stu appended the
+	// racers who ended DNF then DSQ (Time cell = the marker, not a time), continuing
+	// the running rank. Collect them from the engine's ended sets (isDnf/isDsq),
+	// skipping anyone already listed as a clean finisher. DNF first, then DSQ - each
+	// in fetchRacers() order (bib order), matching the legacy blocks. racer_active
+	// only, same as the finishers pass.
+	$dnfRacers = array();
+	$dsqRacers = array();
+
+	foreach ($racers as $number => $racer)
+	{
+		if (empty($racer['racer_active']))
+		{
+			continue;
+		}
+		if (isset($finished[(string) $number]))
+		{
+			continue; // a clean finisher is never also listed as DNF/DSQ
+		}
+
+		// DNF takes precedence over DSQ if a racer somehow carries both markers, so
+		// they appear once. The marker string is the Time-cell text for that row.
+		if ($clock->isDnf($number))
+		{
+			$racer['stu_marker'] = LAN_RACEREPORTS_NUM_DNF;
+			$dnfRacers[] = $racer;
+		}
+		elseif ($clock->isDsq($number))
+		{
+			$racer['stu_marker'] = LAN_RACEREPORTS_NUM_DSQ;
+			$dsqRacers[] = $racer;
+		}
+	}
+
+	// The ordered tail: all DNF rows, then all DSQ rows.
+	$ended = array_merge($dnfRacers, $dsqRacers);
 
 	$headers = array(
 		LAN_RACEREPORTS_COL_RANK,
@@ -239,6 +286,32 @@ function stu_build_rows($report, $clock, $raceId)
 			'order' => isset($racer['stu_sort']) ? (float) $racer['stu_sort'] : PHP_INT_MAX,
 			// Per-category background (only used when colours are on).
 			'color' => $useColors ? race_report_color($clock, $racer) : '',
+		);
+	}
+
+	// DNF/DSQ rows follow the finishers, continuing the running rank. The Time cell
+	// holds the "DNF"/"DSQ" marker instead of a time; there is no elapsed to sort by,
+	// so the DataTables numeric sort key is a large sentinel (PHP_INT_MAX) that keeps
+	// these rows AFTER every finisher when the Time column is sorted. Ended rows are
+	// NEVER coloured (legacy rule), so 'color' stays '' regardless of the toggle.
+	foreach ($ended as $racer)
+	{
+		$rank++;
+
+		$rows[] = array(
+			$rank,                                                                          // 0 rank
+			$racer['stu_marker'],                                                           // 1 time -> "DNF"/"DSQ" (TEXT col)
+			isset($racer['racer_surname']) ? $racer['racer_surname'] : '',                  // 2 surname
+			isset($racer['racer_firstname']) ? $racer['racer_firstname'] : '',              // 3 first name
+			isset($racer['racer_gender']) ? $racer['racer_gender'] : '',                    // 4 gender
+			stu_format_birthdate(isset($racer['racer_birthday']) ? $racer['racer_birthday'] : ''), // 5 birthdate
+			isset($racer['racer_nacionality']) ? $racer['racer_nacionality'] : '',          // 6 nationality
+			(string) $racer['racer_number'],                                                // 7 bib (TEXT col)
+		);
+
+		$meta[] = array(
+			'order' => PHP_INT_MAX, // no time -> always sort after finishers
+			'color' => '',          // ended rows are never coloured (legacy rule)
 		);
 	}
 
@@ -308,11 +381,11 @@ function render_stu_list($built, $raceId)
 
 	foreach ($rows as $i => $row)
 	{
-		// All rows are finishers (ranked). Per-category background is now opt-in
-		// via the stu_colors pref (default OFF = clean table). When ON, the same
-		// race_report_color() path as the online/point reports applies. (SUT lists
-		// finishers only - DNF/DSQ/ended rows are already excluded upstream, so the
-		// "ended rows never coloured" rule holds trivially regardless of the toggle.)
+		// Finisher rows are colorable; DNF/DSQ rows are not (their meta color is
+		// forced to '' upstream - the "ended rows never coloured" legacy rule).
+		// Per-category background is opt-in via the stu_colors pref (default OFF =
+		// clean table). When ON, the same race_report_color() path as the online/
+		// point reports applies to the finisher rows.
 		if ($useColors)
 		{
 			$color = isset($meta[$i]['color']) ? $meta[$i]['color'] : '';
@@ -329,8 +402,8 @@ function render_stu_list($built, $raceId)
 		// string breaks once widths differ (stu_decimals>0, or sub/over-hour lengths);
 		// sorting by seconds keeps the row order identical regardless of stu_decimals.
 		// (float) cast guarantees a numeric attribute value - no escaping needed.
-		// Defensive sentinel for a missing time (stu is finishers-only, so N/A here):
-		// a large value sorts any blank cell consistently last.
+		// DNF/DSQ rows carry a large sentinel (PHP_INT_MAX) as their order key, so
+		// they always sort AFTER the finishers when the Time column is sorted.
 		$rawSeconds = isset($meta[$i]['order']) ? (float) $meta[$i]['order'] : PHP_INT_MAX;
 		echo "<td data-order='" . $rawSeconds . "'>" . $tp->toHTML($row[1], false, 'TITLE') . "</td>";
 		echo "<td>" . $tp->toHTML($row[2], false, 'TITLE') . "</td>";
