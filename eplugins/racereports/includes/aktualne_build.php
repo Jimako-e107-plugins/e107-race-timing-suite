@@ -332,7 +332,7 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 			'section'   => $sectionType,
 		);
 
-		$catId = isset($racer['race_category_id']) ? (int) $racer['race_category_id'] : 0;
+		$catId = isset($racer['racer_category_id']) ? (int) $racer['racer_category_id'] : 0;
 		if (isset($cats[$catId]))
 		{
 			$row['catid'] = $catId;
