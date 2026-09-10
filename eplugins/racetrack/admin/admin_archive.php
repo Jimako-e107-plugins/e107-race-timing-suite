@@ -113,7 +113,7 @@ class race_archive_ui extends e_admin_ui
 			'thclass' => 'left', 'class' => 'left', 'filter' => false, 'batch' => false,
 		),
 		'race_archive_html' => array(
-			'title' => 'HTML', 'type' => 'textarea', 'data' => 'str', 'width' => 'auto',
+			'title' => 'HTML', 'type' => 'textarea', 'data' => false, 'width' => 'auto',
 			'thclass' => 'left', 'class' => 'left', 'filter' => false, 'batch' => false,
 		),
 		'race_archive_created' => array(
