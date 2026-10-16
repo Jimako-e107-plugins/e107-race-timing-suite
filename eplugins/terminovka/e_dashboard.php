@@ -6,17 +6,9 @@
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Chatbox plugin - Dashboard (Status)
+ * terminovka plugin - e_dashboard.php
  *
 */
-
-/**
- *	e107 Chatbox plugin
- *
- *	@package	e107_plugins
- *	@subpackage	chatbox
- *	@version 	$Id$;
- */
 
 if (!defined('e107_INIT')) { exit; }
 

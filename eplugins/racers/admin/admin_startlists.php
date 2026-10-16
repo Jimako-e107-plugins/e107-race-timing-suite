@@ -2,30 +2,21 @@
 /*
  * e107 website system
  *
- * racers plugin - ŠTARTOVACIE LISTINY (start-lists link directory) admin screen.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE output = ONE admin file, mirroring racereports' admin_finish.php: this file
- * owns the start-list-links screen only - the all-tracks (komplet) link, plus per
- * track the start-list links (all categories + one per category tied to the race).
- * All links target racers' OWN front start list (startlist.php) via the plugin's
- * 'startlist' e_url route, so SEF and non-SEF installs both resolve.
+ * racers plugin - admin/admin_startlists.php
  *
- * Routing the racers way: this file is a self-contained admin ENTRY POINT (mirroring
- * the sibling area files and the racetrack archive fix): it bootstraps class2, requires
- * the shared dispatcher (admin_menu.php, which loads class2 + the admin LAN), gates on
- * the plugin's OWN admin permission, defines this area's controller + form classes, then
- * runs the page. racers' admin_menu.php routes the 'startlists' mode straight here via
- * its $adminMenu 'url' => 'admin_startlists.php'.
+*/
+
+/*
+ * Start lists screen (docs/plugins/racers.md, "Start lists"): a link directory
+ * to the public start list (startlist.php, e_url 'startlist'). Read-only; every
+ * value placed in markup is escaped (toHTML / toAttribute).
  *
- * SECURITY (native e107 only): READ-ONLY. Data is read via the db class; every value
- * placed in markup is escaped (text via $tp->toHTML, hrefs via $tp->toAttribute) and
- * every link is built with e107::url(). The screen is gated by getperms('P').
- *
- * startlist param contract (racers/e_url.php 'startlist'):
- *   startlist -> startlist.php ?r=<race_sef>&c=<race_category_sef>
- * The "all categories" / "all tracks" sentinel is the literal 'all' (startlist.php
- * lines 66/81/96) - racers' own token, NOT racereports' 'komplet'/'overview'. The
- * mechanism is identical; only the sentinel string differs.
+ * The "all tracks" / "all categories" token is the literal 'all' (what
+ * startlist.php matches) - not racereports' 'komplet' / 'overview'.
  */
 
 require_once("../../../class2.php");
@@ -40,12 +31,9 @@ if (!getperms('P'))
 
 
 /**
- * Start-lists area: the all-tracks (all categories) link, then per track the start
- * list links (all categories + one per category tied to the race via FIND_IN_SET on
- * race_category_race). Extends e_admin_ui as a custom controller screen (no DB-table
- * CRUD); the render helpers build readable Bootstrap link panels - plain <a> in table
- * cells, NOT a.list-group-item (whose admin-theme color is unreadable) - replicated
- * from racereports' shared admin_report_ui.php link table.
+ * Custom controller screen (no DB-table CRUD). Links are plain <a> in table cells,
+ * not a.list-group-item (unreadable admin-theme colour) - same as racereports'
+ * admin_report_ui.php link table.
  */
 class racers_startlists_ui extends e_admin_ui
 {
@@ -58,8 +46,7 @@ class racers_startlists_ui extends e_admin_ui
 
 	protected $defaultAction = 'startlists';
 
-	// startlist sentinel meaning "all categories" / "all tracks" (the literal token
-	// startlist.php matches; see e_url.php + the file header above).
+	// "all categories" / "all tracks" token (see the file header).
 	const ALL = 'all';
 
 	/**
@@ -78,11 +65,8 @@ class racers_startlists_ui extends e_admin_ui
 	}
 
 	/**
-	 * One clickable link row, rendered as a table row (<tr><td>) so the link is a
-	 * PLAIN <a> in a cell - deliberately NOT a.list-group-item, whose admin-theme
-	 * color (#c6c6c6) is unreadable on the light panel background. $label and the
-	 * optional $sef suffix are escaped via toHTML; the href via toAttribute. The
-	 * containing <table> is emitted by panel(). Mirrors racereports' linkItem().
+	 * One link row (<tr><td><a>). $label and the optional $sef suffix are escaped
+	 * via toHTML, the href via toAttribute. The <table> is emitted by panel().
 	 *
 	 * @param string $url
 	 * @param string $label
@@ -115,7 +99,7 @@ class racers_startlists_ui extends e_admin_ui
 
 	/**
 	 * Wrap a body of <tr> rows in a titled panel with a readable links table. $heading
-	 * is HTML the caller has already escaped. Mirrors racereports' panel().
+	 * is HTML the caller has already escaped.
 	 *
 	 * @param string $heading pre-escaped heading HTML
 	 * @param string $body    table rows
@@ -131,7 +115,7 @@ class racers_startlists_ui extends e_admin_ui
 	}
 
 	/**
-	 * Per-track heading: name + (sef), both escaped. Mirrors racereports' raceHeading().
+	 * Per-track heading: name + (sef), both escaped.
 	 *
 	 * @param array $race
 	 * @return string
@@ -145,10 +129,8 @@ class racers_startlists_ui extends e_admin_ui
 	}
 
 	/**
-	 * Start-list links for a track: the "all categories" (all) link plus one per
-	 * category tied to the track (FIND_IN_SET on race_category_race). Same query
-	 * contract / category resolution as racereports' renderFinishLinks(), built on
-	 * the racers 'startlist' route (startlist.php ?r=<race_sef>&c=<race_category_sef>).
+	 * Start-list links for a track: the "all categories" link plus one per category
+	 * tied to the track (FIND_IN_SET on race_category_race; $raceId int-cast).
 	 *
 	 * @param int    $raceId
 	 * @param string $raceSef
@@ -215,8 +197,7 @@ class racers_startlists_ui extends e_admin_ui
 				. $tp->toHTML(LAN_RACERS_ADMIN_038, false) . "</div>";
 		}
 
-		// All tracks, all categories on one start list (r=all, c=all) - the same link
-		// startlist.php's own "ALL" tab uses.
+		// All tracks, all categories (r=all, c=all) - same as startlist.php's ALL tab.
 		$overview = $this->linkItem(
 			e107::url('racers', 'startlist', array(
 				'race_sef'          => self::ALL,

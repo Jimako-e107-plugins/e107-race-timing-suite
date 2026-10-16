@@ -2,16 +2,18 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2013 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Terminovka.sk plugin - admin config + logs
+ * terminovka plugin - admin_config.php
  *
- * Two admin modes:
- *   - main:    preferences (API token, URL, activation flag)
- *   - results: list/edit race_result rows (the export log)
 */
+
+/*
+ * Admin screens: preferences and the read-only export log
+ * (docs/plugins/terminovka.md, "Main configuration" and "Export logs").
+ */
 
 require_once("../../class2.php");
 
@@ -60,10 +62,8 @@ class terminovka_adminArea extends e_admin_dispatcher
 
     protected $menuTitle = 'Terminovka.sk';
 
-    // The export log is read-only: timetracker owns the race_result table
-    // and is the only place it may be edited. Denying these routes hides the
-    // create/edit/delete buttons and the batch options in the list view and
-    // blocks direct access to those actions.
+    // Read-only export log: denying these routes hides the create/edit/delete
+    // buttons and batch options and blocks direct access.
     protected $access = array(
         'results/create' => e_UC_NOBODY,
         'results/edit'   => e_UC_NOBODY,
@@ -71,11 +71,9 @@ class terminovka_adminArea extends e_admin_dispatcher
     );
 
     /**
-     * Append the centralized cross-plugin admin-menu shortcuts. The canonical
-     * nav map lives in raceevent/includes/admin_links.php; we pass our own
-     * plugin name so terminovka's own entry is excluded. The isInstalled guard
-     * keeps terminovka installable as an independent leaf - links simply don't
-     * appear when raceevent is absent.
+     * Append the shared cross-plugin admin-menu shortcuts
+     * (raceevent/includes/admin_links.php), excluding terminovka's own entry.
+     * Skipped when raceevent is not installed - terminovka stays independent.
      */
     public function init()
     {
@@ -100,7 +98,7 @@ class terminovka_prefs_ui extends e_admin_ui
     protected $pluginTitle = 'Terminovka.sk';
     protected $pluginName  = 'terminovka';
 
-    // Dummy table - we only use this controller for prefs, not for CRUD.
+    // Dummy table - this controller is used for prefs only, not for CRUD.
     protected $table = 'race_result';
     protected $pid   = 'race_result_id';
 
@@ -163,8 +161,7 @@ class terminovka_prefs_form_ui extends e_admin_form_ui
 
 
 /* -------------------------------------------------------------------------
- * race_result list/edit UI
- * (migrated from timetracker/admin/admin_results.php)
+ * Export log - read-only list of race_result
  * ------------------------------------------------------------------------- */
 
 class race_result_ui extends e_admin_ui
@@ -175,16 +172,15 @@ class race_result_ui extends e_admin_ui
     protected $table       = 'race_result';
     protected $pid         = 'race_result_id';
     protected $perPage     = 200;
-    // Read-only export log - no batch actions. Editing happens in timetracker.
+    // Read-only export log - no batch actions.
     protected $batchDelete = false;
     protected $batchExport = false;
     protected $batchCopy   = false;
 
     protected $listOrder = 'race_result_id DESC';
 
-    // Disallow the write actions at controller level too, so the routes are
-    // hard-blocked even if reached directly (the dispatcher already hides the
-    // buttons via $access).
+    // Block the write actions at controller level too (the dispatcher's
+    // $access already hides the buttons).
     protected $disallow = array('create', 'edit', 'delete', 'copy', 'batch', 'inline');
 
     protected $fields = array(

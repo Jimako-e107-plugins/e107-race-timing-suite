@@ -6,17 +6,9 @@
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * RFID import plugin (folder/id: racerfid) - Dashboard (Status)
+ * racerfid plugin - e_dashboard.php
  *
 */
-
-/**
- *	RFID import plugin
- *
- *	@package	e107_plugins
- *	@subpackage	racerfid
- *	@version 	$Id$;
- */
 
 if (!defined('e107_INIT')) { exit; }
 

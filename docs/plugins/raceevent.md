@@ -60,7 +60,7 @@ registration window and the payee belong to the **event**, not to the registrati
 | --- | --- | --- | --- |
 | Registration opens | `LAN_RACEEVENT_REG_START_HELP` | Sign-ups are accepted from this moment. Leave empty (0) for no lower bound. If both bounds are set, opening must be before closing. | Date **and** time. `racereg` accepts a sign-up only inside this window. |
 | Registration closes | `LAN_RACEEVENT_REG_END_HELP` | Sign-ups are accepted until this moment. Leave empty (0) for no upper bound. If both bounds are set, closing must be after opening. | Date **and** time. |
-| Payee IBAN | `LAN_RACEEVENT_PAYEE_IBAN_HELP` | Bank account (IBAN) shown as the payment target on the registration confirmation page. Spaces are removed automatically. Required (together with the beneficiary name) for the payment QR code. | Checked on save (format, length, mod-97 checksum). A suspicious IBAN is **saved with a warning**, not rejected. |
+| Payee IBAN | `LAN_RACEEVENT_PAYEE_IBAN_HELP` | Bank account (IBAN) shown as the payment target on the registration confirmation page. Spaces are removed automatically. Required (together with the beneficiary name) for the payment QR code. | Upper-cased on save and checked (format, length — a Slovak `SK…` IBAN must be exactly 24 characters — and the mod-97 checksum). A suspicious IBAN is **saved with a warning**, not rejected. |
 | Beneficiary name | `LAN_RACEEVENT_PAYEE_NAME_HELP` | Account-holder / beneficiary name shown with the payment details. Required whenever an IBAN is set: PAY by square cannot generate the QR code without it. | **Hard requirement.** Saving an IBAN without a name is rejected. |
 | Payee SWIFT / BIC | `LAN_RACEEVENT_PAYEE_SWIFT_HELP` | Optional bank identifier (BIC), 8 or 11 characters. Spaces are removed automatically. | Optional. A malformed BIC is saved with a warning. |
 
@@ -82,6 +82,8 @@ And three situations that are only **warnings** — the values are saved:
 | The SWIFT / BIC is not 8 or 11 characters | `LAN_RACEEVENT_SWIFT_WARN` |
 | A registration window is set but the payee block is incomplete | `LAN_RACEEVENT_PAYEE_INCOMPLETE_WARN` |
 
+Both refusals and the IBAN warning are also written to the e107 **admin log**.
+
 ---
 
 ### Maintenance
@@ -98,13 +100,15 @@ then press **Execute**.
 
 | Item | Table | LAN key | Notes |
 | --- | --- | --- | --- |
-| Tracks | `race` | `LAN_TR_TBL_RACES` | **Locked by default.** It only unlocks once every other table above is empty — a track cannot be removed while times, racers or results still point at it. |
+| Tracks | `race` | `LAN_TR_TBL_RACES` | **Locked by default.** It only unlocks once every other table in this list is empty — a track cannot be removed while times, racers or results still point at it. Until then the row shows the hint *clear the other tables first* (`LAN_TR_UDRZBA_TRACKS_HINT`). |
 | Checkpoints | `race_point` | `LAN_TR_TBL_POINTS` | |
 | Categories | `race_category` | `LAN_TR_TBL_CATEGORIES` | |
 | Racers / start numbers | `racer` | `LAN_TR_TBL_RACERS` | |
 | Results | `race_result` | `LAN_TR_TBL_RESULTS` | |
 | Checkpoint times | `race_time` | `LAN_TR_TBL_TIMES` | The raw measured times. Clearing this loses the race. |
 | Reader | `race_tracking` | `LAN_TR_TBL_READER` | Belongs to `racerfid`. If that plugin is not installed, the row is simply skipped. |
+
+Every clean is written to the e107 **admin log** with the table name and the number of deleted rows.
 
 Before anything is deleted you get a warning if **archive records are still linked to a track**
 (`LAN_TR_UDRZBA_ARCHIVE_WARN_TITLE`). Unlink them first — otherwise the archived results of the
@@ -119,11 +123,26 @@ the table entirely).
 | --- | --- | --- |
 | Old racer list | `race_racer` | `LAN_TR_TBL_OLD_RACERS` |
 
+A table that no longer exists is shown as *does not exist* and has no checkboxes. Clean and DROP are
+written to the admin log.
+
 #### Required plugins check
 
 A read-only table listing the plugins of the suite with their status: **Active** / **Disabled** /
 **Missing in eplugins**, whether they are mandatory, and how many preferences they have stored.
 Useful as a quick health check after an install or an upgrade.
+
+| Plugin | Shown as mandatory |
+| --- | --- |
+| `racereports`, `racetrack`, `racers` | Yes |
+| `racerfid`, `terminovka`, `racereg` | No |
+
+`raceevent` itself and `racetiming` are not in this list.
+
+#### Edit preferences
+
+The **Edit preferences** button (`LAN_TR_UDRZBA_EDIT_PREFS`) at the bottom opens the core e107
+*Preferences Editor* (Database admin, `db.php?mode=pref_editor`) in a new tab.
 
 ---
 
@@ -140,8 +159,14 @@ function, and flags the broken ones:
 | Malformed function | The link's function is not written as `plugin::method`. | `LAN_RACEEVENT_CL_MALFORMED` |
 | Owner / function mismatch | The link's owner plugin differs from the plugin it calls. | `LAN_RACEEVENT_CL_OWNER_MISMATCH` |
 
-Broken links can be **hidden** (set to the "nobody" userclass) from here. Editing or deleting them
-is done in the normal Site Links admin.
+The plugin is always taken from the function (the part before `::`), not from the link's owner. An
+**owner / function mismatch is only a warning** — the link still works and cannot be hidden here.
+
+Broken links can be **hidden** (set to the "nobody" userclass): tick them and press **Hide selected**
+(`LAN_RACEEVENT_CL_EXECUTE`). Hiding is reversible — change the userclass back in Site Links. Nothing
+is deleted from here, and every hide is written to the e107 admin log. Each row has an **Edit**
+button that opens the link in the normal Site Links admin (new tab), where it can be edited or
+deleted.
 
 This is typically needed after removing a plugin — a leftover menu item pointing at a plugin that
 is gone.
@@ -155,9 +180,20 @@ lists, result lists), with an **alive check** on each one:
 
 | Marker | Meaning | LAN key |
 | --- | --- | --- |
-| OK | The target page exists. | `LAN_RACEEVENT_OV_ALIVE` |
-| missing | The target file is not on disk. | `LAN_RACEEVENT_OV_DEAD` |
-| route not registered | The plugin does not publish that route. | `LAN_RACEEVENT_OV_NO_ROUTE` |
+| OK (green) | The target page exists. Hover to see its file path. | `LAN_RACEEVENT_OV_ALIVE` |
+| missing (red) | The target file is not on disk (hover shows the path), **or** the plugin does not publish that route — then the hover text says *route not registered*. | `LAN_RACEEVENT_OV_DEAD`, `LAN_RACEEVENT_OV_NO_ROUTE` |
+
+The sections, in order:
+
+| Section | One link per | Links to |
+| --- | --- | --- |
+| Tracks | track | the track page (`racetrack`) |
+| Checkpoints | checkpoint, except start and finish | the checkpoint report (`racereports`) |
+| Categories | category | the **start** report (`racereports`) |
+| Start lists | category, plus one *all* entry per track | the start list (`racers`) |
+| Result lists | category, plus one *all* entry per track | the finish report (`racereports`) |
+
+An empty section shows *Nothing here yet.* (`LAN_RACEEVENT_OV_EMPTY`). Every link opens in a new tab.
 
 Read-only. This is the same content as the public [event overview page](#event-overview-page) —
 one shared source, so the admin view and the public page can never disagree.
@@ -181,6 +217,8 @@ A menu you can place through the e107 Menu Manager. It shows the event name as a
 event description below it — both taken from Event configuration.
 
 The look is controlled by the `welcome` template in `raceevent/templates/raceevent_template.php`.
+Only the two shortcodes below are available in it; other event fields (date, town, …) have no
+shortcode yet.
 
 ### Shortcodes
 

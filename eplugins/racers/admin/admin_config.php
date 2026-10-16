@@ -2,21 +2,25 @@
 /*
  * e107 website system
  *
- * racers plugin - admin CRUD UI classes (categories, racers, results).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Bootstrap: load the framework, include the shared dispatcher/menu, check the
- * plugin's OWN admin permission (getperms('P')), then run the page. Native
- * e107 e_admin_ui throughout (toDB/toHTML, parameterized queries, e_token CSRF).
+ * racers plugin - admin/admin_config.php
+ *
+*/
+
+/*
+ * Entry point for the racer (main) and category (cat) CRUD and the plugin
+ * Settings (fields: docs/plugins/racers.md, "Settings", "Categories",
+ * "List / Add racer"). The other admin screens are their own entry files.
+ * racer_result_ui below is not wired into any mode (no racer_result table).
  */
 
 require_once("../../../class2.php");
 
 require_once("admin_menu.php"); // shared dispatcher / menu
-
-// This file is the admin entry point for the racer (main) + category (cat) CRUD only.
-// The startlists / racerlist / registration modes are now their OWN self-contained
-// entry files (admin_startlists.php / admin_racerlist.php / admin_registration.php),
-// each routed via its $adminMenu 'url'; they are no longer require'd here.
+require_once(e_PLUGIN . 'racers/includes/racers_name.php'); // flag map default + validation
 
 if (!getperms('P'))
 {
@@ -30,23 +34,12 @@ class race_category_ui extends e_admin_ui
 
 	protected $pluginTitle		= 'Racers';
 	protected $pluginName		= 'racers';
-	//	protected $eventName		= 'racers-race_category'; // remove comment to enable event triggers in admin. 		
-
-	//	protected $eventName		= 'timetracker-'; // remove comment to enable event triggers in admin. 		
 	protected $table			= 'race_category';
 	protected $pid				= 'race_category_id';
 	protected $perPage			= 30;
 	protected $batchDelete		= true;
 	protected $batchExport     = true;
 	protected $batchCopy		= true;
-
-	//	protected $sortField		= 'somefield_order';
-	//	protected $sortParent      = 'somefield_parent';
-	//	protected $treePrefix      = 'somefield_title';
-
-	//	protected $tabs				= array('tab1'=>'Tab 1', 'tab2'=>'Tab 2'); // Use 'tab'=>'tab1'  OR 'tab'=>'tab2' in the $fields below to enable. 
-
-	//	protected $listQry      	= "SELECT * FROM `#tableName` WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
 
 	protected $listOrder		= 'race_category_id DESC';
 
@@ -127,7 +120,6 @@ class race_category_ui extends e_admin_ui
 	protected $fieldpref = array('race_category_id', 'race_category_gender', 'race_category_age_from', 'race_category_age_to', 'race_category_sef', 'race_category_name', 'race_category_color');
 
 
-	//	protected $preftabs        = array('General', 'Other' );
 	protected $prefs = array();
 
 
@@ -146,7 +138,6 @@ class race_category_ui extends e_admin_ui
 
 
 		$this->fields['race_category_race']['writeParms']['optArray'] = $tmp;
-		//$this->fields['page_metarobots']['writeParms']['title'] = 'x';
 		$this->fields['race_category_race']['writeParms']['multiple'] = 1;
 
 		unset($tmp);
@@ -312,7 +303,7 @@ class racer_ui extends e_admin_ui
 	);
 
 	protected $fieldpref = array('racer_firstname', 'racer_surname', 'racer_active', 'racer_team');
-	protected $preftabs        = array('Nastavenie',  'Tlač');
+	protected $preftabs        = array('Nastavenie',  'Tlač', LAN_RACERS_ADMIN_053);
 
 	protected $prefs = array(
 		'name_hash' => array(
@@ -348,6 +339,39 @@ class racer_ui extends e_admin_ui
 			'type' => 'text',
 			'data' => 'str',
 			'writeParms' => ['size' => 'block-level']
+		),
+		// Country flag next to the racer name (rendered by racers_name::build()) -
+		// own settings tab (index 2).
+		'display_flag'        => array(
+			'title' => LAN_RACERS_ADMIN_044,
+			'tab' => 2,
+			'type' => 'boolean',
+			'data' => 'int',
+			'help' => LAN_RACERS_ADMIN_044_HELP,
+		),
+		'flag_position'        => array(
+			'title' => LAN_RACERS_ADMIN_045,
+			'tab' => 2,
+			'type' => 'dropdown',
+			'data' => 'str',
+			'help' => LAN_RACERS_ADMIN_045_HELP,
+			// 'after' first: an unset pref (existing installs) shows the default.
+			'writeParms' => ['optArray' => ['after' => LAN_RACERS_ADMIN_047, 'before' => LAN_RACERS_ADMIN_046]]
+		),
+		'flag_size'        => array(
+			'title' => LAN_RACERS_ADMIN_048,
+			'tab' => 2,
+			'type' => 'number',
+			'data' => 'int',
+			'help' => LAN_RACERS_ADMIN_048_HELP,
+			'writeParms' => ['default' => racers_name::FLAG_SIZE_DEFAULT, 'min' => racers_name::FLAG_SIZE_MIN, 'max' => racers_name::FLAG_SIZE_MAX, 'post' => ' px']
+		),
+		'flag_map'        => array(
+			'title' => LAN_RACERS_ADMIN_049,
+			'tab' => 2,
+			'type' => 'method',
+			'data' => 'array',
+			'help' => LAN_RACERS_ADMIN_049_HELP,
 		),
 		'startforage'        => array(
 			'title' => LAN_RACERS_ADMIN_027,
@@ -402,13 +426,6 @@ class racer_ui extends e_admin_ui
 	public function init()
 	{
 
-		// if (e107::isInstalled('timetracker'))
-		// {
-		// 	$message = e107::getMessage()->addWarning("Plugin timetracker is not installed!")->render();
-		// 	echo $message;
-		// }
-
-
 		$states = e107::pref('racers', 'states');
 		$states_array = explode(',', $states);
 		$states_assoc_array = array_combine($states_array, $states_array);
@@ -453,9 +470,6 @@ class racer_ui extends e_admin_ui
         <pre style="color: red; user-select:all; cursor:pointer; max-width:326px; overflow-x:scroll">&lt;i class=fas fa-map-marker-alt&gt;&lt;/i&gt;</pre>
        <i class="fas fa-map-marker-alt"></i><hr>';
 
-		// The on-site registration info that used to live here now has its own admin
-		// item "Registrácia na mieste" (admin/admin_registration.php, mode 'registration').
-
 		return array('caption' => $caption, 'text' => $text);
 	}
 
@@ -466,12 +480,198 @@ class racer_ui extends e_admin_ui
 
 		return $new_data;
 	}
+
+	/**
+	 * Normalise the country-flag prefs before e_admin_ui saves them (rules:
+	 * docs/plugins/racers.md, "Settings"). e_token CSRF is handled by e_admin_ui;
+	 * the values come from its posted data, not from $_POST.
+	 *
+	 * - flag_map: posted as rows flag_map[n][ioc] / flag_map[n][iso]; stored as
+	 *   IOC => ISO sorted by key (an all-empty map is stored empty).
+	 * - flag_position: anything other than 'before' becomes 'after'.
+	 *
+	 * @param array $new_data posted prefs
+	 * @param array $old_data stored prefs
+	 * @return array
+	 */
+	public function beforePrefsSave($new_data, $old_data)
+	{
+		if (isset($new_data['flag_map']))
+		{
+			$map     = array();
+			$invalid = array();
+			$rows    = is_array($new_data['flag_map']) ? $new_data['flag_map'] : array();
+
+			foreach ($rows as $row)
+			{
+				if (!is_array($row))
+				{
+					continue;
+				}
+
+				$ioc = isset($row['ioc']) && is_scalar($row['ioc']) ? strtoupper(trim((string) $row['ioc'])) : '';
+				$iso = isset($row['iso']) && is_scalar($row['iso']) ? strtoupper(trim((string) $row['iso'])) : '';
+
+				if ($ioc === '' && $iso === '')
+				{
+					continue; // empty row - ignored silently
+				}
+
+				if (preg_match('/^[A-Z]{3}$/', $ioc) && preg_match('/^[A-Z]{2}$/', $iso))
+				{
+					$map[$ioc] = $iso;
+				}
+				else
+				{
+					$invalid[] = $ioc . '=' . $iso;
+				}
+			}
+
+			ksort($map);
+			$new_data['flag_map'] = $map;
+
+			if (!empty($invalid))
+			{
+				// The dropped values are admin input: escape them before echoing.
+				$list = htmlspecialchars(implode(', ', $invalid), ENT_QUOTES, 'UTF-8');
+				e107::getMessage()->addWarning(str_replace('[x]', $list, LAN_RACERS_ADMIN_050));
+			}
+		}
+
+		if (isset($new_data['flag_size']))
+		{
+			$new_data['flag_size'] = racers_name::clampFlagSize($new_data['flag_size']);
+		}
+
+		if (isset($new_data['flag_position']) && $new_data['flag_position'] !== 'before')
+		{
+			$new_data['flag_position'] = 'after';
+		}
+
+		return $new_data;
+	}
 }
 
 
 
 class racer_form_ui extends e_admin_form_ui
 {
+	/**
+	 * Reference list shown under the flag map field: IOC code => ISO 3166-1 alpha-2
+	 * for the countries most likely to appear at a race. Display-only help - it is
+	 * never saved; the admin copies the codes they need into the map.
+	 */
+	const IOC_ISO_REFERENCE = array(
+		'ALB' => 'AL', 'AND' => 'AD', 'ARG' => 'AR', 'ARM' => 'AM', 'AUS' => 'AU',
+		'AUT' => 'AT', 'AZE' => 'AZ', 'BEL' => 'BE', 'BIH' => 'BA', 'BLR' => 'BY',
+		'BRA' => 'BR', 'BUL' => 'BG', 'CAN' => 'CA', 'CHI' => 'CL', 'CHN' => 'CN',
+		'COL' => 'CO', 'CRO' => 'HR', 'CYP' => 'CY', 'CZE' => 'CZ', 'DEN' => 'DK',
+		'ESP' => 'ES', 'EST' => 'EE', 'ETH' => 'ET', 'FIN' => 'FI', 'FRA' => 'FR',
+		'GBR' => 'GB', 'GEO' => 'GE', 'GER' => 'DE', 'GRE' => 'GR', 'HUN' => 'HU',
+		'IND' => 'IN', 'IRL' => 'IE', 'ISL' => 'IS', 'ISR' => 'IL', 'ITA' => 'IT',
+		'JPN' => 'JP', 'KAZ' => 'KZ', 'KEN' => 'KE', 'KOR' => 'KR', 'LAT' => 'LV',
+		'LIE' => 'LI', 'LTU' => 'LT', 'LUX' => 'LU', 'MDA' => 'MD', 'MEX' => 'MX',
+		'MKD' => 'MK', 'MLT' => 'MT', 'MNE' => 'ME', 'MON' => 'MC', 'NED' => 'NL',
+		'NOR' => 'NO', 'NZL' => 'NZ', 'POL' => 'PL', 'POR' => 'PT', 'ROU' => 'RO',
+		'RSA' => 'ZA', 'RUS' => 'RU', 'SLO' => 'SI', 'SMR' => 'SM', 'SRB' => 'RS',
+		'SUI' => 'CH', 'SVK' => 'SK', 'SWE' => 'SE', 'TUR' => 'TR', 'UKR' => 'UA',
+		'USA' => 'US',
+	);
+
+	/**
+	 * Settings 'method' field for the flag_map pref (IOC code -> ISO 3166-1 alpha-2).
+	 * When the pref is not set at all (existing installs) the default map is shown,
+	 * so a save keeps it. Values are escaped by e_form::text(). Normalised in
+	 * racer_ui::beforePrefsSave().
+	 *
+	 * @param mixed  $curVal stored pref value
+	 * @param string $mode   'write' on the settings page
+	 * @param array  $parms
+	 * @return string
+	 */
+	public function flag_map($curVal, $mode, $parms = array())
+	{
+		if ($mode !== 'write')
+		{
+			return '';
+		}
+
+		$map = ($curVal === null) ? racers_name::DEFAULT_FLAG_MAP : racers_name::cleanFlagMap($curVal);
+
+		$rows = array();
+		foreach ($map as $ioc => $iso)
+		{
+			$rows[] = array($ioc, $iso);
+		}
+		for ($i = 0; $i < 3; $i++)
+		{
+			$rows[] = array('', '');
+		}
+
+		$text = "<table class='table table-condensed table-bordered' style='width:auto'>
+			<thead><tr><th>" . LAN_RACERS_ADMIN_051 . "</th><th>" . LAN_RACERS_ADMIN_052 . "</th></tr></thead><tbody>";
+
+		foreach ($rows as $n => $row)
+		{
+			$text .= "<tr><td>" . $this->text('flag_map[' . $n . '][ioc]', $row[0], 3, array('size' => 'mini'))
+				. "</td><td>" . $this->text('flag_map[' . $n . '][iso]', $row[1], 2, array('size' => 'mini'))
+				. "</td></tr>";
+		}
+
+		$text .= "</tbody></table>";
+
+		$text .= $this->flagMapHelp($map);
+
+		return $text;
+	}
+
+	/**
+	 * Help under the flag map field: the 'states' codes with no flag yet, and the
+	 * IOC_ISO_REFERENCE table with country names from e_form::getCountry().
+	 * All values are A-Z codes or core country names, escaped via toHTML anyway.
+	 *
+	 * @param array $map current IOC => ISO map shown in the field
+	 * @return string
+	 */
+	protected function flagMapHelp($map)
+	{
+		$tp = e107::getParser();
+
+		$text = '';
+
+		$states  = (string) e107::pref('racers', 'states');
+		$missing = array();
+		foreach (explode(',', $states) as $code)
+		{
+			$code = strtoupper(trim($code));
+			if ($code !== '' && !isset($map[$code]))
+			{
+				$missing[] = $code;
+			}
+		}
+
+		if (!empty($missing))
+		{
+			$text .= "<div class='alert alert-warning'>"
+				. str_replace('[x]', $tp->toHTML(implode(', ', $missing), false, 'TITLE'), LAN_RACERS_ADMIN_056)
+				. "</div>";
+		}
+
+		$text .= "<details><summary>" . LAN_RACERS_ADMIN_054 . "</summary>"
+			. "<table class='table table-condensed table-striped' style='width:auto'>"
+			. "<thead><tr><th>" . LAN_RACERS_ADMIN_051 . "</th><th>" . LAN_RACERS_ADMIN_052 . "</th><th>"
+			. LAN_RACERS_ADMIN_055 . "</th></tr></thead><tbody>";
+
+		foreach (self::IOC_ISO_REFERENCE as $ioc => $iso)
+		{
+			$text .= "<tr><td><code>" . $ioc . "</code></td><td><code>" . $iso . "</code></td><td>"
+				. $tp->toHTML($this->getCountry(strtolower($iso)), false, 'TITLE') . "</td></tr>";
+		}
+
+		$text .= "</tbody></table></details>";
+
+		return $text;
+	}
 }
 
 
@@ -481,21 +681,12 @@ class racer_result_ui extends e_admin_ui
 
 	protected $pluginTitle		= 'racers';
 	protected $pluginName		= 'racers';
-	//	protected $eventName		= 'racers-racer_result'; // remove comment to enable event triggers in admin. 		
 	protected $table			= 'racer_result';
 	protected $pid				= 'racer_result_id';
 	protected $perPage			= 10;
 	protected $batchDelete		= true;
 	protected $batchExport     = true;
 	protected $batchCopy		= true;
-
-	//	protected $sortField		= 'somefield_order';
-	//	protected $sortParent      = 'somefield_parent';
-	//	protected $treePrefix      = 'somefield_title';
-
-	//	protected $tabs				= array('tab1'=>'Tab 1', 'tab2'=>'Tab 2'); // Use 'tab'=>'tab1'  OR 'tab'=>'tab2' in the $fields below to enable. 
-
-	//	protected $listQry      	= "SELECT * FROM `#tableName` WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
 
 	protected $listOrder		= 'racer_result_id DESC';
 
@@ -517,18 +708,14 @@ class racer_result_ui extends e_admin_ui
 
 	public function init()
 	{
-		// This code may be removed once plugin development is complete. 
 		if (!e107::isInstalled('racers'))
 		{
 			e107::getMessage()->addWarning("This plugin is not yet installed. Saving and loading of preference or table data will fail.");
 		}
 
-		// Set drop-down values (if any). 
-		$this->fields['racer_result_racer']['writeParms']['optArray'] = array('racer_result_racer_0', 'racer_result_racer_1', 'racer_result_racer_2'); // Example Drop-down array. 
+		$this->fields['racer_result_racer']['writeParms']['optArray'] = array('racer_result_racer_0', 'racer_result_racer_1', 'racer_result_racer_2');
 
 	}
-
-	// ------- Customize Create --------
 
 	public function beforeCreate($new_data, $old_data)
 	{
@@ -537,16 +724,12 @@ class racer_result_ui extends e_admin_ui
 
 	public function afterCreate($new_data, $old_data, $id)
 	{
-		// do something
 	}
 
 	public function onCreateError($new_data, $old_data)
 	{
-		// do something		
 	}
 
-
-	// ------- Customize Update --------
 
 	public function beforeUpdate($new_data, $old_data, $id)
 	{
@@ -556,12 +739,10 @@ class racer_result_ui extends e_admin_ui
 
 	public function afterUpdate($new_data, $old_data, $id)
 	{
-		// do something	
 	}
 
 	public function onUpdateError($new_data, $old_data, $id)
 	{
-		// do something		
 	}
  
 }

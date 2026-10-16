@@ -2,24 +2,31 @@
 /*
  * e107 website system
  *
- * Terminovka.sk plugin - core e_admin.php addon (issue #34)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Injects the "terminovka.sk track ID" field into the racetrack plugin's track
- * edit form WITHOUT racetrack referencing terminovka. The external track ID is
- * owned here: stored in the terminovka_track table, read from there on export.
+ * terminovka plugin - e_admin.php
  *
- * Targeting: the host is matched through $ui->getEventName(), which racetrack_ui
- * sets to 'race' (the event name stays keyed to the unchanged 'race' table, not
- * the plugin folder). The sibling controllers (racetrack_point, racetrack_price)
- * leave their event name unset, so they do not collide.
+*/
+
+/*
+ * Adds the "terminovka.sk track ID" field (own Terminovka tab) to the racetrack
+ * track edit form without racetrack referencing terminovka (docs/plugins/
+ * terminovka.md, "Track ID — on the track form"). The value is stored in the
+ * terminovka_track table and read from there on export.
  *
- * Core plumbing relied upon (verified against the bundled Lite 2.4.x source):
- *   - injected fields get data = false forced by core (nothing is written to
- *     the race table);
- *   - the field arrives in POST as x_terminovka_ext_id;
- *   - process() is called on create/edit (and delete);
- *   - load() populates the list view; the edit form is populated through the
- *     same load() via a small Lite core fix (see NOTES.md).
+ * The host is matched via $ui->getEventName() === 'race' (set on racetrack_ui;
+ * the sibling point/price controllers leave it unset, so they do not collide).
+ *
+ * Core plumbing relied upon (ehandlers/admin_ui.php):
+ *   - injected fields are forced to data = false (nothing written to race);
+ *   - the value arrives in POST as x_terminovka_ext_id;
+ *   - process() is called from _manageSubmit() after a successful create/edit
+ *     only - not on delete, so deleting a track leaves its mapping row;
+ *   - load() is called by setAdminAddonModel() for the list view only.
+ *     getCreate() does not call it, so the edit form shows the field empty
+ *     (the core fix described in /terminovka-NOTES.md is not present).
  */
 
 if (!defined('e107_INIT'))
@@ -55,15 +62,11 @@ class terminovka_admin implements e_admin_addon_interface
             return $config;
         }
 
-        // Load own admin LAN so the injected labels/tab are defined on the host
-        // (race) admin page, which loads race's LAN, not terminovka's.
+        // The host page loads racetrack's LAN, not terminovka's.
         e107::lan('terminovka', true, true);
 
-        // Dedicated terminovka tab on the race track form.
         $config['tabs']['terminovka'] = LAN_TERMINOVKA_TAB;
 
-        // POST arrives as $_POST['x_terminovka_ext_id']; core forces data=false
-        // so nothing is written to the race table.
         $config['fields']['ext_id'] = array(
             'title'      => LAN_TERMINOVKA_TRACK_EXTID,
             'type'       => 'number',
@@ -114,8 +117,9 @@ class terminovka_admin implements e_admin_addon_interface
     }
 
     /**
-     * Persist the posted external track ID into the owned table on create/edit
-     * and remove the mapping on delete.
+     * Persist the posted external track ID into the owned table on create/edit.
+     * The 'delete' branch only runs if core calls process() on delete, which
+     * _manageSubmit() currently does not.
      *
      * @param e_admin_ui $ui
      * @param int        $id race_id of the saved/deleted track.
@@ -149,8 +153,8 @@ class terminovka_admin implements e_admin_addon_interface
 
         $ext = (int) $ui->getPosted('x_terminovka_ext_id', 0);
 
-        // Upsert keyed by race_id (UNIQUE). Parameterized data arrays only,
-        // no string concatenation of the value.
+        // Upsert keyed by race_id (UNIQUE); the value is int-cast and typed via
+        // _FIELD_TYPES.
         $exists = $db->retrieve(self::TABLE, 'terminovka_track_id', 'race_id=' . $raceId);
 
         if ($exists)

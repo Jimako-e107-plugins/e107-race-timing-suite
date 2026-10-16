@@ -2,20 +2,17 @@
 /*
  * e107 website system
  *
- * racereports plugin - START (start-point standings) report area (mode 'start').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the start-links screen only - the
- * all-races (komplet) link, plus per race the start report links (all categories +
- * one per category tied to the race), built natively via the shared base's
- * renderStartLinks(). Exposed the SAME way as the online/point/stu/finish screens.
+ * racereports plugin - admin/admin_start.php
  *
- * NO export, NO DataTables here (the start report needs neither, like finish).
- *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=start (admin_menu.php
- * $adminMenu 'start/start' url points at this file).
+*/
+
+/*
+ * Start list link screen with CSV/XLS buttons (docs/plugins/racereports.md,
+ * "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -34,8 +31,7 @@ if (!getperms('P'))
 
 
 /**
- * Start area: the all-races (komplet) start-list link, then per race the start
- * report links (all categories + one per category) via renderStartLinks().
+ * Start area: the all-tracks link, then per race renderStartLinks().
  */
 class racereports_start_ui extends racereports_reports_ui
 {
@@ -52,9 +48,7 @@ class racereports_start_ui extends racereports_reports_ui
 				. $tp->toHTML(LAN_ADMIN_RACEREPORTS_010, false) . "</div>";
 		}
 
-		// All tracks on one page (r=overview, c=komplet) - renders every race in
-		// turn with the site chrome suppressed. The FIRST param is 'overview' (the
-		// all-tracks trigger); the SECOND param stays 'komplet' (= all categories).
+		// All tracks on one page: r=overview (first param), c=komplet. No export.
 		$overview = $this->linkItem(
 			e107::url('racereports', 'start', array(
 				'race_sef'          => self::OVERVIEW,

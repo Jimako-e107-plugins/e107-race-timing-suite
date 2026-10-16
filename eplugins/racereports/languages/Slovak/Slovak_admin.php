@@ -2,11 +2,13 @@
 /*
  * e107 website system
  *
- * racereports plugin - Slovak admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racereports', true, true). Overrides
- * the English_admin.php base per key; missing terms fall back to English.
- */
+ * racereports plugin - languages/Slovak/Slovak_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -24,7 +26,7 @@ return array(
 	'LAN_ADMIN_RACEREPORTS_107' => 'Dobeh',
 	'LAN_ADMIN_RACEREPORTS_116' => 'Priebeh pretekára',
 
-	// Landing-page report links.
+	// Report screens: empty notices and link labels.
 	'LAN_ADMIN_RACEREPORTS_010' => 'Zatiaľ žiadne preteky.',
 	'LAN_ADMIN_RACEREPORTS_011' => 'Zatiaľ žiadne kategórie.',
 	'LAN_ADMIN_RACEREPORTS_012' => 'Zatiaľ žiadne kontrolné body.',
@@ -33,12 +35,12 @@ return array(
 	'LAN_ADMIN_RACEREPORTS_030' => 'Časy po kontrolných bodoch',
 	'LAN_ADMIN_RACEREPORTS_031' => 'online - všetky kontrolné body',
 
-	// Overview screen: info-only list of the supported report types.
+	// Overview screen (old admin/admin_reports.php only): info-only list.
 	'LAN_ADMIN_RACEREPORTS_050' => 'Zoznam podporovaných výsledkov',
 	'LAN_ADMIN_RACEREPORTS_051' => 'Online',
 	'LAN_ADMIN_RACEREPORTS_052' => 'Časy na kontrolách',
 
-	// SUT screen: per-track finishers-only results.
+	// SUT screen.
 	'LAN_ADMIN_RACEREPORTS_060' => 'Výsledky podľa trate (v cieli)',
 
 	// NUMBER screen: priebeh pretekára - každé číslo -> zostava jedného pretekára.
@@ -84,9 +86,7 @@ return array(
 	'LAN_ADMIN_RACEREPORTS_096' => 'Vypnuté (predvolené) = bez stĺpca kategórie. Zapnuté = zobraziť stĺpec s názvom kategórie vo výsledkovej listine v cieli a v jej exporte (CSV/XLS).',
 	'LAN_ADMIN_RACEREPORTS_110' => 'Výsledky – počet desatín sekundy',
 	'LAN_ADMIN_RACEREPORTS_111' => '0–3. Platí pre výsledkové zostavy (online, kontroly, cieľ, štart, úsek, dobeh). Údaje sú vždy na 3 (ms); toto je len zobrazenie (oreže sa, nezaokrúhľuje). SUT má vlastné nastavenie; zostava Aktuálne sa neriadi týmto.',
-	// Popisky kariet na obrazovke nastavení (e_admin_ui $preftabs). Reťazcové kľúče
-	// kariet (dec/colors/refresh/custom) viažu každú voľbu na identitu karty;
-	// preusporiadanie zoznamu kariet sa nikdy nedotkne volieb.
+	// Settings tab captions ($preftabs).
 	'LAN_ADMIN_RACEREPORTS_112' => 'Desatiny',
 	'LAN_ADMIN_RACEREPORTS_113' => 'Podfarbenie',
 	'LAN_ADMIN_RACEREPORTS_114' => 'Obnovenie',

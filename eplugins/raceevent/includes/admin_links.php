@@ -2,19 +2,23 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - centralized admin-menu cross-links.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Single source of truth for the cross-plugin shortcuts shown in every
- * race-suite admin dispatcher. Each plugin's admin/admin_menu.php (or root
- * admin_config.php) calls raceevent_admin_links::get() from its init() and
- * array_merge()s the result into $adminMenu, passing its own plugin name to
- * exclude self.
+ * raceevent plugin - includes/admin_links.php
  *
- * The captions live in raceevent's admin LAN (raceevent owns them); the URLs
- * are static {e_PLUGIN} strings plus a fixed mode/action query - no user input.
- * Each target admin page enforces its own getperms('P'), so a shortcut never
- * bypasses access control. Missing plugins are hidden silently (no warning) so
- * the leaf plugins (racerfid, terminovka) stay independently installable.
+*/
+
+/*
+ * Cross-plugin admin-menu shortcuts (user view: docs/getting-started/admin-area.md,
+ * "Cross-plugin shortcuts"). Each suite dispatcher calls
+ * raceevent_admin_links::get() from its init() and array_merge()s the result into
+ * $adminMenu, passing its own plugin name to exclude itself.
+ *
+ * The captions live in raceevent's admin LAN; the URLs are static {e_PLUGIN}
+ * strings plus a fixed mode/action query - no user input. Each target admin page
+ * enforces its own getperms('P'), so a shortcut never bypasses access control.
  */
 
 if (!defined('e107_INIT')) { exit; }

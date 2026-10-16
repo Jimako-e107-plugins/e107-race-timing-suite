@@ -2,27 +2,21 @@
 /*
  * e107 website system
  *
- * racereports plugin - CUSTOM / SEGMENT report area (mode 'custom').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the segment-report screen only.
- * Because the segment report is a SPLIT between TWO ARBITRARY points (od/do), a
- * fixed per-race link list (like online/point/finish/start) cannot enumerate every
- * pair without an N×(N-1) ordered-pair explosion. So this screen renders, PER RACE,
- * a minimal native TWO-DROPDOWN picker: a "From (Od)" select and a "To (Do)" select
- * populated from that race's checkpoints, plus a button that opens
- * report_custom.php?trasa=&od=&do= in a new window. The user builds any arbitrary
- * A->B pair; no JavaScript, no DataTables, no export.
+ * racereports plugin - admin/admin_custom.php
  *
- * The form is a plain GET form (escaped by hand) pointed straight at the report's
- * plugin path (e_PLUGIN_ABS . 'racereports/report_custom.php'), so it works the same
- * on SEF and non-SEF installs (the report reads $_GET['trasa']/['od']/['do']
- * directly, exactly as the legacy contract).
+*/
+
+/*
+ * Segment report screen: a From/To picker per track instead of a link list (any
+ * pair of checkpoints is allowed). See docs/plugins/racereports.md, "Report screens".
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared report
- * base, then gate the whole screen on the plugin's OWN admin permission with
- * getperms('P'). The dispatcher routes here for mode=custom (admin_menu.php
- * $adminMenu 'custom/custom' url points at this file).
+ * The picker is a plain GET form pointed at report_custom.php's plugin path, so it
+ * works the same on SEF and non-SEF installs (the report reads trasa/od/do from
+ * $_GET).
  */
 
 require_once("../../../class2.php");
@@ -79,12 +73,9 @@ class racereports_custom_ui extends racereports_reports_ui
 	}
 
 	/**
-	 * The per-race two-dropdown segment picker (From/To + open button). Points come
-	 * from the race's checkpoints (FIND_IN_SET on race_point_race, ORDER BY
-	 * race_point_order); ALL points are offered (a segment may run between any two,
-	 * including start/finish). The form GETs report_custom.php with the chosen
-	 * trasa/od/do. Every value is escaped (toAttribute on the option value/href,
-	 * toHTML on the visible label).
+	 * The per-race From/To picker. All checkpoints are offered, start/finish
+	 * included. Values are escaped (toAttribute on option values / action, toHTML
+	 * on labels).
 	 *
 	 * @param int    $raceId
 	 * @param string $raceSef

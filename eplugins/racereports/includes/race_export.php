@@ -2,41 +2,32 @@
 /*
  * e107 website system
  *
- * racereports plugin - SHARED export module (CSV + fake-XLS), no external library.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Two GENERIC static renderers that stream a report to the browser as a download.
- * They are deliberately NOT tied to any table, report or column set: the caller
- * passes the report's ALREADY-DISPLAYED labels + cells and these functions only
- * stream them. This is the ONE place the byte-level download format lives, so
- * report_stu (first consumer) and any future report (online / point / a finish
- * list) call the same two functions with THEIR displayed columns - no copy-paste,
- * no second column definition. See NOTES.md for the contract.
+ * racereports plugin - includes/race_export.php
  *
- * Modelled on the proven eadmin users.php RenderCsv/RenderXls header/output
- * pattern (fputcsv to php://output for CSV; an Excel-readable HTML <table> echoed
- * under an application/vnd.ms-excel header for the "fake XLS").
+*/
+
+/*
+ * Shared CSV / "fake XLS" download renderers, no external library (user-facing
+ * behaviour: docs/plugins/racereports.md, "Export"). Used by report_stu.php,
+ * report_finish.php and report_start.php.
  *
- * CONTRACT (what the caller must hand in):
- *   $filename : base name WITHOUT extension (the renderer appends .csv / .xls).
- *   $headers  : ordered column labels - the report's OWN display labels.
- *   $rows     : array of rows; each row = ordered array of cell values ALREADY
- *               FORMATTED as displayed (e.g. a time already run through
- *               race_format::formatElapsed with the stu_decimals pref). This
- *               module NEVER computes or reformats a value - it streams the
- *               string it is given, so the file is byte-identical to the page.
- *   $textCols : indices (or keys) of columns that MUST be forced to TEXT so a
- *               spreadsheet does not mangle them (a start number with leading
- *               zeros like "0042" must not become 42; a time string like
- *               "12:17:55.48" must not be reinterpreted as a time/number).
+ * The renderers are generic: the caller passes its own display labels and cells and
+ * they only stream them, so the file matches the page.
+ *   $filename : base name WITHOUT extension (.csv / .xls is appended).
+ *   $headers  : ordered column labels.
+ *   $rows     : rows of cells ALREADY FORMATTED as displayed; nothing is computed or
+ *               reformatted here.
+ *   $textCols : indices of columns forced to TEXT in the XLS (bib "0042", time
+ *               strings) so a spreadsheet does not reinterpret them.
+ * Each renderer ends the request (exit), so call it before HEADERF / any output.
  *
- * Each renderer ENDS the request (exit) right after streaming - no header/footer,
- * no other output. Call them at the TOP of a report page, before HEADERF / any
- * echo.
- *
- * SECURITY: header/disposition values are caller-supplied filenames built from
- * sanitised race data; CSV cells are written verbatim (fputcsv quotes/escapes per
- * RFC 4180), XLS cells are htmlspecialchars()'d so no cell value can break out of
- * the <td> or inject markup.
+ * Header pattern modelled on the core eadmin users.php RenderCsv/RenderXls. CSV cells
+ * are written by fputcsv; XLS cells are htmlspecialchars()'d, so no cell can break
+ * out of its <td>.
  */
 
 if (!defined('e107_INIT')) { exit; }
@@ -47,14 +38,14 @@ class race_export
 	/**
 	 * Stream the rows as a UTF-8 CSV download and exit.
 	 *
-	 * Mirrors users.php: discard any buffered chrome, send the no-cache + CSV
-	 * disposition headers, PREPEND a UTF-8 BOM so Excel reads Slovak diacritics
-	 * correctly, then fputcsv the header row and every data row.
+	 * Discards any buffered output, sends the no-cache + CSV disposition headers,
+	 * prepends a UTF-8 BOM (Excel then reads diacritics correctly) and fputcsv()s
+	 * the header row and every data row.
 	 *
 	 * $textCols is accepted for a uniform signature with xls() but is a no-op for
-	 * CSV: the raw string is already correct IN THE FILE (BOM + verbatim value),
-	 * and wrapping cells in ="..." to force Excel-text would pollute machine
-	 * imports. A future Excel-open-safe toggle is noted in NOTES.md (deferred).
+	 * CSV: the value is already verbatim in the file, and wrapping cells in ="..."
+	 * would pollute machine imports (see racereports-NOTES.md, "Deferred:
+	 * CSV-as-Excel-text toggle").
 	 *
 	 * @param string $filename base name, no extension
 	 * @param array  $headers  ordered column labels
@@ -94,11 +85,10 @@ class race_export
 	/**
 	 * Stream the rows as a "fake XLS" (an Excel-readable HTML table) and exit.
 	 *
-	 * No external library: an HTML <table> sent under the application/vnd.ms-excel
-	 * MIME type opens directly in Excel/LibreOffice. Each $textCols cell is emitted
-	 * with mso-number-format:'@' (Excel "Text" format) so a start number keeps its
-	 * leading zeros and a time string is not reinterpreted - the legacy users.php
-	 * did this for dates; here it is the start number + time columns.
+	 * An HTML <table> sent as application/vnd.ms-excel opens directly in
+	 * Excel/LibreOffice. Each $textCols cell gets mso-number-format:'@' (Excel
+	 * "Text") so a bib keeps its leading zeros and a time string is not
+	 * reinterpreted.
 	 *
 	 * @param string $filename base name, no extension
 	 * @param array  $headers  ordered column labels

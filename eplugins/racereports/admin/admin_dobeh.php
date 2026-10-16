@@ -2,20 +2,16 @@
 /*
  * e107 website system
  *
- * racereports plugin - DOBEH (checkpoint arrivals board) report area (mode 'dobeh').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the arrivals-board links screen
- * only - per race, the per-checkpoint dobeh report links (komplet + one per
- * checkpoint tied to the race, skipping start/finish), built natively via the shared
- * base's renderDobehLinks(). Exposed the SAME way as the online/point screens.
+ * racereports plugin - admin/admin_dobeh.php
  *
- * NO export, NO DataTables here (the dobeh board is a live, auto-refreshing view).
- *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=dobeh (admin_menu.php
- * $adminMenu 'dobeh/dobeh' url points at this file).
+*/
+
+/*
+ * Arrivals board link screen (docs/plugins/racereports.md, "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -34,9 +30,7 @@ if (!getperms('P'))
 
 
 /**
- * Dobeh area: per race, the per-checkpoint arrivals-board report links only.
- * Exposed natively the SAME way as the Checkpoint area (its own dispatcher
- * mode/screen, sharing the base's renderDobehLinks()).
+ * Arrivals area: per race, the per-checkpoint arrivals board links.
  */
 class racereports_dobeh_ui extends racereports_reports_ui
 {

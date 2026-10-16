@@ -2,18 +2,16 @@
 /*
  * e107 website system
  *
- * racereports plugin - Checkpoint-times report area (mode 'point').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the checkpoint-times screen
- * only - per race, the per-checkpoint report links (komplet + one per checkpoint
- * tied to the race, skipping start/finish), built natively via the shared base's
- * renderCheckpointLinks(). Exposed the SAME way as the online screen.
+ * racereports plugin - admin/admin_point.php
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=point (admin_menu.php
- * $adminMenu 'point/point' url points at this file).
+*/
+
+/*
+ * Checkpoint times link screen (docs/plugins/racereports.md, "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -32,9 +30,7 @@ if (!getperms('P'))
 
 
 /**
- * Checkpoint area: per race, the checkpoint-time report links only. Exposed
- * natively the SAME way as the Online area (its own dispatcher mode/screen,
- * sharing the base's renderCheckpointLinks()).
+ * Checkpoint area: per race, the checkpoint-time report links.
  */
 class racereports_point_ui extends racereports_reports_ui
 {

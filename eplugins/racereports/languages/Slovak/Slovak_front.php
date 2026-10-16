@@ -2,12 +2,13 @@
 /*
  * e107 website system
  *
- * racereports plugin - Slovak front language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded on the front-end via
- * e107::lan('racereports', '', true). Overrides the English front strings per
- * key; any key missing here falls back to languages/English/English_front.php.
- */
+ * racereports plugin - languages/Slovak/Slovak_front.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -15,8 +16,8 @@ return array(
 	'LAN_RACEREPORTS_LIVE_STATE'     => 'aktuálny stav',
 	'LAN_RACEREPORTS_ALL_CATEGORIES' => 'všetky kategórie',
 
-	// Online report - auto-refresh page help (collapsible note at the top). Trusted
-	// HTML body, echoed raw so the headings/list/<code> markup render.
+	// Online report - admin-only auto-refresh help note. The BODY is trusted HTML,
+	// echoed raw (not through toHTML).
 	'LAN_RACEREPORTS_HELP_REFRESH_TITLE' => 'Online výsledky — automatické obnovovanie',
 	'LAN_RACEREPORTS_HELP_REFRESH_BODY'  =>
 		'<p>Zostava sa môže sama obnovovať, aby hlásateľ či divák videli aktuálne poradie'
@@ -52,7 +53,7 @@ return array(
 	'LAN_RACEREPORTS_OD'             => 'Od',
 	'LAN_RACEREPORTS_DO'             => 'Do',
 
-	// SUT (per-track finishers-only results) report.
+	// SUT report; the COL_* labels are shared with other reports.
 	'LAN_RACEREPORTS_SUT_TITLE'      => 'Výsledky',
 	'LAN_RACEREPORTS_SUT_NO_FINISH'  => 'Zatiaľ nikto v cieli.',
 	'LAN_RACEREPORTS_COL_RANK'        => 'Poradie',
@@ -63,12 +64,12 @@ return array(
 	'LAN_RACEREPORTS_COL_BIRTHDATE'   => 'Dátum narodenia',
 	'LAN_RACEREPORTS_COL_NATIONALITY' => 'Národnosť',
 	'LAN_RACEREPORTS_COL_BIB'         => 'Štartové číslo',
-	// Dobeh (tabuľa dobehov) hlavička - stĺpec kategórie ("<kategória> — <N.>").
+	// Category column (arrivals board header, finish export).
 	'LAN_RACEREPORTS_COL_CATEGORY'    => 'Kategória',
 	'LAN_RACEREPORTS_COL_NAME'        => 'Meno',
 	'LAN_RACEREPORTS_COL_STATUS'      => 'Stav',
 
-	// SUT export buttons (CSV / fake-XLS download of the displayed results).
+	// SUT export buttons (CSV / XLS download).
 	'LAN_RACEREPORTS_EXPORT_CSV'      => 'CSV',
 	'LAN_RACEREPORTS_EXPORT_XLS'      => 'XLS',
 

@@ -2,11 +2,13 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - English front strings.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Loaded on the front-end via e107::lan('raceevent'). Holds shared front
- * strings plus the welcome menu caption.
- */
+ * raceevent plugin - languages/English/English_front.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 

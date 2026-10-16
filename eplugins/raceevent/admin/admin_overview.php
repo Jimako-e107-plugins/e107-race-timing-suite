@@ -2,20 +2,18 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - "Prehľad preteku" admin screen (event overview).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Admin face of the cross-suite link directory. It renders the SAME output as
- * the public front page (raceevent/page_overview.php) by including the one
- * shared include (raceevent/includes/event_overview.php) - so the two stay
- * identical. The front HTML is plain classic links, so it sits fine inside the
- * admin chrome; this screen just tablerenders the include's returned HTML.
+ * raceevent plugin - admin/admin_overview.php
  *
- * This is a custom controller screen: the default action 'view' is served by
- * the controller method viewPage() (e107's admin action->method convention),
- * with an EMPTY $table/$pid (no DB-table CRUD), exactly like the plugin's
- * checklinks / prefs controllers. Bootstrap mirrors admin_checklinks.php.
- *
- * READ-ONLY: the shared include does db reads + link building only, no writes.
+*/
+
+/*
+ * Admin event overview. Renders the shared include includes/event_overview.php
+ * (the same output as the public page_overview.php) inside the admin chrome.
+ * Custom controller screen: action 'view' -> viewPage(), no DB table.
  */
 
 require_once("../../../class2.php");

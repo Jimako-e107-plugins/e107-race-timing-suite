@@ -2,12 +2,17 @@
 /*
  * e107 website system
  *
- * racers - sitelinks for the public start list (štartovacia listina).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Moved here from timetracker (racers_list) and racetrack
- * (race_points_list_by_race), which both built dead e107::url('timetracker',
- * 'racers', ...) links. The start list belongs to racers; the start itself
- * (race_start_list) stays in timetracker.
+ * racers plugin - e_sitelink.php
+ *
+*/
+
+/*
+ * Sitelink function "Štartovacie listiny" (racers_start_list): start-list
+ * sublinks per track and per track + category (docs/plugins/racers.md, "Front-end").
  */
 
 if (!defined('e107_INIT'))

@@ -2,41 +2,32 @@
 /*
  * e107 website system
  *
- * racereports plugin - shared base for the report-link admin screens.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Each report area (overview / online / point / stu) lives in its OWN admin
- * entry file (admin_overview.php, admin_online.php, admin_point.php,
- * admin_stu.php) and defines exactly one concrete controller. They all share
- * this abstract base, which holds the render helpers (Bootstrap link panels)
- * and the read-only data accessors - the same return-an-HTML-string mechanism
- * raceevent's maintenance screen uses.
+ * racereports plugin - admin/admin_report_ui.php
  *
- * This file is a pure class def (guarded by e107_INIT): the per-area entry files
- * require it AFTER bootstrapping class2.php and loading the LAN, then declare
- * their own controller on top of it.
+*/
+
+/*
+ * Shared base for the report-link admin screens (admin_online.php, admin_point.php,
+ * ...): read-only data accessors and render helpers. Pure class definition; the entry
+ * files require it after bootstrapping class2.php and loading the LAN.
  *
- * SECURITY / conventions (native e107 only):
- *   - READ-ONLY: data is read via the db class; every value placed in markup is
- *     escaped (text via $tp->toHTML, hrefs via $tp->toAttribute) and every report
- *     link is built with e107::url() so SEF and non-SEF installs both resolve.
- *
- * Front report routes (racereports/e_url.php), plugin-scoped keys:
- *   online -> report_online.php ?r=<race_sef>&c=<race_category_sef>
- *   point  -> report_point.php  ?r=<race_sef>&p=<race_point_sef>
+ * Every value placed in markup is escaped (text via toHTML, hrefs via toAttribute);
+ * report links are built with e107::url() so SEF and non-SEF installs both resolve.
  * race_category / race_point are tied to a race via FIND_IN_SET(race_id,
- * race_category_race) / (race_id, race_point_race); race_point has no sef column
- * so its identifier is race_point_code (the value the {race_point_sef} token
- * carries).
+ * race_category_race / race_point_race); race_point has no sef column, so the
+ * {race_point_sef} token carries race_point_code.
  */
 
 if (!defined('e107_INIT')) { exit; }
 
 
 /**
- * Shared base for the report-link admin areas. Extends e_admin_ui as a custom
- * controller screen (no DB table); the concrete classes set only their default
- * action. The render helpers build Bootstrap panels of report links - the same
- * return-an-HTML-string mechanism raceevent's maintenance screen uses.
+ * Shared base for the report-link admin screens: custom controller screens (no DB
+ * table) whose <action>Page() returns an HTML string of Bootstrap panels.
  */
 abstract class racereports_reports_ui extends e_admin_ui
 {
@@ -51,9 +42,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	// {race_category_sef}/{race_point_sef} token; see e_url.php).
 	const KOMPLET = 'komplet';
 
-	// FIRST {race_sef}-token value that triggers the finish/start "all tracks on one
-	// page" mode (stacked per-track tables). Renamed from the legacy 'komplet' to
-	// avoid confusion with the second-param c=komplet ("all categories"). See e_url.php.
+	// FIRST {race_sef}-token value for the finish/start "all tracks on one page"
+	// mode (distinct from the second-param c=komplet = "all categories").
 	const OVERVIEW = 'overview';
 
 	/**
@@ -72,11 +62,9 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * One clickable link row, rendered as a table row (<tr><td>) so the link is a
-	 * PLAIN <a> in a cell - deliberately NOT a.list-group-item, whose admin-theme
-	 * color (#c6c6c6) is unreadable on the light panel background. $label and the
-	 * optional $sef suffix are escaped via toHTML; the href via toAttribute. The
-	 * containing <table> is emitted by panel().
+	 * One link row (<tr><td>): a PLAIN <a> in a cell - not a.list-group-item, whose
+	 * admin-theme colour (#c6c6c6) is unreadable on the light panel. The containing
+	 * <table> is emitted by panel().
 	 *
 	 * @param string $url
 	 * @param string $label
@@ -96,17 +84,11 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Per-track/-race/-category CSV + XLS export buttons as TWO SEPARATE table cells -
-	 * the CSV button in its own <td>, the XLS button in its own <td>, so each lines up
-	 * in its own column beside the report link on the SAME compact row (no btn-group
-	 * span stretching the link cell, which is what made the rows tall). Each cell is
-	 * narrow (width:1%, nowrap) and vertical-align:middle so the row collapses to the
-	 * normal admin table height. $exportBase is the plugin-path report URL WITH its r/c
-	 * (or p) query params already set but WITHOUT &export - built the dedup-safe way per
-	 * race/per category (distinct params); &export=csv / &export=xls are appended here.
-	 * Same buttons / same look (btn-csv / btn-excel) as before; hrefs escaped via
-	 * toAttribute. Caller (linkItemWithExport / renderStuLink) supplies the link cell
-	 * and the surrounding <tr>.
+	 * CSV + XLS export buttons as two separate narrow cells (width:1%, nowrap) beside
+	 * the link cell, so the row keeps the normal admin table height (a btn-group in
+	 * the link cell made the rows tall). $exportBase is the report URL with its query
+	 * params but without &export; &export=csv / &export=xls are appended here. The
+	 * caller supplies the link cell and the surrounding <tr>.
 	 *
 	 * @param string $exportBase report URL incl. r/c (or p) params, no &export
 	 * @return string two <td> cells: CSV column, then XLS column
@@ -127,10 +109,9 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Build the plugin-path export base URL for a report (e.g. report_finish.php),
-	 * with the r/c (or p) query params attached via http_build_query so both params
-	 * survive regardless of SEF (the report pages read $_GET['r']/$_GET['c'] directly).
-	 * The caller appends &export=csv / &export=xls (see exportButtonCells()).
+	 * Plugin-path export base URL for a report (e.g. report_finish.php). Built on the
+	 * plugin path, not e107::url(), so the r/c (or p) params survive regardless of SEF
+	 * (the report pages read $_GET directly).
 	 *
 	 * @param string $reportFile bare report filename, e.g. 'report_finish.php'
 	 * @param array  $params     query params, e.g. array('r'=>$raceSef,'c'=>$catSef)
@@ -142,15 +123,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * One clickable link row (like linkItem) PLUS CSV + XLS export buttons, as a compact
-	 * THREE-COLUMN table row: a PLAIN <a> link in the first <td> (NOT a.list-group-item -
-	 * see linkItem), then the CSV button in its OWN <td> and the XLS button in its OWN
-	 * <td> (separate columns, side by side on the SAME row), so the buttons sit beside
-	 * the link without nesting <a> inside <a> and without stretching the link cell. With
-	 * each button in a narrow, vertical-align:middle cell the row stays at normal admin
-	 * table height (no tall empty rows). The report link href is escaped via toAttribute
-	 * and the label/sef via toHTML; the two button cells come from exportButtonCells().
-	 * Mirrors renderStuLink()'s row layout. The containing <table> is emitted by panel().
+	 * A link row (as linkItem) plus the CSV / XLS cells from exportButtonCells():
+	 * link | CSV | XLS. The containing <table> is emitted by panel().
 	 *
 	 * @param string $url        report link href (e107::url)
 	 * @param string $label      link label
@@ -174,10 +148,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * A muted "nothing here" table row. $colspan lets the cell span the export tables'
-	 * extra button columns: link-only tables (online/point/dobeh) use the default 1, so
-	 * their rows are unchanged; the export tables (finish/start) pass 3 so the fallback
-	 * row spans link + CSV + XLS and the columns stay aligned.
+	 * A muted "nothing here" table row. The export tables (finish/start) pass
+	 * $colspan = 3 so the row spans link + CSV + XLS.
 	 *
 	 * @param string $label
 	 * @param int    $colspan number of columns to span (default 1)
@@ -193,11 +165,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 
 	/**
 	 * Wrap a body in a titled panel. $heading is HTML the caller has already escaped.
-	 * For link lists (the default) $body is a string of <tr> rows and is wrapped in a
-	 * <table class='table table-striped table-bordered'> - so the links render as plain
-	 * <a> in table cells, dodging the admin theme's unreadable a.list-group-item color.
-	 * Pass $asTable=false for non-list bodies (e.g. the custom screen's GET form) to
-	 * drop straight into the panel body with no table.
+	 * By default $body is <tr> rows and is wrapped in a table; pass $asTable=false for
+	 * other bodies (e.g. the segment screen's GET form).
 	 *
 	 * @param string $heading pre-escaped heading HTML
 	 * @param string $body    table rows (default) or arbitrary panel body
@@ -282,10 +251,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Finish (results) report links for a race: the "all categories" (komplet) link
-	 * plus one per category tied to the race (FIND_IN_SET on race_category_race).
-	 * Same query contract / category resolution as renderOnlineLinks(), but built on
-	 * the 'finish' route (report_finish.php ?r=<race_sef>&c=<race_category_sef>).
+	 * Finish report links for a race: the "all categories" (komplet) row plus one per
+	 * category tied to the race, each with CSV / XLS buttons.
 	 *
 	 * @param int $raceId
 	 * @param string $raceSef
@@ -347,11 +314,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Start (start-point standings) report links for a race: the "all categories"
-	 * (komplet) link plus one per category tied to the race (FIND_IN_SET on
-	 * race_category_race). Same query contract / category resolution as
-	 * renderFinishLinks(), but built on the 'start' route (report_start.php
-	 * ?r=<race_sef>&c=<race_category_sef>).
+	 * Start list links for a race: same layout as renderFinishLinks(), on the 'start'
+	 * route.
 	 *
 	 * @param int $raceId
 	 * @param string $raceSef
@@ -413,11 +377,9 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Checkpoint-time report links for a race: the "all checkpoints" (komplet)
-	 * link plus one per checkpoint tied to the race (FIND_IN_SET on
-	 * race_point_race, ORDER BY race_point_order), SKIPPING start/finish (the
-	 * point report itself drops them for p=komplet). race_point has no sef column
-	 * so the {race_point_sef} token carries race_point_code.
+	 * Checkpoint-time report links for a race: the "all checkpoints" (komplet) link
+	 * plus one per checkpoint in race_point_order, skipping start/finish (the report
+	 * drops them for p=komplet too).
 	 *
 	 * @param int $raceId
 	 * @param string $raceSef
@@ -478,13 +440,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * Dobeh (checkpoint arrivals board) report links for a race: the "all
-	 * checkpoints" (komplet) link plus one per checkpoint tied to the race
-	 * (FIND_IN_SET on race_point_race, ORDER BY race_point_order), SKIPPING
-	 * start/finish (the dobeh report itself drops them for p=komplet). Same shape /
-	 * checkpoint resolution as renderCheckpointLinks(), but built on the 'dobeh'
-	 * route (report_dobeh.php ?r=<race_sef>&p=<race_point_sef>). NO export buttons -
-	 * the dobeh board is a live, auto-refreshing view with no export.
+	 * Arrivals board links for a race: same shape as renderCheckpointLinks(), on the
+	 * 'dobeh' route. No export (live board).
 	 *
 	 * @param int $raceId
 	 * @param string $raceSef
@@ -545,21 +502,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * SUT report row for ONE race(track): the link to the per-track finishers-only
-	 * results list PLUS per-track CSV + XLS export buttons ("v riadku tlačítka na
-	 * export zostavy"). The report link uses the 'stu' route ({race_id} token, legacy
-	 * parity - ?p selects a track by race_id). The export buttons point at the SAME
-	 * report with &export=csv / &export=xls appended, built on the plugin path so both
-	 * the ?p (track) and ?export params survive regardless of SEF.
-	 *
-	 * Rendered as a compact THREE-COLUMN table row (link | CSV | XLS) - a PLAIN <a> in
-	 * the first <td> (NOT a.list-group-item, whose admin-theme color is unreadable),
-	 * then the CSV button in its OWN <td> and the XLS button in its OWN <td> (separate
-	 * columns, side by side on the SAME row), so the buttons sit beside the link without
-	 * nesting <a> inside <a> and without stretching the link cell - the row stays at
-	 * normal admin table height. Same layout as linkItemWithExport(); the two button
-	 * cells come from the shared exportButtonCells(). The containing <table> is emitted
-	 * by panel().
+	 * SUT row for one track: link | CSV | XLS (same layout as linkItemWithExport()).
+	 * The 'stu' route takes the race_id ({race_id} token -> ?p).
 	 *
 	 * @param int    $raceId
 	 * @param string $raceName label shown on the link
@@ -572,8 +516,7 @@ abstract class racereports_reports_ui extends e_admin_ui
 
 		$reportUrl = e107::url('racereports', 'stu', array('race_id' => (int) $raceId));
 
-		// Plugin-path export base so both the ?p (track) and ?export params survive
-		// regardless of SEF; exportButtonCells() appends &export=csv / &export=xls.
+		// Plugin-path export base so ?p and ?export survive regardless of SEF.
 		$exportBase = e_PLUGIN_ABS . 'racereports/report_stu.php?p=' . (int) $raceId;
 
 		$suffix = ($raceSef !== '')
@@ -588,12 +531,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * AKTUALNE report row for ONE race: a plain link to the FULL per-race results
-	 * matrix (report_aktualne.php). Like the 'stu' route, the report's ?p selects a
-	 * RACE by race_id (legacy parity), so the 'aktualne' route's {race_id} token is
-	 * the int race id. Phase 1 is the on-screen report only - NO export buttons yet
-	 * (the CSV/XLS + archive snapshot are Phase 2), so this is the plain linkItem()
-	 * shape, not the flex link+buttons row.
+	 * Full results row for one race: a plain link (no export). Like 'stu', the
+	 * 'aktualne' route takes the race_id ({race_id} token -> ?p).
 	 *
 	 * @param int    $raceId
 	 * @param string $raceName label shown on the link
@@ -608,11 +547,8 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * EVERY racer (all tracks), full rows, ordered by bib. The number screen lists
-	 * one row per bib, so it needs the full racer row (getRacerName reads
-	 * surname/firstname/team/local). racer_number is a VARCHAR (leading zeros are
-	 * data), so ORDER BY racer_number is the natural bib order. Empty array on no
-	 * rows. Read-only via the db class; no user input is interpolated.
+	 * Every racer (all tracks), full rows (getRacerName needs them), ordered by
+	 * racer_number - a VARCHAR, so string order. No user input in the query.
 	 *
 	 * @return array racer rows (each a full #racer row)
 	 */
@@ -627,16 +563,9 @@ abstract class racereports_reports_ui extends e_admin_ui
 	}
 
 	/**
-	 * One navigation row for the number (racer progression) screen: a PLAIN <a>
-	 * (NOT a.list-group-item - see linkItem) to the single-racer whole-course report
-	 * (report_number.php?n=<bib>), opened in a NEW TAB. The label is
-	 * "<bib> — <name>": the bib is escaped here (toHTML), while $nameHtml is the
-	 * ALREADY-SAFE output of race_report::getRacerName (it routes surname/firstname
-	 * through toHTML and emits its own markup), so it is inserted as-is and NOT
-	 * re-escaped (which would show literal tags). The href is built with e107::url()
-	 * on the plugin-scoped 'number' route (so SEF and non-SEF installs both resolve)
-	 * and escaped via toAttribute; the bib stays a STRING. NO export buttons - this
-	 * is a navigation list only. The containing <table> is emitted by panel().
+	 * One racer progression row: "<bib> — <name>". The bib is escaped here;
+	 * $nameHtml is the already-safe getRacerName() output (it carries its own
+	 * markup), so it is NOT re-escaped. The bib stays a STRING.
 	 *
 	 * @param string $bib      racer_number (STRING - leading zeros preserved)
 	 * @param string $nameHtml pre-escaped display name (race_report::getRacerName)

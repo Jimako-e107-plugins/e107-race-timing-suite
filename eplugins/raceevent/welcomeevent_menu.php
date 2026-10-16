@@ -2,16 +2,17 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - welcome event menu.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Auto-discovered by the menu manager from the *_menu.php filename convention
- * (the same way timetracker exposed welcomeintro_menu.php - no plugin.xml entry
- * is required). Parses the 'welcome' front template with the raceevent
- * shortcodes and renders the result.
+ * raceevent plugin - welcomeevent_menu.php
  *
- * The event name + description come from the RACEEVENT plugin prefs
- * (e107::getPlugConfig('raceevent')) via the {RACEEVENT_EVENT_NAME} and
- * {RACEEVENT_EVENT_DESCRIPTION} shortcodes in raceevent/e_shortcode.php.
+*/
+
+/*
+ * Welcome menu. Discovered by the Menu Manager from the *_menu.php filename (no
+ * plugin.xml entry needed); renders the 'welcome' template.
  */
 
 if (!defined('e107_INIT'))

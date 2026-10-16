@@ -1,16 +1,18 @@
 <?php
-
-/**
+/*
  * e107 website system
  *
- * Copyright (C) 2008-2016 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
+ * racetrack plugin - race_points_menu.php
+ *
+*/
+
+/*
+ * Checkpoints menu (docs/plugins/racetrack.md, "Menus").
  */
-
-
-// news item rewrite for v2.x
 
 
 if (!defined('e107_INIT'))
@@ -23,13 +25,11 @@ $caption = '';
 
 $text = '';
 
-// The single event is owned by the raceevent plugin (prefs) now (#49). Read the
-// event description from raceevent and escape it on output: it is HTML from a
-// textarea, so it is rendered via $tp->toHTML() (never echoed raw).
+// Event description from raceevent, escaped via toHTML(). Note: $text is
+// overwritten further down, so the description is currently not shown.
 $text = e107::getParser()->toHTML(e107::getPlugConfig('raceevent')->get('event_description'), true, 'BODY');
 
-// Caption can be sourced from raceevent's event_name (escape via toAttribute());
-// left disabled to preserve the existing menu behaviour.
+// Caption from raceevent's event_name - disabled (the menu has no caption).
 //$caption = e107::getParser()->toAttribute(e107::getPlugConfig('raceevent')->get('event_name'));
 
 
@@ -56,14 +56,6 @@ $points_data = e107::getDb()->retrieve($query, true);
 foreach ($points_data as $point) {
     extract($point);
  
-    /*
-    [race_point_id] => 7
-    [race_point_race] => 1
-    [race_point_code] => start
-    [race_point_name] => Štart
-    [race_point_password] => a746f9d49809687527bc0081997738b0
-    [race_point_order] => 1
-    */
     if($race_point_code == 'start') continue;
     if ($race_point_code == 'finish') continue;
 

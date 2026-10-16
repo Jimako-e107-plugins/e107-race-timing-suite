@@ -1,4 +1,15 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - languages/Italian/Italian_front.php
+ *
+*/
+
 if (!defined('e107_INIT')) { exit; }
 
 return array(
@@ -11,7 +22,7 @@ return array(
     'LAN_RACERS_FRONT_007' => 'Errore di invio: ',
     'LAN_RACERS_FRONT_008' => 'Modifica record',
     'LAN_RACERS_FRONT_009' => 'Aggiungi un altro partecipante',
-    // duplicati con ambito front-end delle etichette dei campi di amministrazione riutilizzati da registracia.php
+    // front-scoped duplicates of admin field labels reused by registracia.php
     'LAN_RACERS_FRONT_010' => 'Nome:',
     'LAN_RACERS_FRONT_011' => 'Cognome:',
     'LAN_RACERS_FRONT_012' => 'Data di nascita (g.m.aaaa):',
@@ -26,7 +37,7 @@ return array(
     'LAN_RACERS_FRONT_021' => 'Su quale percorso gareggerà',
     'LAN_RACERS_FRONT_022' => 'Non ancora assegnato',
     'LAN_RACERS_FRONT_023' => 'Numero pettorale',
-    // lista di partenza (già in uso da startlist.php)
+    // start list (startlist.php)
     'LAN_RACERS_STARTLIST_CAPTION'   => 'Lista di partenza',
     'LAN_RACERS_STARTLIST_ALL'       => 'Tutti',
     'LAN_RACERS_STARTLIST_NUMBER'    => 'N. Pett.',

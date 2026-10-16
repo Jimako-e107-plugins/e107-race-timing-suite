@@ -2,16 +2,16 @@
 /*
  * e107 website system
  *
- * racetrack plugin - checkpoints (race_point) administration.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Self-contained admin entry file for the `control` mode (checkpoints CRUD),
- * split out of admin/admin_config.php. Mirrors racetiming's one-file-per-area
- * layout (racetiming/admin/admin_generujstart.php): bootstrap, require the
- * shared dispatcher (admin_menu.php), gate on the plugin's OWN admin permission,
- * define ONLY this area's controller + form classes, then run the page. The
- * dispatcher's `control` mode points here via its $adminMenu 'url'.
+ * racetrack plugin - admin/admin_points.php
  *
- * Field definitions moved verbatim from admin_config.php - no behavioural change.
+*/
+
+/*
+ * Checkpoints screen (fields: docs/plugins/racetrack.md, "Checkpoints").
  */
 
 require_once("../../../class2.php");
@@ -155,14 +155,13 @@ class racetrack_point_ui extends e_admin_ui
 
 
 		$this->fields['race_point_race']['writeParms']['optArray'] = $tmp;
-		//$this->fields['page_metarobots']['writeParms']['title'] = 'x';
 		$this->fields['race_point_race']['writeParms']['multiple'] = 1;
 
 		unset($tmp);
 	}
 
 
-	// left-panel help menu area. (replaces e_help.php used in old plugins)
+	// Left-panel help.
 	public function renderHelp()
 	{
 		$caption = LAN_HELP;
@@ -185,7 +184,7 @@ class racetrack_point_form_ui extends e_admin_form_ui
 			$Data['race_sef'] = "all";
 
 			$url1 = e107::url('racereports', 'point', $Data, ['mode' => 'full']);
-			$url2 = e107::url('racetiming', 'kontrola', $Data, ['mode' => 'full']); // `kontrola` route moved to racetiming
+			$url2 = e107::url('racetiming', 'kontrola', $Data, ['mode' => 'full']); // checkpoint keypad
 
 	 
 

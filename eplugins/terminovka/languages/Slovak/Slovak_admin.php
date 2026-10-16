@@ -2,15 +2,18 @@
 /*
  * e107 website system
  *
- * Terminovka.sk plugin - Slovak admin strings
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * terminovka plugin - languages/Slovak/Slovak_admin.php
+ *
 */
 
 define('LAN_TERMINOVKA_PLUGIN',      'Terminovka.sk');
 define('LAN_TERMINOVKA_EXPORT_LOGS', 'Logy exportu');
 
-/* ---- Skratky medzi pluginmi presunuté do raceevent_admin_links ------------ */
-
-/* ---- Injected race track edit form (e_admin.php addon, issue #34) --------- */
+/* ---- Injected race track edit form (e_admin.php addon) ------------------- */
 if (!defined('LAN_TERMINOVKA_TAB'))             define('LAN_TERMINOVKA_TAB', 'Terminovka');
 if (!defined('LAN_TERMINOVKA_TRACK_EXTID'))     define('LAN_TERMINOVKA_TRACK_EXTID', 'ID trate na terminovka.sk');
 if (!defined('LAN_TERMINOVKA_TRACK_EXTID_HELP')) define('LAN_TERMINOVKA_TRACK_EXTID_HELP', 'ID trate na terminovka.sk, použité ako externé ID trate pri exporte. Ak trať tam nie je zverejnená, ponechajte 0.');

@@ -2,21 +2,21 @@
 /*
  * e107 website system
  *
- * racetiming plugin - admin dispatcher / menu.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Shared admin dispatcher for the racetiming plugin, mirroring the sibling
- * layout (racereg / racetrack / timetracker): one mode per admin area pointing
- * at its own e_admin_ui controller. racetiming owns the race_time table, so the
- * single `main` mode dispatches to the race_time CRUD controller defined in
- * admin/admin_config.php.
+ * racetiming plugin - admin/admin_menu.php
  *
- * SECURITY / conventions (native e107 only):
- *   - The whole screen is gated on the plugin's OWN admin permission with
- *     getperms('P'); for a file under the plugins folder 'P' resolves to this
- *     plugin's permission, registered by the adminLinks block in plugin.xml.
- *   - CRUD input passes through $tp->toDB() and output through $tp->toHTML();
- *     forms are CSRF-protected by e107's e_token (handled by the admin
- *     framework); queries go through the db class. No raw SQL.
+*/
+
+/*
+ * Admin dispatcher: 'main' = race_time CRUD (admin_config.php), 'generate' =
+ * start time setting + start generation (admin_generujstart.php).
+ *
+ * getperms('P') resolves to this plugin's own admin permission because the file
+ * lives under the plugins folder. Input goes through $tp->toDB(), output through
+ * $tp->toHTML(); e_admin_ui handles the e_token (CSRF).
  */
 
 if (!defined('e107_INIT'))
@@ -30,14 +30,10 @@ if (!getperms('P'))
 	exit;
 }
 
-// LAN load order: raceevent admin terms first (shared event base), then
-// racetiming's own admin terms. 3-arg loader uses the sub-folder layout and
-// array-return files so missing Slovak keys fall back to English. Loaded here
-// (before the dispatcher class is declared) because the class property defaults
-// below reference racetiming LAN constants.
-// NOTE: _global is NOT loaded here — the core loads every installed plugin's
-// _global automatically on every page (admin included) via the lan_global_list
-// pref, so a manual 'global' load would be redundant.
+// raceevent admin terms first, then racetiming's. Array-return LAN files, so a
+// missing translation falls back to English per key. Must run before the class
+// below (its property defaults use LAN constants). _global is loaded by the core
+// for every installed plugin (lan_global_list pref), so it is not loaded here.
 e107::lan('raceevent', true, true);
 e107::lan('racetiming', true, true);
 
@@ -50,9 +46,8 @@ class racetiming_adminArea extends e_admin_dispatcher
 			'ui'         => 'race_time_form_ui',
 			'uipath'     => null
 		],
-		// Bulk start-generation (relocated from timetracker). Controller lives in
-		// admin/admin_generujstart.php; only that file loads the class, so listing
-		// the mode here is safe (e_admin_ui only instantiates the active mode).
+		// Start generation - admin/admin_generujstart.php. Only that file defines
+		// the controller; e_admin_ui only instantiates the active mode.
 		'generate' => [
 			'controller' => 'race_generate_ui',
 			'path'       => null,
@@ -93,10 +88,8 @@ class racetiming_adminArea extends e_admin_dispatcher
 	protected $menuTitle = LAN_GLOBAL_RACETIMING_001;
 
 	/**
-	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical
-	 * nav map lives in raceevent/includes/admin_links.php; we pass our own
-	 * plugin name so racetrack's own entries are excluded from the shortcut list.
-	 * Guarded on raceevent being installed so racetrack degrades cleanly without it.
+	 * Append the shared cross-plugin admin-menu shortcuts from
+	 * raceevent/includes/admin_links.php, excluding racetiming's own entries.
 	 */
 	public function init()
 	{

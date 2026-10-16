@@ -2,19 +2,16 @@
 /*
  * e107 website system
  *
- * racereports plugin - AKTUALNE (full per-race results matrix) report area
- * (mode 'aktualne').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the AKTUALNE screen only - ONE
- * screen listing one link per race to the FULL per-race results matrix
- * (report_aktualne.php?p=race_id), built natively via the shared base's
- * renderAktualneLink(). Exposed the SAME way as the online/point/stu screens.
+ * racereports plugin - admin/admin_aktualne.php
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=aktualne (admin_menu.php
- * $adminMenu 'aktualne/aktualne' url points at this file).
+*/
+
+/*
+ * Full results link screen (docs/plugins/racereports.md, "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -33,10 +30,7 @@ if (!getperms('P'))
 
 
 /**
- * AKTUALNE area: ONE screen listing one link per race to the FULL per-race results
- * matrix - one link per race to report_aktualne.php (?p selects a race by race_id,
- * legacy parity). Exposed natively the SAME way as the stu screen, sharing the
- * base's renderAktualneLink().
+ * Full results area: one link per race, via renderAktualneLink().
  */
 class racereports_aktualne_ui extends racereports_reports_ui
 {

@@ -2,15 +2,18 @@
 /*
  * e107 website system
  *
- * Terminovka.sk plugin - English admin strings
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * terminovka plugin - languages/English/English_admin.php
+ *
 */
 
 define('LAN_TERMINOVKA_PLUGIN',      'Terminovka.sk');
 define('LAN_TERMINOVKA_EXPORT_LOGS', 'Export logs');
 
-/* ---- Cross-plugin admin-menu shortcuts moved to raceevent_admin_links ----- */
-
-/* ---- Injected race track edit form (e_admin.php addon, issue #34) --------- */
+/* ---- Injected race track edit form (e_admin.php addon) ------------------- */
 if (!defined('LAN_TERMINOVKA_TAB'))             define('LAN_TERMINOVKA_TAB', 'Terminovka');
 if (!defined('LAN_TERMINOVKA_TRACK_EXTID'))     define('LAN_TERMINOVKA_TRACK_EXTID', 'terminovka.sk track ID');
 if (!defined('LAN_TERMINOVKA_TRACK_EXTID_HELP')) define('LAN_TERMINOVKA_TRACK_EXTID_HELP', "The track's ID on terminovka.sk, used as the external track ID during export. Leave 0 if the track is not published there.");

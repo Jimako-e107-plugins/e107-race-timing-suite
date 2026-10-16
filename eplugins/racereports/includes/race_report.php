@@ -2,21 +2,26 @@
 /*
  * e107 website system
  *
- * racereports plugin - shared report helpers (PART B, presentation layer).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Thin glue between the racetiming compute engine (race_clock / race_format) and
- * the two online report pages (report_online.php = online, report_point.php =
- * point). Does
- * ONLY presentation-side work: fetch racers (racer table), read checkpoint order
- * from racetrack (race_point / race_point_order), and turn an engine result into
- * the exact legacy display cell. It performs NO time math (all of that is in
- * racetiming) and NO ranking decision beyond what each page drives.
+ * racereports plugin - includes/race_report.php
  *
- * SECURITY (written safe from the start - the legacy raw-$_GET-into-SQL pattern
- * is NOT carried over): every value placed in SQL goes through $tp->toDB(); race
- * ids are (int)-cast (they are ints); the bib/start number stays a string and is
- * quoted, never cast; output goes through $tp->toHTML()/toAttribute().
+*/
+
+/*
+ * Shared report helpers: fetch races / categories / checkpoints / racers and turn a
+ * racetiming engine result into the display cell. No time math here - that is the
+ * racetiming engine (race_clock / race_format).
+ *
+ * Every value placed in SQL goes through toDB(); race ids are (int)-cast; the bib is a
+ * string (quoted, never cast - leading zeros are data); output goes through
+ * toHTML()/toAttribute().
  */
+
+// Shared racer display-name builder (getRacerName delegates to it).
+require_once(e_PLUGIN . 'racers/includes/racers_name.php');
 
 class race_report
 {
@@ -50,9 +55,8 @@ class race_report
 	}
 
 	/**
-	 * Resolve a single race by its integer race_id. Mirrors the legacy stu.php
-	 * lookup (timetracker/stu.php:36-37 `WHERE race_id=$_GET['p']`): the stu route's
-	 * ?p selects a TRACK by race_id, not a sef. race id is an int.
+	 * Resolve a single race by its integer race_id (the stu / aktualne routes'
+	 * ?p selects a track by race_id, not by sef).
 	 * @return array|false the #race row, or false
 	 */
 	public function fetchRaceById($raceId)
@@ -65,7 +69,7 @@ class race_report
 		return $sql->retrieve($query);
 	}
 
-	/** All #race rows (for the r=komplet all-races view). */
+	/** All #race rows (for the all-tracks views: r=komplet / r=overview). */
 	public function fetchAllRaces()
 	{
 		$sql  = e107::getDb();
@@ -97,7 +101,8 @@ class race_report
 
 	/**
 	 * Checkpoints of a race, ordered race_point_order DESC (finish-first), the
-	 * order the online furthest-point bucketing walks.
+	 * order the online furthest-point bucketing walks. Callers that need course
+	 * order re-sort.
 	 * @return array race_point rows
 	 */
 	public function fetchCheckpoints($raceId)
@@ -165,80 +170,44 @@ class race_report
 	// ----------------------------------------------------------- name
 
 	/**
-	 * Display name for a racer. Reproduces the legacy getRacerName
-	 * (timetrackerMain_class.php:27-52) - surname + firstname, optional name_hash,
-	 * optional local marker, optional team suffix - but routes the
-	 * admin-entered surname/firstname through $tp->toHTML() as well (the legacy
-	 * left those two fields unescaped, a stored-XSS surface; see NOTES.md). For
-	 * plain-ASCII names toHTML is a no-op, so display parity holds.
+	 * Display name for a racer (HTML-safe). Delegates to racers_name::build()
+	 * (racers/includes/racers_name.php), the single place the name is composed.
 	 *
 	 * @param array  $racer racer row
-	 * @param string $type  "team" includes the team suffix (default), as legacy
+	 * @param string $type  "team" includes the team suffix (default)
 	 * @return string HTML-safe display name
 	 */
 	public function getRacerName($racer = array(), $type = 'team')
 	{
-		$tp    = e107::getParser();
-		$prefs = $this->racerPrefs;
-
-		$surname   = isset($racer['racer_surname']) ? $racer['racer_surname'] : '';
-		$firstname = isset($racer['racer_firstname']) ? $racer['racer_firstname'] : '';
-
-		$racerName = $tp->toHTML($surname, false, 'TITLE') . ' ' . $tp->toHTML($firstname, false, 'TITLE');
-
-		if (!empty($prefs['name_hash']))
-		{
-			// Hash is over the raw name, as legacy (md5 output is safe).
-			$racerName = md5($surname . ' ' . $firstname);
-		}
-
-		if (!empty($prefs['display_local']) && !empty($prefs['text_local']) && !empty($racer['racer_local']))
-		{
-			$racerName .= $tp->toHTML($prefs['text_local'], 'TITLE', true);
-		}
-
-		if ($type === 'team' && !empty($prefs['display_team']) && !empty($racer['racer_team']))
-		{
-			$team = $tp->toHTML($racer['racer_team'], 'TITLE', true);
-			$racerName .= "&nbsp;<small><i>(" . $team . ")</i></small>";
-		}
-
-		return $racerName;
+		return racers_name::build((array) $racer, array('team' => ($type === 'team')));
 	}
 
 	// --------------------------------------------------------- diff cell
 
 	/**
-	 * Reproduce the legacy get_racer_time_on_point() return shape for the "point"
-	 * type (timetracker_class.php:248-310), built entirely from the engine. This
-	 * is the single source of truth both report pages format their time cell
-	 * from, so their output matches the legacy pages branch-for-branch.
+	 * Time cell of a racer at a point (online / checkpoint / arrivals reports),
+	 * built entirely from the engine.
 	 *
 	 * Returns ['time'=>..., 'text'=>..., 'ended'=>...] where:
 	 *   - time : the round(...,3) elapsed float for a ranked racer; '' for
 	 *            no-start / no-crossing; -1 for an ended/flagged racer with no
-	 *            usable time at the point (the legacy magic values, preserved so
-	 *            the page-level ranking tests behave identically);
-	 *   - text : the display string (formatElapsed at $decimals digits, or a flag);
-	 *   - ended: the propagated ended marker ('' | 'DNF' | 'DSQ').
-	 *
-	 * Differences from legacy, both intentional and in scope:
-	 *   - NO result-freeze / GEN_RESULTS side effect (that terminovka-owned write
-	 *     path stays in timetracker and is out of scope for the live read);
-	 *   - the legacy 'DSG' typo is rendered 'DSQ' (intentional fix, flagged by the
-	 *     parity comparator).
+	 *            usable time at the point (magic values kept from the old
+	 *            timetracker code - the pages' ranking tests rely on them);
+	 *   - text : the display string (formatElapsed at $decimals digits, a flag,
+	 *            '-' for no start or '---' for no crossing);
+	 *   - ended: the ended marker stamped at this point ('' | 'DNF' | 'DSQ').
 	 *
 	 * @param race_clock $clock
 	 * @param string     $number
 	 * @param string     $point
-	 * @param int        $decimals displayed fractional digits (default 1 = legacy)
+	 * @param int        $decimals displayed fractional digits
 	 * @return array
 	 */
 	public function diffOnPoint($clock, $number, $point, $decimals = 1)
 	{
 		$number = (string) $number;
 
-		// No usable start crossing -> legacy "-" (startpoint == 0 early return).
+		// No usable start crossing -> "-".
 		if (!$clock->hasStart($number))
 		{
 			return array('text' => '-', 'time' => '', 'ended' => '');
@@ -246,8 +215,8 @@ class race_report
 
 		$endedFlag = $clock->endedAt($number, $point);
 
-		// A usable crossing at the point: compute the time (ended does NOT blank
-		// it in "point" type - legacy only blanked under $type=="archive").
+		// A usable crossing at the point: the time is shown even when an ended
+		// marker is stamped here (only the archive variant blanks it).
 		if ($clock->hasCrossingAt($number, $point))
 		{
 			$elapsed = $clock->elapsedRaw($number, $point);
@@ -272,18 +241,16 @@ class race_report
 		}
 		if ($clock->isDsq($number))
 		{
-			// Legacy emitted the 'DSG' typo here; clean output is 'DSQ'.
 			return array('time' => -1, 'text' => 'DSQ', 'ended' => '');
 		}
 
-		// Neither: no crossing at all -> legacy "---".
+		// Neither: no crossing at all -> "---".
 		return array('time' => '', 'text' => '---', 'ended' => '');
 	}
 
 	/**
-	 * Is this diff a ranked (NORMAL) result? Mirrors the legacy page test
-	 *   $diff['time'] > 0 && $diff['text'] != "" && $diff['ended'] == ""
-	 * used identically by both online (:244) and point (:166).
+	 * Is this diff a ranked result (positive time, non-empty text, no ended
+	 * marker at this point)?
 	 */
 	public function isRanked($diff)
 	{
@@ -292,26 +259,15 @@ class race_report
 }
 
 /**
- * CENTRAL, opt-in DataTables loader for the racereports front reports.
+ * Opt-in DataTables loader for the front reports: registers the plugin's own
+ * assets/datatables/ copy (bs5 build: DataTables 1.13.1 + Responsive 2.4.0) plus
+ * init.js, which binds to #report_stu and #report_aktualne. Called by
+ * report_stu.php and report_aktualne.php; report_online.php deliberately does not
+ * (DataTables would fight the meta refresh). racetrack's archive page loads the
+ * same library files directly, with its own init.
  *
- * Registers the racereports-OWNED DataTables assets (the bs5 build: DataTables
- * 1.13.1 + Responsive 2.4.0) plus the racereports init. This is the ONE place the
- * assets are wired - report pages opt in with a single call to this helper rather
- * than copy-pasting the e107::css/js lines. racereports owns its OWN copy under
- * assets/datatables/ so it does NOT depend on the timetracker copy (which is being
- * decommissioned separately).
- *
- * jQuery: e107 ships core jQuery and auto-loads it on the front-side, but the
- * dependency is DECLARED explicitly here ('jquery') rather than left to implicit
- * load order, so the DataTables plugin and the init both run after jQuery is ready.
- *
- * Once-guard: a static flag makes repeated calls (e.g. from more than one report on
- * a page, or a future point opt-in) register the assets exactly once.
- *
- * Opt-in policy (see NOTES.md): only report_stu.php calls this today.
- * report_online.php deliberately does NOT (it is live/auto-refresh - DataTables
- * would fight the meta refresh). report_point.php can opt in later with a single
- * call to this helper - no other change needed.
+ * The jQuery dependency is declared explicitly ('jquery') rather than left to load
+ * order. A static once-guard registers the assets only once per request.
  */
 function race_report_load_datatables()
 {

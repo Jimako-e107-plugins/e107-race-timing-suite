@@ -2,12 +2,19 @@
 /*
  * e107 website system
  *
- * racerfid plugin (RFID import) - admin UI classes (prefs + external DB config).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Bootstrap: load the framework, include the shared dispatcher/menu, check the
- * plugin's OWN admin permission (getperms('P')), then run the page. Native
- * e107 e_admin_ui throughout (prefs storage, e_token CSRF). The importer class
- * plugin_racerfid_import is autoloaded from includes/import.php (e_PLUGIN path).
+ * racerfid plugin - admin/admin_config.php
+ *
+*/
+
+/*
+ * Admin screens (user view: docs/plugins/racerfid.md, "Admin area"):
+ * racerfid_ui = plugin settings, dbsetting_ui = database access + test.
+ * Native e_admin_ui $prefs forms (core handles storage and the e_token CSRF
+ * check). plugin_racerfid_import is autoloaded from includes/import.php.
  */
 
 require_once("../../../class2.php");
@@ -30,7 +37,6 @@ class racerfid_ui extends e_admin_ui
 
 	protected $pluginTitle		= 'RFID import';
 	protected $pluginName		= 'racerfid';
-	//	protected $eventName		= 'racerfid-'; // remove comment to enable event triggers in admin. 		
 	protected $table			= '';
 	protected $pid				= '';
 	protected $perPage			= 10;
@@ -38,13 +44,6 @@ class racerfid_ui extends e_admin_ui
 	protected $batchExport     = true;
 	protected $batchCopy		= true;
 
-	//	protected $sortField		= 'somefield_order';
-	//	protected $sortParent      = 'somefield_parent';
-	//	protected $treePrefix      = 'somefield_title';
-
-	//	protected $tabs				= array('tab1'=>'Tab 1', 'tab2'=>'Tab 2'); // Use 'tab'=>'tab1'  OR 'tab'=>'tab2' in the $fields below to enable. 
-
-	//	protected $listQry      	= "SELECT * FROM `#tableName` WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
 
 	protected $listOrder		= ' DESC';
 
@@ -53,7 +52,6 @@ class racerfid_ui extends e_admin_ui
 	protected $fieldpref = array();
 
 
-	//	protected $preftabs        = array('General', 'Other' );
 	protected $prefs = array(
 		'tracking_active'		=> array('title' => LAN_RACETRACKING_PREF_001, 'tab' => 0, 'type' => 'boolean', 'data' => 'int', 'help' => LAN_RACETRACKING_PREF_001_HELP, 'writeParms' => []),
 		'cron_disabled'		=> array('title' => LAN_RACETRACKING_PREF_002, 'tab' => 0, 'type' => 'boolean', 'data' => 'int', 'help' => LAN_RACETRACKING_PREF_002_HELP, 'writeParms' => []),
@@ -68,8 +66,6 @@ class racerfid_ui extends e_admin_ui
 
 	}
 
-	// ------- Customize Create --------
-
 	public function beforeCreate($new_data, $old_data)
 	{
 		return $new_data;
@@ -77,16 +73,12 @@ class racerfid_ui extends e_admin_ui
 
 	public function afterCreate($new_data, $old_data, $id)
 	{
-		// do something
 	}
 
 	public function onCreateError($new_data, $old_data)
 	{
-		// do something		
 	}
 
-
-	// ------- Customize Update --------
 
 	public function beforeUpdate($new_data, $old_data, $id)
 	{
@@ -95,15 +87,13 @@ class racerfid_ui extends e_admin_ui
 
 	public function afterUpdate($new_data, $old_data, $id)
 	{
-		// do something	
 	}
 
 	public function onUpdateError($new_data, $old_data, $id)
 	{
-		// do something		
 	}
 
-	// left-panel help menu area. (replaces e_help.php used in old plugins)
+	// Left-panel help box.
 	public function renderHelp()
 	{
 		$caption = LAN_HELP;
@@ -132,7 +122,6 @@ class dbsetting_ui extends racerfid_ui
 	protected $fieldpref = array();
 
 
-	//	protected $preftabs        = array('General', 'Other' );
 	protected $prefs = array(
 		'e107db_server'		=> array('title' => LAN_RACETRACKING_SERVER, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => []),
 		'e107db_port'		=> array('title' => LAN_RACETRACKING_PORT, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => []),
@@ -143,8 +132,8 @@ class dbsetting_ui extends racerfid_ui
 		'e107db_table'		=> array('title' => LAN_RACETRACKING_TABLE, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => ['default'=> 'race_tracking']),
 		'e107db_fieldname'  => array('title' => LAN_RACETRACKING_FIELDNAME, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => ['default' => 'Meno']),
 		'e107db_fieldnumber'  => array('title' => LAN_RACETRACKING_FIELDNUMBER, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => ['default' => 'TagID']),
-	//	'e107db_fieldstart'  => array('title' => LAN_RACETRACKING_FIELDSTART, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => ['default' => 'Start']),
-	//	'e107db_fieldfinish'  => array('title' => LAN_RACETRACKING_FIELDFINISH, 'tab' => 0, 'type' => 'text', 'data' => 'str', 'help' => '', 'writeParms' => ['default' => 'Ciel']),
+		// No start/finish column prefs: each checkpoint's DB Import Field
+		// (racetrack race_point_dbfield) names its column.
 	);
 
 	private $import;
@@ -154,7 +143,7 @@ class dbsetting_ui extends racerfid_ui
 
 
 
-	// left-panel help menu area. (replaces e_help.php used in old plugins)
+	// Left-panel help box.
 	public function renderHelp()
 	{
 		$caption = LAN_HELP;

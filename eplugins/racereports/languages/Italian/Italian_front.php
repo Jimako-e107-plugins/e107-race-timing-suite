@@ -2,14 +2,13 @@
 /*
  * e107 website system
  *
- * racereports plugin - Italian front language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded on the front-end via
- * e107::lan('racereports', '', true) by the online (report_online.php) and point
- * (report_point.php) report pages. Canonical, complete set; the Slovak file
- * (languages/Slovak/Slovak_front.php) overrides per key and falls back here for
- * any missing term. LAN key pattern: LAN_RACEREPORTS_<NAME>.
- */
+ * racereports plugin - languages/Italian/Italian_front.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -18,9 +17,8 @@ return array(
     'LAN_RACEREPORTS_LIVE_STATE'     => 'classifiche attuali',
     'LAN_RACEREPORTS_ALL_CATEGORIES' => 'tutte le categorie',
 
-    // Resoconto online - aiuto aggiornamento automatico pagina (nota comprimibile in alto). 
-    // Il BODY contiene HTML attendibile (emesso direttamente, non tramite toHTML) affinché i titoli, 
-    // l'elenco e i marcatori <code> vengano visualizzati; la fonte di verità è questo file LAN.
+    // Online report - admin-only auto-refresh help note. The BODY is trusted HTML,
+    // echoed raw (not through toHTML).
     'LAN_RACEREPORTS_HELP_REFRESH_TITLE' => 'Risultati online — aggiornamento automatico',
     'LAN_RACEREPORTS_HELP_REFRESH_BODY'  =>
         '<p>Le classifiche possono aggiornarsi automaticamente in modo che lo speaker o uno spettatore possano vedere'
@@ -59,7 +57,7 @@ return array(
     'LAN_RACEREPORTS_OD'             => 'Da (Od)',
     'LAN_RACEREPORTS_DO'             => 'A (Do)',
 
-    // Resoconto SUT (risultati per percorso riservati ai soli atleti arrivati).
+    // SUT report; the COL_* labels are shared with other reports.
     'LAN_RACEREPORTS_SUT_TITLE'      => 'Risultati',
     'LAN_RACEREPORTS_SUT_NO_FINISH'  => 'Nessun arrivato al momento.',
     'LAN_RACEREPORTS_COL_RANK'        => 'Posizione',
@@ -70,14 +68,14 @@ return array(
     'LAN_RACEREPORTS_COL_BIRTHDATE'   => 'Data di nascita',
     'LAN_RACEREPORTS_COL_NATIONALITY' => 'Nazionalità',
     'LAN_RACEREPORTS_COL_BIB'         => 'Numero pettorale',
-    // Intestazione Dobeh (tabellone arrivi) - colonna categoria ("<categoria> — <Ennesimo>").
+    // Category column (arrivals board header, finish export).
     'LAN_RACEREPORTS_COL_CATEGORY'    => 'Categoria',
     // Etichette delle colonne di esportazione Traguardo/Partenza (le tabelle di traguardo/partenza non hanno una riga'
     // di intestazione sullo schermo; queste vengono utilizzate solo per la riga di intestazione CSV/XLS).
     'LAN_RACEREPORTS_COL_NAME'        => 'Nome',
     'LAN_RACEREPORTS_COL_STATUS'      => 'Stato',
 
-    // Pulsanti di esportazione SUT (download CSV / finto-XLS dei risultati visualizzati).
+    // SUT export buttons (CSV / XLS download).
     'LAN_RACEREPORTS_EXPORT_CSV'      => 'CSV',
     'LAN_RACEREPORTS_EXPORT_XLS'      => 'XLS',
 

@@ -2,24 +2,18 @@
 /*
  * e107 website system
  *
- * racetrack plugin - ARCHIVE administration (race_archive).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Self-contained admin entry file for the `archive` mode (archive CRUD), split
- * out of admin/admin_config.php. Mirrors the sibling area entry files
- * (admin_points.php / admin_prices.php): bootstrap, require the shared dispatcher
- * (admin_menu.php, which loads class2 + the admin LAN), gate on the plugin's OWN
- * admin permission, define ONLY this area's controller + form classes, then run
- * the page. The dispatcher's `archive` mode points here via its $adminMenu 'url'.
+ * racetrack plugin - admin/admin_archive.php
  *
- * ONE output = ONE admin file, mirroring racereports' per-report admin files
- * (admin_aktualne.php, admin_finish.php, ...) and racers' admin_startlists.php /
- * admin_racerlist.php. The archive classes moved here verbatim from
- * admin_config.php - no behavioural change.
- *
- * The shared archive generate routine + its e_token/message wrapper
- * (racetrack_archive_generate / racetrack_archive_trigger) live in
- * racetrack/includes/race_archive_generate.php - the single home both the
- * "Pregenerovat" button here AND race_ui's "Archivovat" row button call.
+*/
+
+/*
+ * Archive screen (fields, buttons, linked vs unlinked:
+ * docs/plugins/racetrack.md, "Archive"). The generate routine shared with the
+ * Track list's Archive button is in includes/race_archive_generate.php.
  */
 
 require_once("../../../class2.php");
@@ -32,22 +26,12 @@ if (!getperms('P'))
 	exit;
 }
 
-// Shared archive generate routine + trigger wrapper - used by BOTH this screen's
-// "Pregenerovat" button and race_ui's "Archivovat" row button (admin_config.php).
+// racetrack_archive_trigger() for the Regenerate row button.
 require_once(e_PLUGIN . 'racetrack/includes/race_archive_generate.php');
 
 
 /**
- * ARCHIVE admin (race_archive). Standard e_admin_ui mirroring the legacy
- * timetracker admin_archive.php, but now owned by racetrack (the table lives in
- * racetrack_sql.php). List: ID | Track | Title | Sef | Options; perPage 10;
- * order race_archive_id DESC.
- *
- * Track (race_archive_race) is an inline-editable DROPDOWN = all #race rows
- * (race_id => race_name) PLUS 0 => "Unlinked archive". Setting 0 IS the unlink
- * control. Desc/Data/HTML are frozen payloads (textarea/bbarea); Created/Updated
- * are noedit datestamps. Manual create is allowed; once linked (race > 0) the
- * "Pregenerovat" option appears.
+ * Archive list and form. race_archive_race = 0 means "Unlinked archive".
  */
 class race_archive_ui extends e_admin_ui
 {
@@ -101,7 +85,7 @@ class race_archive_ui extends e_admin_ui
 			'width' => 'auto',
 			'thclass' => 'left',
 			'class' => 'left',
-			// Auto-sef from the name on create (same idiom as race_sef).
+			// Auto-filled from the name.
 			'writeParms' => array('show' => 1, 'sef' => 'race_archive_name'),
 		),
 		'race_archive_desc' => array(
@@ -134,15 +118,14 @@ class race_archive_ui extends e_admin_ui
 
 	public function init()
 	{
-		// "Pregenerovat" archive-row button (token-protected POST). Same shared
-		// generate as "Archivovat"; the posted race id comes from this row's
-		// race_archive_race (must be linked, > 0).
+		// Regenerate row button (token-protected POST); the posted id is this
+		// row's race_archive_race.
 		if (!empty($_POST['racetrack_pregenerovat']))
 		{
 			racetrack_archive_trigger((int) varset($_POST['racetrack_archive_race'], 0));
 		}
 
-		// Track dropdown: every race PLUS 0 => Unlinked. Setting 0 unlinks the row.
+		// Track dropdown: every track plus 0 => Unlinked archive.
 		$tmp  = array();
 		$rows = e107::getDb()->retrieve('race', 'race_id, race_name', '', true);
 		if (is_array($rows))
@@ -202,16 +185,12 @@ class race_archive_form_ui extends e_admin_form_ui
 
 		$text = "<div class='btn-group'>";
 
-		// "Zobrazit" (Quick View) - ALWAYS available. PURE view of the FRONTEND
-		// snapshot; opens in a new window and NEVER regenerates (the fix for the
-		// legacy Quick-View bug that secretly ran &generuj=1).
+		// View: the public archive page, new tab. Never regenerates.
 		$viewUrl = e107::url('racetrack', 'archiv', array('race_archive_sef' => $sef), array('mode' => 'full'));
 		$text .= "<a target='_blank' class='btn btn-default' title='" . $tp->toAttribute(LAN_ADMIN_ARCHIVE_VIEW) . "' href='"
 			. $viewUrl . "'>" . $tp->toHTML(LAN_ADMIN_ARCHIVE_VIEW, false) . "</a>";
 
-		// "Pregenerovat" - ONLY when linked (race > 0). Token-protected POST that
-		// runs the shared generate for this row's linked race, overwriting it.
-		// Hidden for unlinked rows (no race to generate from).
+		// Regenerate - only for a linked row. Handled in race_archive_ui::init().
 		if ($race > 0)
 		{
 			$text .= "<form method='post' action='" . e_SELF . "?mode=archive&action=list' style='display:inline'>";

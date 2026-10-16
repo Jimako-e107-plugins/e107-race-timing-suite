@@ -2,14 +2,13 @@
 /*
  * e107 website system
  *
- * racereports plugin - English front language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded on the front-end via
- * e107::lan('racereports', '', true) by the online (report_online.php) and point
- * (report_point.php) report pages. Canonical, complete set; the Slovak file
- * (languages/Slovak/Slovak_front.php) overrides per key and falls back here for
- * any missing term. LAN key pattern: LAN_RACEREPORTS_<NAME>.
- */
+ * racereports plugin - languages/English/English_front.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -18,9 +17,8 @@ return array(
     'LAN_RACEREPORTS_LIVE_STATE'     => 'current standings',
     'LAN_RACEREPORTS_ALL_CATEGORIES' => 'all categories',
 
-    // Online report - auto-refresh page help (collapsible note at the top). The
-    // BODY is trusted HTML (echoed raw, not through toHTML) so the headings, list
-    // and <code> markup render; the source of truth is this LAN file.
+    // Online report - admin-only auto-refresh help note. The BODY is trusted HTML,
+    // echoed raw (not through toHTML).
     'LAN_RACEREPORTS_HELP_REFRESH_TITLE' => 'Online results — automatic refresh',
     'LAN_RACEREPORTS_HELP_REFRESH_BODY'  =>
         '<p>The standings can refresh themselves so the announcer or a spectator sees the'
@@ -59,7 +57,7 @@ return array(
     'LAN_RACEREPORTS_OD'             => 'Od',
     'LAN_RACEREPORTS_DO'             => 'Do',
 
-    // SUT (per-track finishers-only results) report.
+    // SUT report; the COL_* labels are shared with other reports.
     'LAN_RACEREPORTS_SUT_TITLE'      => 'Results',
     'LAN_RACEREPORTS_SUT_NO_FINISH'  => 'No finishers yet.',
     'LAN_RACEREPORTS_COL_RANK'        => 'Ranking',
@@ -70,14 +68,14 @@ return array(
     'LAN_RACEREPORTS_COL_BIRTHDATE'   => 'Birthdate',
     'LAN_RACEREPORTS_COL_NATIONALITY' => 'Nationality',
     'LAN_RACEREPORTS_COL_BIB'         => 'Bibnumber',
-    // Dobeh (arrivals board) header - category column ("<category> — <Nth>").
+    // Category column (arrivals board header, finish export).
     'LAN_RACEREPORTS_COL_CATEGORY'    => 'Category',
     // Finish/start export column labels (the finish/start tables have no on-screen
     // header row; these are used only for the CSV/XLS header line).
     'LAN_RACEREPORTS_COL_NAME'        => 'Name',
     'LAN_RACEREPORTS_COL_STATUS'      => 'Status',
 
-    // SUT export buttons (CSV / fake-XLS download of the displayed results).
+    // SUT export buttons (CSV / XLS download).
     'LAN_RACEREPORTS_EXPORT_CSV'      => 'CSV',
     'LAN_RACEREPORTS_EXPORT_XLS'      => 'XLS',
 
@@ -91,8 +89,8 @@ return array(
     'LAN_RACEREPORTS_AKT_COL_TIME'      => 'Time',
     'LAN_RACEREPORTS_AKT_COL_CATRANK'   => 'Rank in category',
 
-    // NUMBER (single-racer progression) report: unknown bib, column headers and the
-    // DNF/DSQ status note.
+    // NUMBER (racer progression) report: unknown bib, column headers and the
+    // DNF/DSQ status note (DNF/DSQ also used as the SUT marker).
     'LAN_RACEREPORTS_NUM_UNKNOWN_BIB'   => 'Unknown bib number.',
     'LAN_RACEREPORTS_NUM_COL_POINT'     => 'Checkpoint',
     'LAN_RACEREPORTS_NUM_COL_TIMEOFDAY' => 'Time of day',

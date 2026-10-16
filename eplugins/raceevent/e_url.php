@@ -2,20 +2,17 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - simple-mode URL (SEF) configuration.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * raceevent previously declared NO e_url routes. It now owns the event
- * OVERVIEW front page (the cross-suite link directory) under the original
- * 'preteky' alias:
+ * raceevent plugin - e_url.php
  *
- *   index : event overview / link directory (raceevent/page_overview.php)
- *
- * The 'preteky' SEF alias used to belong to timetracker's own 'index' route,
- * which is now COMMENTED OUT in timetracker/e_url.php (intentional trace of the
- * strangler move). raceevent takes the alias here, so there is no collision.
- *
- * The route key is PLUGIN-SCOPED (e107::url('raceevent', 'index', ...)); the
- * 'preteky' SEF alias is the global route segment.
+*/
+
+/*
+ * SEF routes - listed in docs/reference/routes.md. Route keys are plugin-scoped
+ * (e107::url('raceevent', 'index')).
  */
 
 class raceevent_url // plugin-folder + '_url'
@@ -24,9 +21,7 @@ class raceevent_url // plugin-folder + '_url'
 	{
 		$config = array();
 
-		// Event overview / link directory. Re-homes timetracker's old
-		// 'index'/'preteky' front page into raceevent (the base plugin that owns
-		// the event), pointed at the fresh page_overview.php.
+		// Event overview / link directory.
 		$config['index'] = array(
 			'alias'    => 'preteky',                          // global SEF segment (the original alias).
 			'regex'    => '^{alias}\/$',                      // matched against the url; redirects on match.

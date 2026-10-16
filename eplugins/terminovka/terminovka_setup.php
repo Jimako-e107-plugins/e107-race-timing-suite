@@ -2,15 +2,20 @@
 /*
  * e107 website system
  *
- * Terminovka.sk plugin - setup / upgrade hooks (issue #34)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Takes ownership of the external track ID. The terminovka_track table is
- * created by the core SQL-diff step (from terminovka_sql.php) BEFORE these
- * post hooks run, so the migration below can safely populate it.
+ * terminovka plugin - terminovka_setup.php
  *
- * Migration: copy any legacy race.race_extid values into terminovka_track,
- * then drop the now-orphaned race.race_extid column. Guarded by a
- * column-exists check so it is idempotent and a no-op on fresh installs.
+*/
+
+/*
+ * Install/upgrade hooks. Migration: copy legacy race.race_extid values into
+ * terminovka_track, then drop the race.race_extid column. The core SQL-diff step
+ * creates terminovka_track (terminovka_sql.php) BEFORE these post hooks run.
+ * Guarded by a column-exists check, so it is idempotent and a no-op on fresh
+ * installs.
  */
 
 if (!defined('e107_INIT'))
@@ -91,8 +96,8 @@ class terminovka_setup
             }
         }
 
-        // The external track ID now belongs to terminovka_track; drop the
-        // legacy column from race so its schema matches race_sql.php.
+        // Drop the legacy column so race matches racetrack_sql.php (db_verify
+        // does not drop extra columns itself).
         $db->gen('ALTER TABLE `' . MPREFIX . 'race` DROP `race_extid`');
     }
 }

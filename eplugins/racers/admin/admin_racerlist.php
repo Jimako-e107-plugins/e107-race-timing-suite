@@ -2,28 +2,21 @@
 /*
  * e107 website system
  *
- * racers plugin - PREHĽAD PRETEKÁROV (racer overview reach-link) admin screen.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE output = ONE admin file, mirroring racereports' one-screen-per-file structure.
- * This entry exists only so admins can REACH the racers/list front page (racers.php)
- * from the admin menu - it is a SINGLE link, not a per-track list. The link targets
- * racers' OWN 'index' e_url route (racers/list/ -> racers.php), built with e107::url()
- * so SEF and non-SEF installs both resolve, and opens in a NEW TAB.
+ * racers plugin - admin/admin_racerlist.php
  *
- * Why a controller screen and NOT the bare $adminMenu 'url' mechanism: the e107
- * dispatcher's $adminMenu 'url' renders a normal in-frame admin link with no per-item
- * target support, so pointing it at a FRONT SEF route would navigate the admin frame
- * away into the public page (jarring, no new tab). A tiny controller screen renders a
- * proper button that opens the overview in a new tab - the cleaner option the task
- * allows. It also keeps the racers way: NO 'url' on the menu item, so the mode is
- * served by the single admin entry (admin_config.php) like every other racers mode.
+*/
+
+/*
+ * Racer overview screen (docs/plugins/racers.md, "Racer overview"): one button
+ * opening the racer list (e_url 'index') in a new tab.
  *
- * Routing the racers way: this file is a self-contained admin ENTRY POINT (mirroring the
- * sibling area files and the racetrack archive fix): it bootstraps class2, requires the
- * shared dispatcher (admin_menu.php, which loads class2 + the admin LAN), gates on the
- * plugin's OWN admin permission, defines this area's controller + form classes, then runs
- * the page. racers' admin_menu.php routes the 'racerlist' mode straight here via its
- * $adminMenu 'url' => 'admin_racerlist.php'.
+ * A controller screen, not a bare $adminMenu 'url' to the front route: the
+ * dispatcher's 'url' has no per-item target, so the admin frame would navigate
+ * away into the public page instead of opening a new tab.
  */
 
 require_once("../../../class2.php");
@@ -37,11 +30,6 @@ if (!getperms('P'))
 }
 
 
-/**
- * Racer-overview area: a single screen rendering ONE button link to the racers/list
- * front page (racers.php) via the 'index' e_url route. Extends e_admin_ui as a custom
- * controller screen (no DB-table CRUD).
- */
 class racers_racerlist_ui extends e_admin_ui
 {
 	protected $pluginTitle = LAN_RACERS_ADMIN_035;

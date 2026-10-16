@@ -1,5 +1,20 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - registracia.php
+ *
+*/
 
+/*
+ * On-site registration form (/racers/registracia/, e_url 'registracia'):
+ * docs/plugins/racers.md, "On-site registration form". The category dropdown is
+ * refilled by racers.js via racer_category_handler.php.
+ */
 
 if (!defined('e107_INIT'))
 {
@@ -17,23 +32,20 @@ function formatNumber($number)
 {
     if ($number === "" || $number === null)
     {
-        return null; // Return null or handle as needed
+        return null;
     }
     return str_pad($number, 4, '0', STR_PAD_LEFT);
 }
 
 require_once(HEADERF);
 
-e107::lan('racers', '', true);       // front strings (array form, EN + SK)
-// The admin field labels reused by this form now have front-scoped duplicates
-// (LAN_RACERS_FRONT_010..023), so no cross-scope _admin load is needed here.
-// _global (LAN_RACERS_GLOBAL_*) is loaded automatically by the core on every
-// page via the lan_global_list pref, so no manual 'global' load is needed here.
+e107::lan('racers', '', true);       // front strings
+// Field labels use front-scoped duplicates (LAN_RACERS_FRONT_010..023), so no
+// _admin load; _global is loaded by the core on every page (lan_global_list pref).
 
-// Získajte hodnotu preferencie 'manualinput'
 $manualInputEnabled = e107::pref('racers', 'manualinput');
 
-// Ak manualinput nie je povolený (nie je 1), ukončíme kód s oznamom
+// Form is off unless the manualinput pref is 1.
 if ($manualInputEnabled != 1)
 {
     require_once(HEADERF);
@@ -42,8 +54,8 @@ if ($manualInputEnabled != 1)
     $text = e107::getMessage()->addInfo($text)->render();
     e107::getRender()->tablerender('', $text);
 
-    require_once(FOOTERF); // e107 pätička
-    exit; // Ukončí ďalší kód
+    require_once(FOOTERF);
+    exit;
 }
 
 
@@ -136,7 +148,7 @@ if (isset($_POST['submit']) && !$chyba)
     if (!empty($_POST['racer_id']))
     {
 
-        // Úprava existujúceho záznamu
+        // Update an existing record.
         $racerId = (int)$_POST['racer_id'];
 
 
@@ -186,7 +198,7 @@ if (isset($_POST['submit']) && !$chyba)
         else
         {
 
-            // Pridanie nového záznamu
+            // Add a new record.
             $sql->insert('racer', $data);
             e107::getMessage()->addSuccess('Záznam bol úspešne pridaný.');
         }

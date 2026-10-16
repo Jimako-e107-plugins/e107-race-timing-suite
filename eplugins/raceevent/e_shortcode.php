@@ -2,18 +2,20 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - site-wide shortcode batch.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Equivalent to multiple .sc files: e107 auto-registers this batch site-wide
- * (via the e_shortcode_list pref built when the plugin is installed/scanned),
- * so the codes below resolve in any parseTemplate(..., true) call - the same
- * mechanism timetracker uses for its {TIMETRACKER_*} codes.
+ * raceevent plugin - e_shortcode.php
  *
- * Every value is read from the RACEEVENT plugin prefs
- * (e107::getPlugConfig('raceevent')) and escaped on output:
- *   - event_name        -> toAttribute() (htmlspecialchars, safe for HTML text
- *                          and attribute context);
- *   - event_description -> toHTML() (renders the textarea/HTML body).
+*/
+
+/*
+ * Site-wide shortcode batch: e107 registers it via the core e_shortcode_list pref
+ * when the plugin is installed/scanned, so the codes resolve in any
+ * parseTemplate(..., true) call. Values come from e107::getPlugConfig('raceevent');
+ * event_name is escaped with toAttribute(), event_description is rendered with
+ * toHTML(). The shortcodes are listed in docs/reference/shortcodes.md.
  */
 
 if (!defined('e107_INIT'))
@@ -28,7 +30,6 @@ class raceevent_shortcodes extends e_shortcode
 	// would be overridden. We only add new {RACEEVENT_*} codes, so keep false.
 	public $override = false;
 
-	/* {RACEEVENT_EVENT_NAME} - event name from raceevent prefs, escaped for HTML/attribute context. */
 	function sc_raceevent_event_name($parm = null)
 	{
 		$value = e107::getPlugConfig('raceevent')->get('event_name');
@@ -36,7 +37,6 @@ class raceevent_shortcodes extends e_shortcode
 		return e107::getParser()->toAttribute($value);
 	}
 
-	/* {RACEEVENT_EVENT_DESCRIPTION} - event description (textarea) from raceevent prefs, rendered as HTML. */
 	function sc_raceevent_event_description($parm = null)
 	{
 		$value = e107::getPlugConfig('raceevent')->get('event_description');

@@ -2,17 +2,19 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2013 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Terminovka.sk plugin - batch export worker
+ * terminovka plugin - terminovka.php
  *
- * Picks up every race_result row with sent=0 and re-tries sending it to the
- * API. Useful for racers who didn't cross the finish line naturally (manual
- * DNF/DSQ entries, late fixes) - the normal trigger path wouldn't catch
- * those.
 */
+
+/*
+ * Manual batch export page (docs/plugins/terminovka.md, "Manual batch export
+ * page"). Re-runs the terminovka_finish_time handler for every unsent
+ * race_result row, then reloads itself after refresh_interval seconds.
+ */
 
 require_once('../../class2.php');
 if (!getperms('P'))
@@ -26,8 +28,7 @@ e107::lan('terminovka', true, true);
 $tp        = e107::getParser();
 $plugPrefs = e107::pref('terminovka');
 
-// Terminovka owns its own refresh interval (decoupled from racerfid).
-// If it is 0, the batch page will not refresh and we stop here.
+// 0 = stop here: nothing is sent and the page does not refresh.
 $interval = (int) varset($plugPrefs['refresh_interval'], 0);
 
 $export_actived = (int) varset($plugPrefs['export_actived'], 0);
@@ -64,8 +65,7 @@ if (is_array($results))
         $racer_number = $result['race_result_number'];
         echo "<br>" . LAN_TERMINOVKA_SENDING . ": " . $tp->toHTML($racer_number);
 
-        // Reuse the consolidated send-and-log path in e_event.php
-        // (identical logic to the natural trigger path).
+        // Reuse the send-and-log path in e_event.php (onFinishTime()).
         $eventMgr->trigger('terminovka_finish_time', array(
             'racer_number' => $racer_number,
             'time'         => $result['race_result_time'],

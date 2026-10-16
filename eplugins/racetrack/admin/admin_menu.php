@@ -2,26 +2,23 @@
 /*
  * e107 website system
  *
- * racetrack plugin - shared admin dispatcher / menu.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Shared admin dispatcher for the racetrack plugin, mirroring the sibling
- * layout (racetiming): one admin file per entity area. Each $adminMenu entry
- * carries an explicit 'url' to its area's OWN entry file, and every mode's
- * 'path' is null - the dispatcher does NOT include the controller files. The
- * menu URL routes a mode to the file that defines its controller, and
- * e_admin_ui only instantiates the ACTIVE mode's controller, so listing a mode
- * whose class lives in another file is safe:
- *   - main    (tracks)      -> admin/admin_config.php   (also the admin entry point)
- *   - control (checkpoints) -> admin/admin_points.php
- *   - prices  (price tiers) -> admin/admin_prices.php
+ * racetrack plugin - admin/admin_menu.php
  *
- * LAN is loaded HERE (before the dispatcher class is declared, because the
- * class property defaults reference racetrack LAN constants). Every area entry
- * file require_once()s this dispatcher, so this is the single place the admin
- * LAN is loaded for all three areas - mirroring racetiming/admin/admin_menu.php.
+*/
+
+/*
+ * Shared admin dispatcher for all four areas. Each area has its own entry file
+ * (admin_config.php = tracks, admin_points.php, admin_prices.php,
+ * admin_archive.php); every mode's 'path' is null and each $adminMenu item
+ * carries 'url' to that file. This is safe because e_admin_ui only instantiates
+ * the ACTIVE mode's controller.
  *
- * The init() override appends the centralized cross-plugin admin-menu shortcuts
- * from raceevent/includes/admin_links.php (guarded on raceevent being installed).
+ * The admin LAN is loaded here, before the class is declared, because the class
+ * property defaults use racetrack LAN constants.
  */
 
 if (!defined('e107_INIT'))
@@ -36,8 +33,7 @@ if (!getperms('P'))
 }
 
 e107::lan('racetrack', true, true);
-// _global is loaded automatically by the core on every page via the
-// lan_global_list pref, so no manual 'global' load is needed here.
+// _global is loaded by the core on every page (lan_global_list pref).
 e107::coreLan('user');
 e107::coreLan('users', true);
 e107::coreLan('date');
@@ -54,29 +50,21 @@ class racetrack_adminArea extends e_admin_dispatcher
 			'ui' 			=> 'racetrack_form_ui',
 			'uipath' 		=> null
 		),
-		// Checkpoints CRUD. Controller lives in admin/admin_points.php; only that
-		// file loads the class, so listing the mode here is safe (e_admin_ui only
-		// instantiates the active mode).
+		// Controller class in admin/admin_points.php.
 		'control'	=> array(
 			'controller' 	=> 'racetrack_point_ui',
 			'path' 			=> null,
 			'ui' 			=> 'racetrack_point_form_ui',
 			'uipath' 		=> null
 		),
-		// Price tiers CRUD. Controller lives in admin/admin_prices.php (active-mode
-		// only, as above).
+		// Controller class in admin/admin_prices.php.
 		'prices'	=> array(
 			'controller' 	=> 'racetrack_price_ui',
 			'path' 			=> null,
 			'ui' 			=> 'racetrack_price_form_ui',
 			'uipath' 		=> null
 		),
-		// Archive CRUD. Controller lives in admin/admin_archive.php, its OWN
-		// self-contained entry file (like admin_points.php / admin_prices.php);
-		// the 'archive/*' $adminMenu items below carry 'url' => 'admin_archive.php'
-		// so the mode routes straight there. Only that file loads the class, so
-		// listing the mode here is safe (e_admin_ui only instantiates the active
-		// mode).
+		// Controller class in admin/admin_archive.php.
 		'archive'	=> array(
 			'controller' 	=> 'race_archive_ui',
 			'path' 			=> null,
@@ -86,9 +74,8 @@ class racetrack_adminArea extends e_admin_dispatcher
 
 	);
 
-	// Every item carries an explicit 'url' to its area's own entry file so
-	// cross-area navigation routes to the file that defines that mode's
-	// controller (relative URL: all three files live in this admin/ folder).
+	// Every item needs 'url' to the entry file that defines the mode's
+	// controller (relative: all entry files are in this admin/ folder).
 	protected $adminMenu = array(
 
 		'main/list'			=> array('caption' => LAN_ADMIN_RACE_003, 'perm' => 'P', 'url' => 'admin_config.php'),
@@ -114,10 +101,8 @@ class racetrack_adminArea extends e_admin_dispatcher
 	protected $menuTitle = LAN_GLOBAL_RACE_001;
 
 	/**
-	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical
-	 * nav map lives in raceevent/includes/admin_links.php; we pass our own
-	 * plugin name so racetrack's own entries are excluded from the shortcut list.
-	 * Guarded on raceevent being installed so racetrack degrades cleanly without it.
+	 * Append the cross-plugin admin-menu shortcuts from
+	 * raceevent/includes/admin_links.php (racetrack's own entries excluded).
 	 */
 	public function init()
 	{

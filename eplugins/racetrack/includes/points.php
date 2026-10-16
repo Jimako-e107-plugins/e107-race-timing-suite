@@ -1,35 +1,14 @@
 <?php
- 
-/**
- * Class trumbowyg_admin_config.
- */
-
- /*
- CREATE TABLE `race_point` (
-`race_point_id` int NOT NULL AUTO_INCREMENT,
-`race_point_race` varchar(10) NOT NULL,
-`race_point_code` varchar(10) NOT NULL,
-`race_point_name` varchar(255) NOT NULL,
-`race_point_password` varchar(255) NOT NULL,
-`race_point_order` int NOT NULL,
-PRIMARY KEY (`race_point_id`) USING BTREE,
-KEY `race_point_order` (`race_point_order`)
-) ENGINE=InnoDB;
-*/
-
 /*
-CREATE TABLE `race_time` (
-`race_time_id` int NOT NULL AUTO_INCREMENT,
-`race_time_racer_number` VARCHAR(11) NOT NULL,
-`race_time_point` VARCHAR(11) NOT NULL ,
-`race_time_time` VARCHAR(100) NOT NULL ,
-`race_time_ended` VARCHAR(3) NOT NULL DEFAULT '',
-`race_time_created` INT(10) NOT NULL,
-`race_time_updated` INT(10) NOT NULL,
-PRIMARY KEY (`race_time_id`),
-UNIQUE `racer` (`race_time_racer_number`, `race_time_point`, `race_time_ended`)
-) ENGINE=InnoDB;
- */
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racetrack plugin - includes/points.php
+ *
+*/
 
 class plugin_race_points  {
 
@@ -56,7 +35,7 @@ class plugin_race_points  {
         return self::$pointInfo;
     }
 
-    /* všetky časy pre konkretny point */
+    /* All times recorded at one checkpoint. */
     static function getSinglePointData($point = "")
     {
 

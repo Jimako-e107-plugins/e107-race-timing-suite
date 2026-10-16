@@ -2,12 +2,13 @@
 /*
  * e107 website system
  *
- * racetiming plugin - Slovak global language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetiming', 'global', true).
- * Overrides the English_global.php base per key; missing terms fall back to
- * English.
- */
+ * racetiming plugin - languages/Slovak/Slovak_global.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 

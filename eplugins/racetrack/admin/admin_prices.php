@@ -2,16 +2,17 @@
 /*
  * e107 website system
  *
- * racetrack plugin - registration price tiers (race_price) administration.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Self-contained admin entry file for the `prices` mode (price-tier CRUD), split
- * out of admin/admin_config.php. Mirrors racetiming's one-file-per-area layout
- * (racetiming/admin/admin_generujstart.php): bootstrap, require the shared
- * dispatcher (admin_menu.php), gate on the plugin's OWN admin permission, define
- * ONLY this area's controller + form classes, then run the page. The dispatcher's
- * `prices` mode points here via its $adminMenu 'url'.
+ * racetrack plugin - admin/admin_prices.php
  *
- * Field definitions moved verbatim from admin_config.php - no behavioural change.
+*/
+
+/*
+ * Price tiers screen (fields and the tier rule: docs/plugins/racetrack.md,
+ * "Price tiers").
  */
 
 require_once("../../../class2.php");
@@ -25,11 +26,8 @@ if (!getperms('P'))
 }
 
 /**
- * Date-tiered registration prices per track (issue #24). Each row is a price
- * that becomes effective from `race_price_from` (Unix timestamp). The applicable
- * fee for a sign-up is the row with the greatest `race_price_from <= now`; the
- * racereg sign-up flow reads these rows and FREEZES the resolved value into the
- * registration. Stored as DECIMAL(10,2); dates as INT timestamps.
+ * Price tiers. The applicable tier is resolved by racereg
+ * (race_registration::resolvePrice()), not here.
  */
 class racetrack_price_ui extends e_admin_ui
 {
@@ -70,7 +68,7 @@ class racetrack_price_ui extends e_admin_ui
 			'help'     => LAN_ADMIN_PRICE_VALUE_HELP,
 			'writeParms' => array('size' => 'small'),
 		),
-		// Date+time tier start. Stored as INT timestamp.
+		// Unix timestamp (date + time).
 		'race_price_from' => array(
 			'title'    => LAN_ADMIN_PRICE_FROM,
 			'type'     => 'datestamp',
@@ -96,7 +94,7 @@ class racetrack_price_ui extends e_admin_ui
 
 	public function init()
 	{
-		// Track dropdown - read-only read of the race (tracks) table.
+		// Track dropdown.
 		$tracks = array();
 		$rows   = e107::getDb()->retrieve('race', 'race_id, race_name', '', true);
 		if (is_array($rows))

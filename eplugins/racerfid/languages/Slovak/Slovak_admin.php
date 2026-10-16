@@ -2,19 +2,13 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2012 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Language file
- */
-
-/**
- *	RFID import plugin (folder/id: racerfid) - Slovak admin language file
+ * racerfid plugin - languages/Slovak/Slovak_admin.php
  *
- *	@package	e107_plugins
- *	@subpackage	racerfid
- */
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -63,7 +57,7 @@ return array(
     'LAN_RACETRACKING_INVALID_IDENTIFIER' => 'Neplatný SQL identifikátor (povolené sú len písmená, číslice a podčiarkovník):',
     'LAN_RACETRACKING_DEPS_MISSING' => 'Pre spustenie importu musia byť nainštalované pluginy timetracker a race.',
 
-    /* ---- Batch worker / cron (citacka.php, e_cron.php) ----------------------- */
+    /* ---- Manual import page / cron (citacka.php, e_cron.php) ---------------- */
     'LAN_RACETRACKING_IMPORT_DONE' => 'Import dobehol',
     'LAN_RACETRACKING_NO_INTERVAL' => 'Nie je nastavený interval refreshu',
     'LAN_RACETRACKING_NOT_ACTIVATED' => 'Import nie je aktivovaný',

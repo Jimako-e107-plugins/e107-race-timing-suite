@@ -1,45 +1,48 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - includes/registration.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 /**
- * Standalone on-site registration category-match logic.
+ * On-site registration category matching, called by racer_category_handler.php
+ * (the AJAX endpoint of the on-site form). Kept separate from includes/racers.php
+ * so it can be reused (e.g. by racereg).
  *
- * This is a FAITHFUL 1:1 copy of the matching logic in the current working
- * racer_category_handler.php (post-revert form). It is intentionally separate
- * from includes/racers.php (the tested race model) so it can be reused later
- * (e.g. by racereg) without mixing into that model.
- *
- * STEP 1 of the age+gender -> category redo: this file is dormant / not wired up.
- * Nothing calls it yet; the on-site handler keeps running on its own code.
- * No improvements are made here on purpose (no bound params, no gender
- * whitelist, no CSRF, no validation) - those are separate later steps.
+ * SQL: the gender goes through $tp->toDB(), the track id is int-cast and the
+ * age is computed (int), so no posted value reaches the query raw.
  */
 class plugin_racers_registration {
 
     /**
      * Return the list of matching race_category rows for the given inputs.
      *
-     * Reproduces the working handler exactly:
      *   - gender match (race_category_gender = '{$gender}') when a gender is given,
      *   - age range match (age_from <= age <= age_to) when a birthday is given,
-     *   - FIND_IN_SET(raceId, race_category_race) ONLY when a real track is given.
-     * Age is computed the SAME way the working handler does (copied verbatim,
-     * including the undefined $calculationMethod branch that always falls through
-     * to the today-diff calculation).
-     *
-     * Birthday is the on-site 'd.m.yyyy' string the working handler handles.
+     *   - FIND_IN_SET(raceId, race_category_race) only when a track is given.
+     * $calculationMethod is undefined, so the age is always computed as of today
+     * (the startforage pref is read into $plPref but not used).
      *
      * @param string $birthday on-site birthday string (e.g. 'd.m.yyyy')
      * @param string $gender   race_category_gender value
-     * @param int    $raceId   track id; 0 / empty => no track filter
+     * @param int    $raceId   track id (int-cast); 0 / empty => no track filter
      * @return array matching race_category rows (same set the handler builds <option>s from)
      */
     public static function getCategories($birthday, $gender, $raceId = 0): array
     {
         $sql = e107::getDb();
+        $tp  = e107::getParser();
 
-        $race = $raceId;
+        $race = (int) $raceId;
+        $gender = $tp->toDB((string) $gender);
 
         $plPref = e107::pref('racers', 'startforage');
 
@@ -49,25 +52,23 @@ class plugin_racers_registration {
 
         if (!empty($birthday))
         {
-            // Calculate age
+            // Age
             $birthDate = new DateTime($birthday);
             $today = new DateTime();
             //$age = $today->diff($birthDate)->y;
 
-            // Skontrolujte spôsob výpočtu veku (či sa má počítať k 1. januáru alebo k dnešnému dňu)
+            // Age as of 1 January or as of today ($calculationMethod: see docblock).
             if ($calculationMethod === 'startOfYear')
             {
-                // Nastavíme dátum na 1. januára aktuálneho roka
                 $startOfYear = new DateTime($today->format('Y') . '-01-01');
-                // Vypočítať vek k 1. januáru
                 $age = $startOfYear->diff($birthDate)->y;
             }
             else
             {
-                // Vypočítať vek k dnešnému dňu
                 $age = $today->diff($birthDate)->y;
             }
 
+            $age = (int) $age;
             $where1 = "  AND {$age} >= race_category_age_from  AND {$age} <= race_category_age_to ";
         }
 

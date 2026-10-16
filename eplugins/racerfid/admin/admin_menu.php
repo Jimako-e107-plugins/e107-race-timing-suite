@@ -2,14 +2,17 @@
 /*
  * e107 website system
  *
- * racerfid plugin (RFID import) - shared admin dispatcher / menu.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Holds the admin dispatcher (racerfid_adminArea). Each admin area is its own
- * mode pointing at its own controller/UI defined in admin/admin_config.php.
- * Structure mirrors raceevent/admin/admin_menu.php.
+ * racerfid plugin - admin/admin_menu.php
  *
- * Bootstrap: load the framework, check the plugin's OWN admin permission
- * (getperms('P')), load the LAN file, then declare the dispatcher.
+*/
+
+/*
+ * Shared admin dispatcher / menu; the controllers live in admin/admin_config.php.
+ * The database screens are main-admin only (perm '0').
  */
 
 if (!defined('e107_INIT')) { exit; }
@@ -62,11 +65,9 @@ class racerfid_adminArea extends e_admin_dispatcher
 	protected $menuTitle = 'RFID import';
 
 	/**
-	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical
-	 * nav map lives in raceevent/includes/admin_links.php; we pass our own
-	 * plugin name so racerfid's own entries are excluded. The isInstalled guard
-	 * keeps racerfid installable as an independent leaf - links simply don't
-	 * appear when raceevent is absent.
+	 * Append the cross-plugin shortcuts (docs/getting-started/admin-area.md,
+	 * "Cross-plugin shortcuts") from raceevent/includes/admin_links.php,
+	 * excluding our own. The isInstalled guard keeps racerfid independent.
 	 */
 	public function init()
 	{

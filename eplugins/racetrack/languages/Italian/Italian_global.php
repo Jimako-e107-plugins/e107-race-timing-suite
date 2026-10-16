@@ -2,12 +2,13 @@
 /*
  * e107 website system
  *
- * race plugin - Italian global language file (issue #37).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetrack', 'global', true). Canonical,
- * complete set; the Slovak file (languages/Slovak/Slovak_global.php) overrides
- * per key and falls back here for any missing term.
- */
+ * racetrack plugin - languages/Italian/Italian_global.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 

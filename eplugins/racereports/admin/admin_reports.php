@@ -2,41 +2,20 @@
 /*
  * e107 website system
  *
- * racereports plugin - admin entry: bootstraps and runs the dispatcher.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Modelled on raceevent/admin/admin_config.php. This single entry file defines
- * the dispatcher's controllers and runs the page; both admin areas live here as
- * native e107 e_admin_ui controllers (empty $table/$pid - no DB-table CRUD),
- * exactly like raceevent's maintenance / checklinks screens. The shared base
- * racereports_reports_ui holds the link-list render helpers so each area's
- * <action>Page() just assembles panels and returns the HTML string, which the
- * framework renders inside the admin theme.
+ * racereports plugin - admin/admin_reports.php
  *
- * Three admin areas (see admin_menu.php $modes):
- *   - overview (overviewPage): INFO ONLY — a short static list of the supported
- *     report types (Online, checkpoint times). NO live links, no e107::url().
- *   - online   (onlinePage):   per race, the Online report links only.
- *   - point    (pointPage):    per race, the checkpoint-time report links only
- *     (per checkpoint, skipping start/finish, + "komplet") — exposed the SAME
- *     native way as the online screen.
- *
- * SECURITY / conventions (native e107 only):
- *   - Bootstrap via class2.php, load the LAN (so the dispatcher captions and the
- *     pluginTitle constants resolve), require the dispatcher, then gate the whole
- *     screen on the plugin's OWN admin permission with getperms('P'). No
- *     top-level redirect anywhere (the dispatcher's per-mode perm 'P' and
- *     auth.php enforce access too).
- *   - READ-ONLY: data is read via the db class; every value placed in markup is
- *     escaped (text via $tp->toHTML, hrefs via $tp->toAttribute) and every report
- *     link is built with e107::url() so SEF and non-SEF installs both resolve.
- *
- * Front report routes (racereports/e_url.php), plugin-scoped keys:
- *   online -> report_online.php ?r=<race_sef>&c=<race_category_sef>
- *   point  -> report_point.php  ?r=<race_sef>&p=<race_point_sef>
- * race_category / race_point are tied to a race via FIND_IN_SET(race_id,
- * race_category_race) / (race_id, race_point_race); race_point has no sef column
- * so its identifier is race_point_code (the value the {race_point_sef} token
- * carries).
+*/
+
+/*
+ * Old single admin entry from before the one-file-per-screen split. Not linked
+ * from the admin menu; it is the only file serving the info-only 'overview' mode,
+ * plus older copies of the online and point screens. It carries its own copy of the
+ * racereports_reports_ui base, so it must not be loaded together with
+ * admin_report_ui.php.
  */
 
 require_once("../../../class2.php");
@@ -54,10 +33,7 @@ if (!getperms('P'))
 
 
 /**
- * Shared base for both admin areas. Extends e_admin_ui as a custom controller
- * screen (no DB table); the concrete classes set only their default action. The
- * render helpers build Bootstrap panels of report links - the same return-an-
- * HTML-string mechanism raceevent's maintenance screen uses.
+ * Old copy of the shared base; the current one is admin_report_ui.php.
  */
 abstract class racereports_reports_ui extends e_admin_ui
 {
@@ -268,9 +244,7 @@ abstract class racereports_reports_ui extends e_admin_ui
 
 
 /**
- * Overview area: INFO ONLY — a short static list of the report types this plugin
- * supports. NO live per-race/category/checkpoint links (those live on the Online
- * and Checkpoint screens). Pure informational markup, no e107::url() here.
+ * Overview: a static, info-only list of report types (no links).
  */
 class racereports_overview_ui extends racereports_reports_ui
 {
@@ -292,9 +266,7 @@ class racereports_overview_ui extends racereports_reports_ui
 
 
 /**
- * Checkpoint area: per race, the checkpoint-time report links only. Exposed
- * natively the SAME way as the Online area (its own dispatcher mode/screen,
- * sharing the base's renderCheckpointLinks()).
+ * Checkpoint area: per race, the checkpoint-time report links.
  */
 class racereports_point_ui extends racereports_reports_ui
 {

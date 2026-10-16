@@ -2,14 +2,18 @@
 /*
  * e107 website system
  *
- * racers plugin - shared admin dispatcher / menu.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Holds the admin dispatcher (racers_adminArea). Each admin area is its own
- * mode pointing at its own controller/UI defined in admin/admin_config.php.
- * Structure mirrors raceevent/admin/admin_menu.php.
+ * racers plugin - admin/admin_menu.php
  *
- * Bootstrap: load the framework, check the plugin's OWN admin permission
- * (getperms('P')), load the LAN files, then declare the dispatcher.
+*/
+
+/*
+ * Shared admin dispatcher / menu (racers_adminArea). Modes main + cat are served
+ * by admin_config.php; every other mode is its own entry file, reached via the
+ * menu item's 'url'. Menu items: docs/plugins/racers.md, "Admin area".
  */
 
 if (!defined('e107_INIT')) { exit; }
@@ -22,13 +26,8 @@ if (!getperms('P'))
 	exit;
 }
 
-// Sub-folder array LAN (EN base with per-key Slovak override / fallback): admin
-// strings only. The strings reused by admin_config.php's renderHelp now have
-// admin-scoped duplicates (LAN_RACERS_ADMIN_031/032), so no cross-scope _front
-// load is needed here.
-// _global is NOT loaded here: the core loads every installed plugin's _global
-// automatically on every page via the lan_global_list pref, so a manual 'global'
-// load would be redundant.
+// Admin strings only; _global is loaded by the core on every page
+// (lan_global_list pref).
 e107::lan('racers', true, true);
 
 
@@ -120,10 +119,7 @@ class racers_adminArea extends e_admin_dispatcher
 			'uipath' 		=> null
 		),
 
-		// Štartovacie listiny: the start-list link directory (per track komplet +
-		// per category -> racers' own startlist front page). Controller defined in
-		// admin/admin_startlists.php, its OWN self-contained entry file; the
-		// 'startlists/*' $adminMenu item carries 'url' => 'admin_startlists.php'.
+		// Start lists - admin/admin_startlists.php (own entry file, menu 'url').
 		'startlists'	=> array(
 			'controller' 	=> 'racers_startlists_ui',
 			'path' 			=> null,
@@ -131,9 +127,7 @@ class racers_adminArea extends e_admin_dispatcher
 			'uipath' 		=> null
 		),
 
-		// Prehľad pretekárov: a single reach-link to the racers/list front page.
-		// Controller defined in admin/admin_racerlist.php, its OWN entry file; the
-		// 'racerlist/*' $adminMenu item carries 'url' => 'admin_racerlist.php'.
+		// Racer overview - admin/admin_racerlist.php (own entry file, menu 'url').
 		'racerlist'	=> array(
 			'controller' 	=> 'racers_racerlist_ui',
 			'path' 			=> null,
@@ -141,10 +135,7 @@ class racers_adminArea extends e_admin_dispatcher
 			'uipath' 		=> null
 		),
 
-		// Registrácia na mieste: a single info/link screen for on-site registration
-		// (conditional on the racers/manualinput pref). Controller defined in
-		// admin/admin_registration.php, its OWN entry file; the 'registration/*'
-		// $adminMenu item carries 'url' => 'admin_registration.php'.
+		// On-site registration - admin/admin_registration.php (own entry file, menu 'url').
 		'registration'	=> array(
 			'controller' 	=> 'racers_registration_ui',
 			'path' 			=> null,
@@ -169,9 +160,6 @@ class racers_adminArea extends e_admin_dispatcher
 		'racerlist/racerlist'	=> array('caption' => LAN_RACERS_ADMIN_035, 'perm' => 'P', 'url' => 'admin_racerlist.php'),
 		'registration/registration'	=> array('caption' => LAN_RACERS_ADMIN_043, 'perm' => 'P', 'url' => 'admin_registration.php'),
 
-		// 'main/div0'      => array('divider'=> true),
-		// 'main/custom'		=> array('caption'=> 'Custom Page', 'perm' => 'P'),
-
 	);
 
 	protected $adminMenuAliases = array(
@@ -181,10 +169,8 @@ class racers_adminArea extends e_admin_dispatcher
 	protected $menuTitle = LAN_RACERS_ADMIN_003;
 
 	/**
-	 * Append the centralized cross-plugin admin-menu shortcuts. The canonical
-	 * nav map lives in raceevent/includes/admin_links.php; we pass our own
-	 * plugin name so racers' own entries are excluded from the shortcut list.
-	 * Guarded on raceevent being installed so racers degrades cleanly without it.
+	 * Append the cross-plugin admin-menu shortcuts (raceevent/includes/admin_links.php),
+	 * excluding racers' own entries. Skipped when raceevent is not installed.
 	 */
 	public function init()
 	{

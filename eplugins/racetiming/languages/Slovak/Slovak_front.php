@@ -2,16 +2,17 @@
 /*
  * e107 website system
  *
- * racetiming plugin - Slovak front language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded on the front-end via e107::lan('racetiming', '',
- * true). Overrides the English front strings per key; any key missing here falls
- * back to languages/English/English_front.php.
+ * racetiming plugin - languages/Slovak/Slovak_front.php
  *
- * NOTE: per the faithful 1:1 relocation, the keypad glyphs, header caption and
- * operator notices in vstup.php are intentionally LEFT HARDCODED (Slovak) and
- * are NOT wired to these keys (see NOTES.md). The values below mirror the
- * current hardcoded Slovak wording.
+*/
+
+/*
+ * vstup.php does not use these keys yet: the keypad texts are still hardcoded in
+ * Slovak.
  */
 
 if (!defined('e107_INIT')) { exit; }

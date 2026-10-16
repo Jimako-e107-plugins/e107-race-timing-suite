@@ -1,4 +1,15 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - languages/English/English_admin.php
+ *
+*/
+
 if (!defined('e107_INIT')) { exit; }
 
 return array(
@@ -38,12 +49,11 @@ return array(
     'LAN_RACERS_ADMIN_028'      => 'Today',
     'LAN_RACERS_ADMIN_029'      => 'As of Jan 1',
     'LAN_RACERS_ADMIN_030'      => 'Allow manual entry of participants.',
-    // admin-scoped duplicates of LAN_RACERS_FRONT_001/002 (admin_config.php renderHelp)
+    // admin-scoped duplicates of LAN_RACERS_FRONT_001/002 (admin_registration.php)
     'LAN_RACERS_ADMIN_031'      => 'Manual entry of participants is not allowed.',
     'LAN_RACERS_ADMIN_032'      => 'Caution: manual entry of participants without access control is allowed.',
     // racers/list page (racers.php) tablerender heading
     'LAN_RACERS_ADMIN_033'      => 'Racers list',
-    // category admin-menu captions (owned by racers, formerly borrowed from timetracker)
     // Start-lists (admin_startlists.php) + racer-overview (admin_racerlist.php) screens
     'LAN_RACERS_ADMIN_034'      => 'Start lists',
     'LAN_RACERS_ADMIN_035'      => 'Racer overview',
@@ -55,8 +65,24 @@ return array(
     'LAN_RACERS_ADMIN_041'      => 'Start lists by track and category',
     'LAN_RACERS_ADMIN_042'      => 'Open the racer overview',
     'LAN_RACERS_ADMIN_043'      => 'On-site registration',
+    'LAN_RACERS_ADMIN_044'      => 'Show the country flag next to the name?',
+    'LAN_RACERS_ADMIN_044_HELP' => 'Shows the flag of the racer\'s nationality next to the name, using the IOC to ISO code map below. Racers whose nationality is not in the map get no flag.',
+    'LAN_RACERS_ADMIN_045'      => 'Flag position',
+    'LAN_RACERS_ADMIN_045_HELP' => 'Before the surname, or directly after "surname firstname" (before the bib number, the local text and the team).',
+    'LAN_RACERS_ADMIN_046'      => 'Before the name',
+    'LAN_RACERS_ADMIN_047'      => 'After the name',
+    'LAN_RACERS_ADMIN_048'      => 'Flag size',
+    'LAN_RACERS_ADMIN_048_HELP' => 'Flag size in pixels (8 to 64).',
+    'LAN_RACERS_ADMIN_049'      => 'Nationality to flag map',
+    'LAN_RACERS_ADMIN_049_HELP' => 'How to fill it in: the left box is the code used in the Nationality field (IOC, 3 letters, e.g. GER), the right box is the country code that draws the flag (ISO, 2 letters, e.g. DE). Look the pair up in the "IOC to ISO code reference" below and copy both codes into an empty row. Clear both boxes to remove a row.',
+    'LAN_RACERS_ADMIN_050'      => 'These flag map rows were not saved (IOC needs 3 letters, ISO 2 letters): [x]',
+    'LAN_RACERS_ADMIN_051'      => 'IOC code',
+    'LAN_RACERS_ADMIN_052'      => 'ISO code',
+    'LAN_RACERS_ADMIN_053'      => 'Country flags',
+    'LAN_RACERS_ADMIN_054'      => 'IOC to ISO code reference (click to open)',
+    'LAN_RACERS_ADMIN_055'      => 'Country',
+    'LAN_RACERS_ADMIN_056'      => 'These codes from "Country codes" (Settings tab) have no flag yet - add them to the table: [x]',
     'LAN_RACERS_ADMIN_CATEGORIES'     => 'Categories list',
     'LAN_RACERS_ADMIN_CATEGORIES_ADD' => 'Add category',
-    // Cross-plugin admin-menu shortcuts moved to raceevent_admin_links
-    // (captions: LAN_RACEEVENT_LINK_*).
+    // Cross-plugin admin-menu shortcuts: raceevent_admin_links (LAN_RACEEVENT_LINK_*).
 );

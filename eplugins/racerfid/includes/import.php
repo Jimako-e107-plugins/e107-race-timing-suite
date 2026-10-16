@@ -2,17 +2,20 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2017 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * RFID import plugin (folder/id: racerfid) - importer
- *
- * Reads RFID chip-reader records from an external database (raw PDO) and
- * imports them into timetracker's race_time table (local e107 db), mapped via
- * race's race_point table.
+ * racerfid plugin - includes/import.php
  *
 */
+
+/*
+ * Importer (user view: docs/plugins/racerfid.md, "How the mapping works").
+ * Reads the reader table from the external database (raw PDO) and writes
+ * racetiming's race_time in the local e107 database, mapped via racetrack's
+ * race_point table.
+ */
 
 if (!defined('e107_INIT')){ exit; }
 
@@ -31,9 +34,9 @@ class plugin_racerfid_import
 	 * Whitelist a SQL identifier (table/column name) before it is
 	 * interpolated into a query string. Only [A-Za-z0-9_] is allowed.
 	 *
-	 * Ports the alt_auth fix: reject invalid identifiers instead of quoting
-	 * arbitrary text. No user-supplied VALUE reaches these queries (the
-	 * importer reads all rows), so identifier hardening is the relevant part.
+	 * Rejects invalid identifiers instead of quoting arbitrary text. No
+	 * user-supplied VALUE reaches these queries (the importer reads all rows),
+	 * so identifier hardening is the relevant part.
 	 *
 	 * @param string $name
 	 * @return bool
@@ -44,9 +47,9 @@ class plugin_racerfid_import
 	}
 
 	/**
-	 * Soft dependency gate. The import reads race_point from the `race` plugin
-	 * and writes race_time from the `timetracker` plugin, so both must be
-	 * installed. Returns true only when both are present.
+	 * Runtime dependency gate (plugin.xml declares none): the import reads
+	 * race_point (racetrack) and writes race_time (racetiming), so both must
+	 * be installed.
 	 *
 	 * @return bool
 	 */
@@ -130,8 +133,8 @@ class plugin_racerfid_import
 		echo LAN_RACETRACKING_RECORDS_WITH . " '" . $tp->toHTML($fieldnumber) . "': " . (int) $recordsWithMeno . "<br><hr>";
 
 
-		// The race_point mapping comes from the `race` plugin - only read it
-		// when the dependencies are present.
+		// race_point belongs to racetrack - only read it when the dependencies
+		// are present.
 		if ($this->dependenciesMet())
 		{
 			$points = e107::getDb()->retrieve('race_point', "*", " ORDER BY race_point_order ", true);
@@ -196,8 +199,8 @@ class plugin_racerfid_import
 	{
 		e107::lan('racerfid', true, true);
 
-		// Abort gracefully (admin warning, no fatal) when the plugins that own
-		// race_point / race_time are not installed.
+		// Abort with an admin warning (no fatal) when racetrack / racetiming
+		// are not installed.
 		if (!$this->dependenciesMet())
 		{
 			e107::getMessage()->addWarning(LAN_RACETRACKING_DEPS_MISSING);

@@ -2,60 +2,27 @@
 /*
  * e107 website system
  *
- * racereports plugin - START report (start-point standings / štartová listina).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * A clone of report_finish.php, but the single per-racer time cell shows the
- * START TIME-OF-DAY (wall clock at the 'start' checkpoint), NOT an elapsed/diff.
- * A racer is a STARTER when the racetiming engine returns a 'start' crossing for
- * them (race_clock::timeOfDay(number,'start') !== null) AND racer_active is set
- * (the manual "bib collected" flag, NOT derived from the start time); everyone
- * else (no start crossing, or racer_active=false) falls into the not-started
- * group shown after the starters, with no time. An un-marked racer
- * (racer_active=false) is bucketed here as DNS - a report-level reading of the
- * bib-collection flag, NOT a claim that racer_active means DNS. The start time is the
- * SAME engine read the racers/startlist.php start list uses
- * (race_clock::formatTimeOfDay($clock->timeOfDay(number,'start'), result_decimals))
- * - NO new or changed engine method is introduced; the point is FIXED to 'start'.
+ * racereports plugin - report_start.php
  *
- * Modes (legacy query contract, ?r=<race_sef>&c=<race_category_sef>), mirroring
- * report_finish.php:
- *   r=overview           -> ALL tracks on one page, each rendered in turn; define
- *                           e_IFRAME so HEADERF/FOOTERF skip the site header/footer
- *                           chrome (e_IFRAME in e107 = suppress the chrome to save
- *                           space, NOT an actual <iframe>), exactly as finish does.
- *                           (First param renamed from the legacy 'komplet' to
- *                           'overview' - the SECOND-param c=komplet is unchanged.)
- *   r=<race>, c=komplet  -> that race, all categories.
- *   r=<race>, c=<cat>    -> that race + that category.
+*/
+
+/*
+ * Start list (docs/plugins/racereports.md, "Start list").
+ * Query: ?r=<race_sef>&c=<race_category_sef>, r=overview = all tracks.
  *
- * EXPORT (?export=csv|xls): the displayed cells of one SINGLE-RACE scope are built
- * ONCE into a neutral structure ($headers + $rows of already-formatted cells +
- * $textCols) and the HTML table AND the CSV/XLS download both render from THAT same
- * structure - there is no second, divergent row set (mirrors report_stu / finish).
- * The export streams and exits at the TOP of the page, before HEADERF / any output.
- * SCOPE: export is offered for a single race only (r=<race> with c=<cat> or
- * c=komplet -> one table -> one file); r=overview (ALL tracks, many tables) is NOT
- * exported (its admin "all tracks" link carries no export buttons and a manual
- * ?r=overview&export=... falls through to the normal HTML page). See NOTES.md. The
- * exported rows include BOTH the starters AND the not-started rows (with an empty
- * time cell), matching exactly what the screen shows.
+ * A starter is racer_active (the manual "Nastúpil" flag, NOT derived from the start
+ * time) AND has a 'start' crossing (race_clock::timeOfDay(number, 'start') !== null),
+ * the same engine read racers/startlist.php uses. Everyone else is in the
+ * not-started group. Starters are sorted by NAME on purpose (mass starts share one
+ * start time). The page and the ?export=csv|xls download render from ONE row
+ * structure (racereports_start_build()); export covers a single track only.
  *
- * SORT: starters are sorted ALPHABETICALLY BY NAME (ascending), NOT by time. This
- * is an INTENTIONAL difference from report_point / report_finish (which sort by
- * the time value): mass starts share the same start time-of-day, so a time sort
- * would be meaningless here. See racereports/NOTES.md.
- *
- * Coloring: per-category row background is applied to STARTER rows only, and only
- * when the start_colors pref is on (DEFAULT 1 - start is coloured by default, its
- * own per-report pref like finish_colors/stu_colors). The not-started rows are
- * NEVER coloured (plain <tr>), same rule as online/point/finish.
- *
- * SECURITY: the legacy raw-$_GET-into-SQL pattern and its extract($racer) are NOT
- * carried over. Every SQL value goes through $tp->toDB() in the shared helper;
- * race/category ids are (int)-cast; the bib/start number stays a STRING (never
- * (int)); the start-crossing read is the engine's $clock->timeOfDay($number,
- * 'start') (NO string-concat SQL); output is escaped via $tp->toHTML()/
- * toAttribute(); racer fields are read by explicit array access, never extract().
+ * Every SQL value goes through toDB() in the shared helper; race/category ids are
+ * (int)-cast; the bib stays a STRING; output is escaped.
  */
 
 if (!defined('e107_INIT'))
@@ -87,25 +54,18 @@ if (!defined('LAN_RACEREPORTS_COL_TIME'))        define('LAN_RACEREPORTS_COL_TIM
 $tp     = e107::getParser();
 $report = new race_report();
 
-// One read of race_time -> split map (same pattern as racers/startlist.php). build()
-// returns $this, so the clock is ready to answer timeOfDay() for every racer below.
+// One read of race_time -> split map. build() returns $this.
 $clock = (new race_clock())->build();
 
-// Per-category row coloring toggle (admin SETTINGS page). DEFAULT 1 = ON is enforced
-// HERE at the consumer (start is coloured by default - its OWN pref, same as finish).
-// Read once and passed into the render so starter rows get the per-category
-// background via the shared race_report_color() path.
+// start_colors, default 1 (on) applied here at the consumer.
 $useColors = (int) e107::getPlugConfig('racereports')->get('start_colors', 1);
 
 $raceSef = isset($_GET['r']) ? $tp->toDB($_GET['r']) : '';
 $export  = isset($_GET['export']) ? (string) $_GET['export'] : '';
 
-// EXPORT BRANCH: stream and exit BEFORE HEADERF / any output. SINGLE-RACE scope
-// only (r=<race> with c=<cat> or c=komplet). The cells are exactly what the HTML
-// table shows (same start-number string, same start-time string), so the file is
-// byte-identical to the page. The start number (leading zeros) and the time string
-// are marked as text columns so spreadsheets do not mangle them. An overview (all
-// tracks) or unresolved scope is NOT exported - it falls through to the HTML path.
+// EXPORT BRANCH: stream and exit BEFORE HEADERF / any output. Single track only;
+// $forExport = true gives a PLAIN-text name cell. An overview or unresolved scope
+// falls through to the HTML page.
 if ($export === 'csv' || $export === 'xls')
 {
 	if ($raceSef !== '' && $raceSef !== 'overview')
@@ -114,15 +74,14 @@ if ($export === 'csv' || $export === 'xls')
 		if (!empty($race))
 		{
 			$categorySef = isset($_GET['c']) ? $tp->toDB($_GET['c']) : '';
-			$built = racereports_start_build_scope($report, $clock, $race, $categorySef, $useColors);
+			$built = racereports_start_build_scope($report, $clock, $race, $categorySef, $useColors, true);
 
 			if ($built !== null)
 			{
 				require_once(e_PLUGIN . 'racereports/includes/race_export.php');
 
-				// Filename: start_<race_sef>[_<cat_sef>]_<Y-m-d>. The sef parts are
-				// sanitised to a safe slug so they can never inject into the
-				// Content-Disposition header.
+				// The sef parts are reduced to a safe slug so they cannot inject
+				// into the Content-Disposition header.
 				$slug    = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $raceSef);
 				$catSlug = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $categorySef);
 				$fname   = 'start_' . $slug
@@ -147,10 +106,7 @@ $style = '
 }';
 e107::css('inline', $style);
 
-// PRE-HEADERF: r=overview suppresses the site header/footer chrome. e_IFRAME MUST
-// be defined BEFORE HEADERF renders (HEADERF reads it to decide whether to draw the
-// chrome). Only r=overview defines it - the single-race modes keep the normal page
-// chrome, exactly as report_finish.php does.
+// r=overview: no site header/footer. e_IFRAME MUST be defined BEFORE HEADERF.
 if ($raceSef === 'overview')
 {
 	define('e_IFRAME', true);
@@ -167,8 +123,7 @@ if ($raceSef === '')
 
 if ($raceSef === 'overview')
 {
-	// ALL races, each rendered in turn. The chrome is already suppressed (e_IFRAME
-	// defined pre-HEADERF above).
+	// ALL races, each rendered in turn.
 	echo "<div class='container'><div class='row'>";
 	foreach ($report->fetchAllRaces() as $race)
 	{
@@ -216,24 +171,23 @@ else
 }
 
 /**
- * Build the SINGLE-RACE export scope: the neutral structure for one race, either
- * all categories (c=komplet / c='') or one category (c=<cat>). For a category sef
- * that resolves to more than one category row the rows are concatenated in the same
- * top-to-bottom order the HTML page shows them, so the export matches the screen.
- * Returns null when a named category sef resolves to nothing.
+ * Build the SINGLE-RACE export scope: all categories (c=komplet / c='') or one
+ * category sef. A sef matching several category rows is concatenated in screen
+ * order. Returns null when a named category sef resolves to nothing.
  *
  * @param race_report $report
  * @param race_clock  $clock
  * @param array       $race
  * @param string      $categorySef '' or 'komplet' = all categories
  * @param int         $useColors
+ * @param bool        $forExport true = CSV/XLS: plain-text name cell (see racereports_start_build)
  * @return array|null neutral structure (headers/rows/meta/textCols) or null
  */
-function racereports_start_build_scope($report, $clock, $race, $categorySef, $useColors)
+function racereports_start_build_scope($report, $clock, $race, $categorySef, $useColors, $forExport = false)
 {
 	if ($categorySef === '' || $categorySef === 'komplet')
 	{
-		return racereports_start_build($report, $clock, $race, null, $useColors);
+		return racereports_start_build($report, $clock, $race, null, $useColors, $forExport);
 	}
 
 	$raceId     = (int) $race['race_id'];
@@ -246,7 +200,7 @@ function racereports_start_build_scope($report, $clock, $race, $categorySef, $us
 	$merged = null;
 	foreach ($categories as $category)
 	{
-		$built = racereports_start_build($report, $clock, $race, $category, $useColors);
+		$built = racereports_start_build($report, $clock, $race, $category, $useColors, $forExport);
 		if ($merged === null)
 		{
 			$merged = $built;
@@ -263,23 +217,11 @@ function racereports_start_build_scope($report, $clock, $race, $categorySef, $us
 
 /**
  * Build one race/category START table as a NEUTRAL structure that both the HTML
- * table and the CSV/XLS export render from: STARTERS first (alphabetical by name,
- * ranked, each showing their start time-of-day), then the not-started group (after
- * the starters, no time).
+ * table and the CSV/XLS export render from: starters (see the file header), then
+ * the not-started group with an empty time cell.
  *
- * A STARTER is a racer who is active AND has a 'start' crossing in the timing
- * layer (race_clock::timeOfDay(number,'start') !== null). The start-time cell =
- * race_clock::formatTimeOfDay($clock->timeOfDay($number,'start'), $resDec) - the
- * SAME engine read racers/startlist.php uses, at the central result_decimals pref
- * (default 2; like finish's formatElapsed). formatTimeOfDay truncates the sub-second
- * part via the same substr cut as formatElapsed - see NOTES.md. The point is FIXED
- * to 'start' (no point param).
- *
- * Racers with no start crossing, or un-marked (racer_active=false, which this
- * report buckets as DNS, as in finish - a report-level reading of the flag, not its
- * definition), are NOT starters and fall into the not-started group, rendered after
- * the starters with an empty time cell. The racer_active+crossing guard mirrors
- * startlist.php (which only reads a start time when $racer['racer_active']).
+ * Start-time cell = race_clock::formatTimeOfDay(timeOfDay(number, 'start'),
+ * $resDec); formatTimeOfDay truncates the sub-second part like formatElapsed.
  *
  * Returns:
  *   headers  : ordered export column labels (rank, bib, name, gender, nationality,
@@ -296,16 +238,17 @@ function racereports_start_build_scope($report, $clock, $race, $categorySef, $us
  * @param array       $race
  * @param array|null  $category  null = all categories
  * @param int         $useColors 1 = colour starter rows per category, 0 = plain
+ * @param bool        $forExport true = CSV/XLS: the name cell (index 2) is the PLAIN-text
+ *                               name from racers_name::build(plain) - no HTML markup,
+ *                               flag as a UTF-8 emoji; false (default) = the HTML name
  * @return array
  */
-function racereports_start_build($report, $clock, $race, $category, $useColors)
+function racereports_start_build($report, $clock, $race, $category, $useColors, $forExport = false)
 {
 	$raceId     = (int) $race['race_id'];
 	$categoryId = ($category !== null) ? (int) $category['race_category_id'] : null;
 
-	// Central RESULT-time precision (DISPLAY-ONLY). start shows time-of-day, so the
-	// decimals apply to the sub-second part; formatTimeOfDay TRUNCATES that part via
-	// the same substr cut as formatElapsed (the data's .mmm is unchanged). Default 2.
+	// result_decimals (display-only), applied to the sub-second part of the time of day.
 	$resDec = (int) e107::getPlugConfig('racereports')->get('result_decimals', 2);
 
 	$racers = $report->fetchRacers($raceId, $categoryId); // keyed by bib string
@@ -316,13 +259,13 @@ function racereports_start_build($report, $clock, $race, $category, $useColors)
 	foreach ($racers as $number => $racer)
 	{
 		$number = (string) $number;
-		$racer['racer_name'] = $report->getRacerName($racer);
+		// Export: plain-text name (escaped by race_export::xls). Page: HTML name.
+		$racer['racer_name'] = $forExport
+			? racers_name::build($racer, array('plain' => true))
+			: $report->getRacerName($racer);
 
-		// racer_active (bib marked collected) + a 'start' crossing -> STARTER. The
-		// guard mirrors startlist.php (which only reads a start time when
-		// racer_active). An un-marked racer is bucketed by this report as DNS - a
-		// report-level reading of the bib-collection flag, not its definition. The
-		// crossing read is the engine's timeOfDay() (NO string-concat SQL).
+		// racer_active + a 'start' crossing -> STARTER (racer_active is a manual
+		// flag, see racereports-NOTES.md, "Terminology: racer_active vs DNS").
 		$active = !empty($racer['racer_active']);
 		$epoch  = $active ? $clock->timeOfDay($number, 'start') : null;
 
@@ -330,9 +273,8 @@ function racereports_start_build($report, $clock, $race, $category, $useColors)
 		{
 			// STARTERS: start time-of-day at result_decimals (display-only truncation).
 			$racer['starttext'] = race_clock::formatTimeOfDay($epoch, $resDec);
-			// Alphabetical sort key from the raw surname+firstname (NOT the rendered
-			// HTML name, which may carry markup). Sort is BY NAME on purpose - see
-			// the file header.
+			// Sort key from the raw surname + firstname (the rendered name may
+			// carry markup).
 			$surname            = isset($racer['racer_surname']) ? $racer['racer_surname'] : '';
 			$firstname          = isset($racer['racer_firstname']) ? $racer['racer_firstname'] : '';
 			$racer['_sortname'] = strtolower($surname . ' ' . $firstname);
@@ -344,9 +286,7 @@ function racereports_start_build($report, $clock, $race, $category, $useColors)
 		}
 	}
 
-	// Sort starters ALPHABETICALLY BY NAME (ascending) - NOT by time. Mass starts
-	// share the same start time-of-day, so a time sort would be meaningless; this is
-	// the INTENTIONAL difference from point/finish (see file header / NOTES.md).
+	// Starters BY NAME, not by time (see the file header).
 	usort($starters, function ($a, $b) { return strcmp($a['_sortname'], $b['_sortname']); });
 
 	$headers = array(
@@ -386,9 +326,7 @@ function racereports_start_build($report, $clock, $race, $category, $useColors)
 		);
 	}
 
-	// Not-started group: rendered AFTER the starters, NON-ranked (empty rank cell),
-	// with an empty time cell, and NEVER coloured (plain <tr>) - same rule as the
-	// finish ended block.
+	// Not-started group: no rank, no time, never coloured.
 	foreach ($notStarted as $racer)
 	{
 		$rows[] = array(
@@ -406,19 +344,14 @@ function racereports_start_build($report, $clock, $race, $category, $useColors)
 		'headers'  => $headers,
 		'rows'     => $rows,
 		'meta'     => $meta,
-		// Force the bib (1) and the start-time (5) to TEXT on export so a spreadsheet
-		// keeps "0042" and the time string verbatim instead of reinterpreting them.
+		// Bib (1) and start time (5) as TEXT in the XLS.
 		'textCols' => array(1, 5),
 	);
 }
 
 /**
- * Render one START table from the neutral structure built by
- * racereports_start_build(). The cells are the SAME ones the export streams; this
- * function only adds the HTML decoration (per-category starter background). The
- * visible table cells are byte-for-byte the pre-refactor output: starter rows are
- * ranked + optionally coloured, not-started rows keep the empty rank/time cells and
- * are never coloured, and the start table has no on-screen header row.
+ * Render one START table from racereports_start_build(). The cells are the SAME
+ * ones the export streams; this only adds the row colour. No on-screen header row.
  *
  * @param array $built     the racereports_start_build() structure
  * @param int   $useColors 1 = colour starter rows per category, 0 = plain
@@ -470,9 +403,8 @@ function racereports_start_render_table($built, $useColors)
 }
 
 /**
- * Per-category row background colour (race_category.race_category_color), looked up
- * the same way the legacy pages did. Static cache for the request. Identical to the
- * helper in report_finish.php / report_online.php / report_point.php / report_stu.php.
+ * Per-category row background colour (race_category.race_category_color), static
+ * cache for the request. Each report page defines its own copy.
  */
 function race_report_color($clock, $racer)
 {

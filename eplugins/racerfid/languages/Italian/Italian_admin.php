@@ -2,22 +2,13 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2012 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Language file
- */
-
-/**
- *     RFID import plugin (folder/id: racerfid) - Italian admin language file
+ * racerfid plugin - languages/Italian/Italian_admin.php
  *
- *     Imports RFID chip-reader records from an external database into
- *     timetracker's race_time table.
- *
- *     @package    e107_plugins
- *     @subpackage    racerfid
- */
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -64,7 +55,7 @@ return array(
     'LAN_RACETRACKING_INVALID_IDENTIFIER' => "Identificatore SQL non valido (sono ammessi solo lettere, numeri e trattino basso):",
     'LAN_RACETRACKING_DEPS_MISSING' => "I plugin timetracker e race devono essere installati affinché l'importazione possa essere eseguita.",
 
-    /* ---- Batch worker / cron (citacka.php, e_cron.php) ----------------------- */
+    /* ---- Manual import page / cron (citacka.php, e_cron.php) ---------------- */
     'LAN_RACETRACKING_IMPORT_DONE' => "Importazione completata",
     'LAN_RACETRACKING_NO_INTERVAL' => "L'intervallo di aggiornamento non è impostato",
     'LAN_RACETRACKING_NOT_ACTIVATED' => "L'importazione non è attivata",

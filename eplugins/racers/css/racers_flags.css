@@ -1,0 +1,17 @@
+/*
+ * racers plugin - country flag next to the racer name (racers_name::build()).
+ *
+ * Bundled "Twemoji Country Flags" font (fonts/TwemojiCountryFlags.woff2, from the
+ * country-flag-emoji-polyfill npm package - see fonts/LICENSE-TwemojiCountryFlags.md)
+ * so every browser shows the same flag, including Chrome/Edge on Windows, which do
+ * not render flag emoji natively. The font-family is applied ONLY to .racers-flag.
+ */
+@font-face {
+  font-family: "Twemoji Country Flags";
+  unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E0063, U+E0065, U+E0067,
+    U+E006C, U+E006E, U+E0073-E0074, U+E0077, U+E007F;
+  src: url('../fonts/TwemojiCountryFlags.woff2') format('woff2');
+  font-display: swap;
+}
+
+.racers-flag { font-family: "Twemoji Country Flags", sans-serif; line-height: 1; vertical-align: middle; }

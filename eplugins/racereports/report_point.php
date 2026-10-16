@@ -2,28 +2,18 @@
 /*
  * e107 website system
  *
- * racereports plugin - POINT report (clean equivalent of timetracker_point.php).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Per-checkpoint standings: all racers of a race timed to ONE chosen checkpoint,
- * sorted by elapsed start->that checkpoint ASCENDING. p=komplet renders every
- * checkpoint of the race except start/finish.
+ * racereports plugin - report_point.php
  *
- * All time math comes from the racetiming engine (race_clock + race_format);
- * this page does ONLY presentation: fetch racers, read the checkpoint, bucket
- * into THREE visibility groups and render. Output is escaped.
- *
- *   1. PASSED  - a usable crossing at the point -> ranked (elapsed ASC), coloured,
- *                shown to EVERYONE.
- *   2. ENDED   - DNF/DSQ/DNS (a real ended marker via the engine) -> shown to
- *                EVERYONE after the ranked block, NOT coloured, no rank.
- *   3. WAITING - no crossing here AND not ended ("still waited for") -> shown ONLY
- *                to ADMIN; non-admin visitors do not see waiting racers at all.
- *
- * Public columns: rank-at-point, bib (string), name, time. For ADMIN ONLY an extra
- * trailing column carries, on every row that HAS a stored crossing (race_time_id),
- * an edit icon that opens the racetiming race_time admin on that exact row in a NEW
- * window. Rows with no stored crossing (crossingId null) get no icon. The whole
- * admin column is gated on ADMIN. See racereports/NOTES.md.
+*/
+
+/*
+ * Checkpoint times (docs/plugins/racereports.md, "Checkpoint times"). All time math
+ * comes from the racetiming engine; this page only groups and renders. The admin edit
+ * link carries only the (int) race_time_id.
  */
 
 if (!defined('e107_INIT'))
@@ -48,8 +38,7 @@ if (!defined('LAN_RACEREPORTS_NO_POINT')) define('LAN_RACEREPORTS_NO_POINT', 'No
 // edit-icon title can never fatal on an undefined constant under PHP 8.
 if (!defined('LAN_EDIT')) define('LAN_EDIT', 'Edit');
 
-// Engine (racetiming) + shared report helper. Loaded by path so no <dependency>
-// on racetiming is required (the skeleton deps are left unchanged).
+// Engine (racetiming) + shared report helper.
 require_once(e_PLUGIN . 'racetiming/includes/race_clock.php');
 require_once(e_PLUGIN . 'racetiming/includes/race_format.php');
 require_once(e_PLUGIN . 'racereports/includes/race_report.php');
@@ -72,9 +61,7 @@ if ($raceSef === '')
 
 if ($raceSef === 'komplet')
 {
-	// The POINT report is scoped to a single race; all-races is the online view's
-	// job. Keep the live read simple and explicit rather than reproducing the
-	// legacy broken r=komplet branch (see NOTES.md).
+	// Not supported: the checkpoint report is per track.
 	echo "<div class='container'><p>" . LAN_RACEREPORTS_NO_RACE . "</p></div>";
 	require_once(FOOTERF);
 	exit;
@@ -121,10 +108,8 @@ else
 }
 
 /**
- * Render one per-checkpoint table in THREE visibility groups:
- *   PASSED (ranked, elapsed ASC, coloured, everyone) -> ENDED (everyone, no rank,
- *   not coloured) -> WAITING (ADMIN only). For ADMIN an extra trailing column
- *   carries an edit icon on every row that has a stored crossing (race_time_id).
+ * Render one per-checkpoint table: PASSED (ranked) -> ENDED (DNF/DSQ) -> WAITING
+ * (ADMIN only), plus the admin status / edit cells.
  *
  * @param race_report $report
  * @param race_clock  $clock
@@ -136,14 +121,13 @@ function render_point_list($report, $clock, $raceId, $point)
 	$tp      = e107::getParser();
 	$pointId = (string) $point['race_point_code'];
 
-	// Central RESULT-time precision (DISPLAY-ONLY, truncates). Default 2 enforced
-	// here at the consumer; passed explicitly to diffOnPoint (helper default left 1).
+	// result_decimals (display-only, truncates), passed explicitly to diffOnPoint.
 	$resDec = (int) e107::getPlugConfig('racereports')->get('result_decimals', 2);
 
 	$racers = $report->fetchRacers($raceId);
 
 	$passed  = array(); // usable crossing here -> ranked
-	$ended   = array(); // DNF/DSQ/DNS marker -> shown to everyone, no rank
+	$ended   = array(); // DNF/DSQ marker -> shown to everyone, no rank
 	$waiting = array(); // no crossing here AND not ended -> ADMIN only
 
 	foreach ($racers as $number => $racer)
@@ -153,8 +137,8 @@ function render_point_list($report, $clock, $raceId, $point)
 		$racer['race_time_id'] = $clock->crossingId((string) $number, $pointId);
 
 		$diff = $report->diffOnPoint($clock, $number, $pointId, $resDec);
-		// Legacy point page time cell = text . " " . ended (trailing space when no
-		// flag) - reproduced for parity.
+		// Time cell = text . " " . ended marker (the trailing space when there is
+		// no marker is kept from the old timetracker output).
 		$racer['difftext'] = $diff['text'] . " " . $diff['ended'];
 
 		if ($report->isRanked($diff))
@@ -166,9 +150,7 @@ function render_point_list($report, $clock, $raceId, $point)
 		elseif ($clock->endedAt((string) $number, $pointId) !== ''
 			|| $clock->isDnf((string) $number) || $clock->isDsq((string) $number))
 		{
-			// ENDED: a real DNF/DSQ/DNS marker (at this point or racer-wide). The
-			// engine separates this from the bare no-crossing case (diffOnPoint);
-			// no re-query.
+			// ENDED: a DNF/DSQ marker (at this point or racer-wide).
 			$racer['difftime'] = '';
 			$ended[] = $racer;
 		}
@@ -204,9 +186,7 @@ function render_point_list($report, $clock, $raceId, $point)
 		echo "</tr>";
 	}
 
-	// ENDED (DNF/DSQ/DNS) rendered AFTER the ranked block, non-ranked, shown to
-	// EVERYONE. NOT coloured - only ranked racers get the per-category background,
-	// matching the online report (report_online.php).
+	// ENDED (DNF/DSQ): after the ranked block, no rank, not coloured.
 	foreach ($ended as $racer)
 	{
 		echo "<tr>";
@@ -219,8 +199,7 @@ function render_point_list($report, $clock, $raceId, $point)
 		echo "</tr>";
 	}
 
-	// WAITING (no crossing here, not ended - "still waited for") rendered ONLY for
-	// ADMIN. Non-admin visitors do not see these rows at all.
+	// WAITING: ADMIN only.
 	if (ADMIN)
 	{
 		foreach ($waiting as $racer)
@@ -241,18 +220,10 @@ function render_point_list($report, $clock, $raceId, $point)
 }
 
 /**
- * ADMIN-only status cell sitting BETWEEN the name and time columns: a plain glyph
- * telling, at a glance, whether this racer has a stored crossing at THIS point.
- *
- *   ✅  the racer HAS a crossing here (race_time_id is non-null)
- *   ❌  the racer has NO crossing here (race_time_id is null)
- *
- * This restores the admin-only ✅/❌ column the legacy timetracker_point.php showed.
- * It is driven PURELY off race_time_id (= crossingId(number, point), already on the
- * row from render_point_list) - no extra query. The emoji are literal UTF-8 in this
- * file; they are deliberately NOT routed through toGlyph/FontAwesome because the
- * frontend theme may render FA differently or not at all. Non-admins get NO cell, so
- * for them the column does not exist - exactly like legacy.
+ * ADMIN-only status cell between the name and time columns: ✅ when a crossing is
+ * stored at this point (race_time_id non-null), ❌ otherwise. No extra query. The
+ * emoji are literal UTF-8, NOT toGlyph/FontAwesome, because the front theme may
+ * not render FA. Non-admins get no cell at all.
  *
  * @param array $racer  carries 'race_time_id' (?int) from crossingId()
  */
@@ -269,13 +240,9 @@ function point_admin_status_cell($racer)
 }
 
 /**
- * ADMIN-only trailing cell: an edit icon linking the racetiming race_time admin
- * (NEW window) on this racer's crossing row, when one is stored. Rows with no
- * stored crossing (crossingId null) get an empty cell - nothing to edit. The whole
- * column is gated on ADMIN, so non-admins never see it.
- *
- * The id is the only value placed in the URL and is (int)-cast there; the bib /
- * name / time cells stay escaped in the public columns.
+ * ADMIN-only trailing cell: an edit icon to the racetiming race_time admin (new
+ * window) for this racer's crossing, or an empty cell when none is stored. The id
+ * is the only value placed in the URL and is (int)-cast there.
  *
  * @param e_parse $tp
  * @param array   $racer  carries 'race_time_id' (?int) from crossingId()
@@ -305,9 +272,8 @@ function point_admin_edit_cell($tp, $racer)
 }
 
 /**
- * Per-category row background colour, looked up the same way the legacy pages
- * did (timetracker::$cats[category_id]['race_category_color']). Read once here to
- * keep the engine free of presentation concerns.
+ * Per-category row background colour (race_category.race_category_color), static
+ * cache for the request. Each report page defines its own copy.
  */
 function race_report_color($clock, $racer)
 {

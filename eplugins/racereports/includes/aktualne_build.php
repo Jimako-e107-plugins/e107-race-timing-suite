@@ -2,28 +2,28 @@
 /*
  * e107 website system
  *
- * racereports plugin - AKTUALNE builder (the FULL per-race results matrix).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * PURE, side-effect-free file: it only DEFINES racereports_aktualne_build() and its
- * helpers (guarded by e107_INIT). It echoes nothing and renders no page chrome, so
- * it can be required by:
- *   - report_aktualne.php  (the on-screen page: echoes the returned ['html']);
- *   - parity/parity_aktualne.php (the parity harness: compares the returned cells
- *     against the legacy timetrackerArchive output);
- *   - Phase 2 (archive writing: persists the SAME ['html'] + ['data']).
+ * racereports plugin - includes/aktualne_build.php
  *
- * The caller MUST have loaded the racetiming engine (race_clock + race_format)
- * before calling racereports_aktualne_build() - the helpers reference those classes
- * at call time. This file requires nothing itself, so it never double-loads them.
+*/
+
+/*
+ * Full results (aktualne) matrix builder; column and row rules in
+ * docs/plugins/racereports.md, "Full results (aktuálne)". It only DEFINES
+ * functions and RETURNS ['html', 'data'] without echoing, so it is required by:
+ *   - report_aktualne.php (echoes the html);
+ *   - racetrack/includes/race_archive_generate.php (stores the html and the
+ *     serialized data as the archive snapshot).
+ * The caller must load the racetiming engine (race_clock + race_format) first; this
+ * file only requires racers_name.php. The table id #report_aktualne is what
+ * assets/datatables/init.js binds to (racetrack's archive page loads the same
+ * DataTables library with its own init).
  *
- * Faithful port of timetracker/classes/timetrackerArchive_class.php onto the engine.
- * See report_aktualne.php's header and racereports/NOTES.md for the contract (the
- * two distinct legacy truncations HH:MM / HH:MM:SS, the DNF furthest-point order,
- * the blank-after-DNF cells, catorder blank for DNF/DSQ, the 'racers' name prefs).
- *
- * SECURITY: race id is (int)-cast; the bib/start number stays a STRING; every SQL
- * value goes through $tp->toDB() (here or in the engine); output is escaped via
- * toHTML/toAttribute. No extract(), no raw-$_GET-into-SQL, no writes.
+ * Race id is (int)-cast; the bib stays a STRING; SQL values go through toDB() (here or
+ * in the engine); output is escaped. No writes.
  */
 
 if (!defined('e107_INIT'))
@@ -31,19 +31,16 @@ if (!defined('e107_INIT'))
 	exit;
 }
 
+// Shared racer display-name builder (aktualne_racer_name delegates to it).
+require_once(e_PLUGIN . 'racers/includes/racers_name.php');
+
 /**
- * Build the FULL per-race results matrix as a NEUTRAL structure that BOTH the page
- * (echoes ['html']) and the future Phase-2 archive (persists ['html'] + ['data'])
- * render from. RETURNS - does not echo.
+ * Build the full per-race results matrix. RETURNS ['html', 'data'] - does not echo.
  *
- * Faithful port of timetrackerArchive_class.php onto the racetiming engine:
- *   - racers: racer_race_id = race_id AND racer_active, ORDER BY racer_number;
- *   - three sections NORMAL / DNF / DSQ (engine isDnf/isDsq), each ordered by the
- *     legacy ordertime and rendered in racer_number order (DataTables then sorts the
- *     visible table by the Por. column, col 0 asc);
- *   - per-checkpoint cell = elapsed start->checkpoint truncated to HH:MM; "Cas" =
- *     finish elapsed truncated to HH:MM:SS;
- *   - DNF furthest-point ordering + blank-after-DNF cells; catorder blank for DNF/DSQ.
+ * Port of the old timetracker archive onto the racetiming engine: three sections
+ * NORMAL / DNF / DSQ (engine isDnf/isDsq), each ranked by its ordertime but
+ * emitted in racer_number order - DataTables then sorts the visible table by the
+ * Por. column (col 0 asc).
  *
  * @param int         $raceId race id (caller int-casts; re-cast here defensively)
  * @param race_clock  $clock  built engine
@@ -52,15 +49,10 @@ if (!defined('e107_INIT'))
  */
 function racereports_aktualne_build($raceId, $clock, $report)
 {
-	// SELF-CONTAINED LAN: this include references LAN_RACEREPORTS_AKT_* (the
-	// column headers + empty-row text) but does not own a page, so it must load
-	// its OWN front LAN rather than rely on the caller. report_aktualne.php (the
-	// front page) loads it, but the ARCHIVE generate path (racetrack calling
-	// racereports_aktualne_build()) does not - without this load those constants
-	// are undefined and PHP 8 fatals. The LAN registry is load-once, so a second
-	// call from report_aktualne.php is a harmless no-op. Mirrors how
-	// raceevent/includes/event_overview.php loads its own LAN. The defensive
-	// define() fallbacks below are belt-and-suspenders for an odd LAN path.
+	// Load our own front LAN: the racetrack archive path does not, and the
+	// LAN_RACEREPORTS_AKT_* constants would be undefined (fatal on PHP 8). Load-once,
+	// so the second call from report_aktualne.php is a no-op. The define()
+	// fallbacks cover an odd LAN path.
 	e107::lan('racereports', '', true); // front strings (array form)
 
 	if (!defined('LAN_RACEREPORTS_AKT_EMPTY'))       define('LAN_RACEREPORTS_AKT_EMPTY', 'No racers.');
@@ -77,10 +69,8 @@ function racereports_aktualne_build($raceId, $clock, $report)
 	$race     = $report->fetchRaceById($raceId);
 	$raceName = (is_array($race) && isset($race['race_name'])) ? (string) $race['race_name'] : '';
 
-	// Name-display prefs now live in the 'racers' plugin (the legacy archive read
-	// them from 'timetracker'; that pref store has moved with the racer model -
-	// see NOTES.md). race_report::getRacerName reads the same store. We need the
-	// archive-specific name format (bib IS part of the name), so we read directly.
+	// 'racers' name-display prefs (passed to aktualne_racer_name, which no longer
+	// uses them - racers_name reads the same store itself).
 	$prefs = e107::pref('racers');
 	if (!is_array($prefs))
 	{
@@ -94,10 +84,8 @@ function racereports_aktualne_build($raceId, $clock, $report)
 		$cats = array();
 	}
 
-	// Checkpoints of THIS race, ORDER BY race_point_order ASC, keyed by code. The
-	// legacy archive walks them ascending (set_table_columns / set_point_times);
-	// race_report::fetchCheckpoints() is DESC (online furthest-first), so we read
-	// ascending here directly.
+	// Checkpoints of THIS race in course order (ASC), keyed by code;
+	// race_report::fetchCheckpoints() is DESC, so read them here directly.
 	$checkpoints = aktualne_fetch_checkpoints($raceId); // [code => race_point row], ASC
 
 	// Column checkpoint codes: every checkpoint EXCEPT 'start' (the 'finish'
@@ -112,16 +100,14 @@ function racereports_aktualne_build($raceId, $clock, $report)
 		$cpCodes[] = $code;
 	}
 
-	// count(self::$checkpoints) in the legacy DNF ordertime INCLUDES start.
+	// The DNF ordertime formula counts checkpoints INCLUDING start.
 	$checkpointCount = count($checkpoints);
 
 	// Racers of this race (racer_active), keyed by bib STRING, ORDER BY racer_number.
 	$racers = aktualne_fetch_racers($raceId);
 
-	// Partition NORMAL / DNF / DSQ (engine membership). Exclusive: a racer flagged
-	// both DNF and DSQ goes to DNF only (legacy would list it in BOTH the DNF and
-	// DSQ blocks - a latent double-print; we list once, flagged as an intentional
-	// fix in NOTES.md / the parity harness).
+	// Partition NORMAL / DNF / DSQ. Exclusive: a racer flagged both DNF and DSQ is
+	// listed once, as DNF (the old timetracker archive printed it in both blocks).
 	$normal = array();
 	$dnf    = array();
 	$dsq    = array();
@@ -142,8 +128,7 @@ function racereports_aktualne_build($raceId, $clock, $report)
 		}
 	}
 
-	// Process each section. The Por. counter is CUMULATIVE across sections (legacy
-	// passes count(normal), then count(normal)+count(dnf) as the order base).
+	// The Por. counter is CUMULATIVE across sections (order base = rows so far).
 	$order  = 0;
 	$rows0  = aktualne_process_section($clock, $normal, 0, $checkpoints, $cpCodes, $checkpointCount, $cats, $prefs, $order);
 	$order += count($rows0);
@@ -161,15 +146,14 @@ function racereports_aktualne_build($raceId, $clock, $report)
 	$ths .= '<th>' . $tp->toHTML(LAN_RACEREPORTS_AKT_COL_TIME, false) . '</th>';
 	foreach ($cpCodes as $code)
 	{
-		// The checkpoint code IS the legacy header (e.g. "K2", "finish").
+		// The checkpoint code is the column header (e.g. "K2", "finish").
 		$ths .= '<th>' . $tp->toHTML($code, false, 'TITLE') . '</th>';
 	}
 	$ths .= '<th>' . $tp->toHTML(LAN_RACEREPORTS_AKT_COL_CATRANK, false) . '</th>';
 
 	$colspan = 4 + count($cpCodes) + 1;
 
-	// Stable hook (#report_aktualne) + race-report class for the central DataTables
-	// init (assets/datatables/init.js targets #report_aktualne, searching:true).
+	// Stable hook #report_aktualne for assets/datatables/init.js.
 	$html  = "<div class='table-responsive'>";
 	$html .= "<table id='report_aktualne' class='table table-striped table-bordered table-hover race-report dt-responsive nowrap'"
 		. " data-order='[[0, \"asc\"]]' width='100%'>";
@@ -192,7 +176,7 @@ function racereports_aktualne_build($raceId, $clock, $report)
 
 	$html .= '</tbody></table></div>';
 
-	// ---- DATA (structured; Phase 2 persists this) --------------------------
+	// ---- DATA (structured; stored with the archive snapshot) ---------------
 	$dataSections = array();
 	foreach ($sections as $type => $sectionRows)
 	{
@@ -231,8 +215,6 @@ function racereports_aktualne_build($raceId, $clock, $report)
 
 /**
  * Checkpoints of a race, ORDER BY race_point_order ASC, keyed by race_point_code.
- * The legacy archive (init) walks them ascending; race_report::fetchCheckpoints()
- * is DESC, so this reads ascending directly. Race id is an int.
  *
  * @param int $raceId
  * @return array [code => race_point row]
@@ -262,7 +244,7 @@ function aktualne_fetch_checkpoints($raceId)
 
 /**
  * Racers of a race that are racer_active, keyed by bib STRING, ORDER BY
- * racer_number (legacy archive init filter, kept verbatim). Race id is an int.
+ * racer_number.
  *
  * @param int $raceId
  * @return array [number => racer row]
@@ -291,19 +273,15 @@ function aktualne_fetch_racers($raceId)
 }
 
 /**
- * Process ONE section (0 = NORMAL, 1 = DNF, 2 = DSQ) into datarows keyed by bib.
- * Reproduces the legacy set_racer_data + get_finish_time + set_point_times +
- * set_correct_orders pipeline for that section, on the engine. Returns the rows in
- * the ORIGINAL bib order (legacy renders datarows in racer_number order; the Por./
- * catorder values carry the computed rank, and DataTables sorts the visible table
- * by Por. col 0 asc).
+ * Process ONE section (0 = NORMAL, 1 = DNF, 2 = DSQ) into rows keyed by bib, in the
+ * ORIGINAL bib order; the Por. / catorder values carry the computed rank.
  *
  * @param race_clock $clock
  * @param array      $racers          [number => racer] for this section
  * @param int        $sectionType     0|1|2
  * @param array      $checkpoints     [code => race_point row] ASC (incl. start)
  * @param array      $cpCodes         column checkpoint codes (excl. start) ASC
- * @param int        $checkpointCount count incl. start (legacy DNF ordertime)
+ * @param int        $checkpointCount count incl. start (DNF ordertime)
  * @param array      $cats            [id => race_category row]
  * @param array      $prefs           'racers' name-display prefs
  * @param int        $orderBase       cumulative Por. base (count of prior sections)
@@ -313,7 +291,7 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 {
 	$rows = array();
 
-	// 1) set_racer_data + get_finish_time: base cells, "Cas", and the sort key.
+	// 1) Base cells, "Cas" (Time) and the sort key (ordertime).
 	foreach ($racers as $number => $racer)
 	{
 		$number = (string) $number;
@@ -339,7 +317,9 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 			$row['kat']   = isset($cats[$catId]['race_category_name']) ? $cats[$catId]['race_category_name'] : '';
 		}
 
-		if ($sectionType === 1) // DNF: ordertime = furthest-point key, "Cas" = DNF
+		// DNF: ordertime = (checkpoints - DNF point order) * 1e6 (+ the time at that
+		// point, step 2), so the furthest DNF ranks first; "Cas" = DNF.
+		if ($sectionType === 1)
 		{
 			$dnfPoint   = $clock->endedPoint($number, 'DNF');
 			$pointOrder = ($dnfPoint !== null && isset($checkpoints[$dnfPoint]))
@@ -357,10 +337,9 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 			$finish = aktualne_archive_diff($clock, $number, 'finish');
 			$ftime  = $finish['time'];
 
-			// Legacy keeps the finish time UNLESS (time < 0 OR text == "") - here
-			// expressed without the PHP-8 loose-comparison quirk: keep only a
-			// positive-or-zero numeric time with non-empty text (identical result set:
-			// a no-finish cell has text '-'/'---' with a non-numeric time -> skipped).
+			// Keep only a numeric time >= 0 with non-empty text (a no-finish cell has
+			// text '-'/'---' and a non-numeric time). Written without PHP 8 loose
+			// comparisons.
 			$skip = ($finish['text'] === '') || !is_numeric($ftime) || ($ftime < 0);
 			if (!$skip)
 			{
@@ -373,8 +352,8 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 		$rows[$number] = $row;
 	}
 
-	// 2) set_point_times: per-checkpoint HH:MM cells + DNF blank-after-marker, and
-	//    the DNF ordertime accumulation (legacy ordertime += difftime).
+	// 2) Per-checkpoint HH:MM cells, blank after the DNF point, and the DNF
+	//    ordertime += time at the DNF point.
 	foreach ($rows as $number => &$row)
 	{
 		$ended    = false;
@@ -399,7 +378,7 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 				}
 				elseif ($ended)
 				{
-					// After the DNF marker point: BLANK (legacy $ended flag).
+					// After the DNF marker point: BLANK.
 					$cell     = '';
 					$difftime = 0;
 				}
@@ -429,8 +408,8 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 	}
 	unset($row);
 
-	// 3) set_correct_orders: rank by ordertime ASC (stable), assign Por. (cumulative)
-	//    and catorder (per-category, BLANK for DNF/DSQ).
+	// 3) Rank by ordertime ASC (stable), assign Por. (cumulative) and catorder
+	//    (per-category, BLANK for DNF/DSQ).
 	$sorted = $rows; // copy; stable uasort keeps bib order for equal ordertime
 	uasort($sorted, function ($a, $b)
 	{
@@ -464,18 +443,14 @@ function aktualne_process_section($clock, $racers, $sectionType, $checkpoints, $
 }
 
 /**
- * Reproduce the legacy get_racer_time_on_point() "archive" return shape
- * (timetracker_class.php:248-309, $type=="archive") built entirely from the engine.
+ * Time cell of a racer at a point, archive variant (cf. race_report::diffOnPoint).
  * Returns ['text'=>..., 'time'=>..., 'ended'=>...]:
  *   - no usable start crossing -> text "-", time "";
- *   - usable crossing at the point -> the elapsed cut to tenths (= substr(
- *     secondsToTime, 0, 10)); when an ended marker is stamped here, the time is
- *     blanked ('') and, at the 'finish' point ONLY, the text is replaced by the
- *     ended marker (the legacy archive-type rule);
+ *   - usable crossing at the point -> the elapsed cut to tenths; when an ended
+ *     marker is stamped here, the time is blanked ('') and, at the 'finish' point
+ *     ONLY, the text is replaced by the marker;
  *   - no crossing but an ended marker stamped here -> text = marker, time "-1";
- *   - ended elsewhere (racer-wide DNF/DSQ) -> "DNF" / "DSQ" (the legacy 'DSG' typo
- *     is rendered 'DSQ' - an intentional fix, flagged by the parity harness),
- *     time "-1";
+ *   - ended elsewhere (racer-wide DNF/DSQ) -> "DNF" / "DSQ", time "-1";
  *   - nothing -> text "---", time "".
  *
  * @param race_clock $clock
@@ -500,17 +475,15 @@ function aktualne_archive_diff($clock, $number, $point)
 	if (is_numeric($actual) && $actual > 0)
 	{
 		$elapsed = $clock->elapsedRaw($number, $point); // round($actual-$start,3)
-		// legacy: substr(secondsToTime($elapsed), 0, 10) === formatElapsed($elapsed, 1).
-		// HARDCODED 1 on purpose: Aktualne is the overview matrix (mid-times / finish
-		// cells of the live grid), NOT a result list, so it is deliberately NOT governed
-		// by the central result_decimals pref - it keeps the legacy tenths render.
+		// HARDCODED 1 decimal on purpose: this matrix is not governed by the
+		// result_decimals pref (the cells are cut to HH:MM / HH:MM:SS anyway).
 		$text = race_format::formatElapsed($elapsed, 1);
 		$time = $elapsed;
 
 		if ($ended !== '')
 		{
-			// archive type: ended racer's time is blanked; at finish the text
-			// becomes the ended marker, elsewhere the time text stays.
+			// Ended here: time blanked; at finish the text becomes the marker,
+			// elsewhere the time text stays.
 			$time = '';
 			if ($point === 'finish')
 			{
@@ -534,7 +507,6 @@ function aktualne_archive_diff($clock, $number, $point)
 	}
 	if ($clock->isDsq($number))
 	{
-		// Legacy emitted the 'DSG' typo here; clean output is 'DSQ' (intentional fix).
 		return array('text' => 'DSQ', 'time' => '-1', 'ended' => '');
 	}
 
@@ -542,49 +514,26 @@ function aktualne_archive_diff($clock, $number, $point)
 }
 
 /**
- * Archive-specific display name: "Surname Firstname  (number) [local] [(team)]".
- * Reproduces the legacy timetrackerArchive::getRacerName composition where the BIB
- * NUMBER is part of the name. The display_local/text_local/display_team prefs now
- * live in the 'racers' plugin store (passed in). Surname/firstname/number/team are
- * escaped via toHTML (the legacy left surname/firstname raw - a stored-XSS surface;
- * for plain-ASCII names toHTML is a no-op so display parity holds - see NOTES.md).
+ * Matrix display name: "Surname Firstname  (number) [local] [(team)]" - the bib
+ * is part of the name. Delegates to racers_name::build()
+ * (racers/includes/racers_name.php), the single place the name is composed:
+ * name_hash NOT applied, team appended when the display_team pref is on. HTML-safe.
  *
  * @param array $racer racer row
- * @param array $prefs 'racers' prefs
+ * @param array $prefs 'racers' prefs - UNUSED, kept so the caller's signature does
+ *                     not change (racers_name reads the same store itself)
  * @return string HTML-safe display name
  */
 function aktualne_racer_name($racer, $prefs)
 {
-	$tp = e107::getParser();
-
-	$surname   = isset($racer['racer_surname'])   ? (string) $racer['racer_surname']   : '';
-	$firstname = isset($racer['racer_firstname']) ? (string) $racer['racer_firstname'] : '';
-	$number    = isset($racer['racer_number'])    ? (string) $racer['racer_number']    : '';
-
-	$name = $tp->toHTML($surname, false, 'TITLE') . ' ' . $tp->toHTML($firstname, false, 'TITLE')
-		. "  (" . $tp->toHTML($number, false, 'TITLE') . ") ";
-
-	if (!empty($prefs['display_local']) && !empty($prefs['text_local']) && !empty($racer['racer_local']))
-	{
-		$name .= $tp->toHTML($prefs['text_local'], 'TITLE', true);
-	}
-
-	if (!empty($prefs['display_team']) && !empty($racer['racer_team']))
-	{
-		$team = $tp->toHTML($racer['racer_team'], 'TITLE', true);
-		$name .= "&nbsp;<small><i>(" . $team . ")</i></small>";
-	}
-
-	return $name;
+	return racers_name::build((array) $racer, array('bib' => true, 'hash' => false, 'team' => true));
 }
 
 /**
- * Render ONE matrix row. Por. (col 0) is the rank DataTables sorts on. The "Cas"
- * column and every per-checkpoint cell carry a numeric data-order (raw elapsed
- * seconds) so the HH:MM / HH:MM:SS text never sorts lexicographically (same trick
- * as report_stu); blank/flag cells get a large sentinel so they sort last. The
- * name is already HTML-safe (built by aktualne_racer_name); all other text is
- * escaped here.
+ * Render ONE matrix row. The Time column and every checkpoint cell carry a numeric
+ * data-order (raw elapsed seconds) so DataTables never sorts the HH:MM text
+ * lexicographically; blank/flag cells get a large sentinel so they sort last. The
+ * name is already HTML-safe; all other text is escaped here.
  *
  * @param array  $row
  * @param array  $cpCodes column checkpoint codes (excl. start)

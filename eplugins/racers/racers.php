@@ -1,9 +1,21 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - racers.php
+ *
+*/
 
+/*
+ * Racer list (/racers/list/, e_url 'index'): docs/plugins/racers.md, "Racer list page".
+ */
 
-// SEF entry point for /racers/list/ (e_url 'index' route -> racers.php). Bootstrap
-// e107 unconditionally so direct file access works too; require_once is a no-op when
-// e107 is already loaded via the SEF route, so /racers/list/ resolution is unchanged.
+// Unconditional bootstrap: works via the SEF route and on direct file access
+// (require_once is a no-op when e107 is already loaded).
 require_once(__DIR__ . '/../../class2.php');
 
 if (!defined('ADMIN') || !ADMIN)
@@ -15,9 +27,8 @@ if (!defined('ADMIN') || !ADMIN)
 
 require_once(HEADERF);
 
-e107::lan('racers', true, true);     // admin field labels (array form, EN + SK)
-// _global (LAN_RACERS_GLOBAL_*) is loaded automatically by the core on every
-// page via the lan_global_list pref, so no manual 'global' load is needed here.
+e107::lan('racers', true, true);     // admin field labels
+// _global is loaded by the core on every page (lan_global_list pref).
 
 $sql = e107::getDb();
 $tp  = e107::getParser();   // explicit parser - do not rely on the legacy global $tp
@@ -196,21 +207,17 @@ $fields['racer_category_id']['writeParms']['id'] = "racerCategory";
 
 if (!isset($_GET['edit']))
 {
-    // DataTables (basic search + sort) via the shared LOCAL loader owned by
-    // racereports - no CDN. SearchBuilder is deliberately NOT adopted. Guarded on
-    // isInstalled so the table still renders (just without sort/search) when
-    // racereports is absent.
+    // DataTables (search + sort) via racereports' local loader, no CDN. Without
+    // racereports the table renders without sort/search.
     if (e107::isInstalled('racereports'))
     {
         require_once(e_PLUGIN . 'racereports/includes/race_report.php');
         race_report_load_datatables();
     }
-    // racers-owned init: targets `table.racers` with a SK language block (the shared
-    // init.js targets the racereports report tables, not this one).
+    // racers' own init.js targets table.racers (racereports' init.js does not).
     e107::js('footer', e_PLUGIN_ABS . "racers/init.js");
 
-    //zoznam
-    // Bootstrap 5 table for listing existing racers
+    // Racer list table.
     $racers = $sql->retrieve('racer', '*', true, true);
 
     $tableText = "<div class='table-responsive'><table class='racers table table-condensed'>
@@ -235,10 +242,8 @@ if ($racers && !isset($_GET['edit']))
         foreach ($fields as $key => $field)
         {
 
-            // Render every field verbatim as a STRING so special bib values like
-            // "0000" survive (the old `!= 0` loose compare blanked them - DATA LOSS).
-            // Genuine int checkbox columns keep their "blank when 0" look, handled
-            // per-field so the list display is otherwise unchanged.
+            // Compare as STRING so bibs like "0000" are not blanked; checkbox
+            // columns stay blank when 0.
             $raw = isset($racer[$key]) ? (string) $racer[$key] : '';
             if ($field['type'] == 'checkbox')
             {
@@ -248,9 +253,8 @@ if ($racers && !isset($_GET['edit']))
             {
                 $value = ($raw !== '') ? $tp->toHTML($raw, false, 'defs') : '';
             }
-            // Foreign-key ids resolve to admin-entered names - escape them (they
-            // previously reached the <td> RAW = stored XSS) and guard the lookup so a
-            // deleted race/category id does not PHP-8-warn.
+            // Track / category ids resolve to admin-entered names: escape them, and
+            // guard the lookup so a deleted track/category id does not warn.
             if ($key == 'racer_race_id')
             {
                 $name  = isset($race_array[$racer[$key]]) ? $race_array[$racer[$key]] : '';

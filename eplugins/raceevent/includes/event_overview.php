@@ -2,46 +2,42 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - shared EVENT OVERVIEW include (link directory).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Single source of truth for the "Prehľad preteku" link directory. Both the
- * public front page (raceevent/page_overview.php) and the admin screen
- * (raceevent/admin/admin_overview.php) include this file and render the SAME
- * output, so they stay identical.
+ * raceevent plugin - includes/event_overview.php
  *
- * WHAT IT IS: a cross-suite link directory plus a cheap "is it alive" check.
- * For every report this lists, it resolves the e_url route's redirect TARGET
- * FILE and shows a per-link marker for whether that file exists on disk - so
- * Jimmi can see at a glance which reports are done vs. still missing (e.g.
- * racereports' START report stays red until report_start.php is built). The
- * page never fails on a missing target; a missing file/route is just flagged.
+*/
+
+/*
+ * Shared event-overview include (user view: docs/plugins/raceevent.md, "Event
+ * overview"). Used by page_overview.php and admin/admin_overview.php, so both
+ * render the same output.
  *
- * SECTIONS (entity / dependency order, this exact order):
- *   1. Zoznam tratí             -> e107::url('racetrack','race', ...)      (per race)
- *   2. Zoznam kontrolných bodov -> e107::url('racereports','point', ...)   (per checkpoint)
- *   3. Zoznam kategórií         -> e107::url('racereports','start', ...)   (per category; START report)
- *   4. Štartovacie listiny      -> e107::url('racers','startlist', ...)    (per category + per-race komplet)
- *   5. Výsledkové listiny       -> e107::url('racereports','finish', ...)  (per category + per-race komplet)
+ * Sections and their routes:
+ *   1. Tracks       -> e107::url('racetrack','race', ...)     (per race)
+ *   2. Checkpoints  -> e107::url('racereports','point', ...)  (per checkpoint)
+ *   3. Categories   -> e107::url('racereports','start', ...)  (per category; START report)
+ *   4. Start lists  -> e107::url('racers','startlist', ...)   (per category + per-race komplet)
+ *   5. Results      -> e107::url('racereports','finish', ...) (per category + per-race komplet)
  *
- * Sections 2 / 3 / 5 deliberately MIRROR the racereports e_sitelink.php
- * builders - same query, same start/finish skip, same race_point_sef mapping:
+ * Sections 2 / 3 / 5 MIRROR the racereports e_sitelink.php builders - same query,
+ * same start/finish skip, same race_point_sef mapping:
  *   - section 2 == racereports_sitelink::racereports_points()
  *   - section 5 == racereports_sitelink::racereports_finish()
- *   - section 3 reuses racereports_finish()'s #race ⋈ #race_category source but
- *     points at the 'start' key (start-as-point, the START report).
- * Do NOT invent a third query variant - keep these in lock-step with the
- * sitelink builders. stu and online are intentionally EXCLUDED (one-off /
- * central-reporting, not part of the live event overview).
+ *   - section 3 reuses racereports_finish()'s #race x #race_category source but
+ *     points at the 'start' key (the START report).
+ * Keep these in lock-step with the sitelink builders. stu and online are
+ * intentionally excluded.
  *
- * REPLACES the legacy hand-made timetracker/index.php overview, which pointed
- * at OLD/broken targets (timetracker finish/category/start/point) and carried
- * dead code (unused start/finish/tmp classification, double $url assignments,
- * no escaping). Built fresh from the section spec - its bugs are NOT ported.
+ * The alive-check resolves each e_url route's redirect target file and flags a
+ * missing file or an unregistered route; it never fails the page.
  *
- * READ-ONLY: db class reads + link building only, no writes. Every label is
- * escaped with $tp->toHTML() and every href with $tp->toAttribute().
+ * READ-ONLY: db class reads + link building only. Every label is escaped with
+ * $tp->toHTML() and every href with $tp->toAttribute().
  *
- * Usage (both callers):
+ * Usage:
  *   require_once(e_PLUGIN . 'raceevent/includes/event_overview.php');
  *   $html = raceevent_event_overview();   // returns the HTML, renders nothing
  */
@@ -73,10 +69,9 @@ if (!function_exists('raceevent_event_overview'))
 		$tp  = e107::getParser();
 		$sql = e107::getDb();
 
-		// Resolve the registered e_url routes ONCE. getUrlConfig() is exactly the
-		// source e107::url() itself consults (the scanned e_url_list), so a route
-		// that is not registered (e.g. racereports 'start' until report_start is
-		// wired up) is simply absent here -> flagged red by the alive-check.
+		// Resolve the registered e_url routes ONCE. getUrlConfig() is the source
+		// e107::url() itself consults (the scanned e_url_list), so an unregistered
+		// route is simply absent here -> flagged red by the alive-check.
 		$routes = e107::getUrlConfig();
 
 		// Pre-compute the target-file status for each route used below. Every link
@@ -88,7 +83,7 @@ if (!function_exists('raceevent_event_overview'))
 		$st_finish    = raceevent_overview_route_status($routes, 'racereports', 'finish');
 
 		// Shared data sources - the SAME queries the racereports e_sitelink.php
-		// builders use, read straight via the db class (no timetracker dep).
+		// builders use.
 		$races = $sql->retrieve("SELECT * FROM #race ORDER BY race_name DESC", true);
 
 		$racecats = $sql->retrieve(
@@ -157,8 +152,7 @@ if (!function_exists('raceevent_event_overview'))
 
 		// ---- 3. Zoznam kategórií (per category; START report) ---------------
 		// Reuses racereports_finish()'s #race ⋈ #race_category source but points
-		// at the 'start' key (the START report = start-as-point, report_start,
-		// which may not exist yet - linked anyway; the alive-check flags it).
+		// at the 'start' key (the START report).
 		$rows = array();
 		if (is_array($racecats))
 		{
@@ -284,9 +278,8 @@ if (!function_exists('raceevent_event_overview'))
 
 	/**
 	 * Render the per-link status marker. Green = route registered AND its target
-	 * file is present; red = route not registered OR the target file is missing
-	 * (e.g. a report not built yet). The tooltip carries the resolved target so
-	 * the missing path is visible on hover.
+	 * file is present; red = route not registered OR the target file is missing.
+	 * The tooltip carries the resolved target (or "route not registered").
 	 *
 	 * @param array $status raceevent_overview_route_status() output
 	 * @return string

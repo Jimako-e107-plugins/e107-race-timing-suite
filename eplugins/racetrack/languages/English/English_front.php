@@ -2,21 +2,21 @@
 /*
  * e107 website system
  *
- * race plugin - English front language file (issue #37).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetrack', '', true) by
- * race_points_menu.php. LAN_TC_ALL was used only by the deleted page_start.php
- * (start-list copy) and was removed when that page moved to the canonical
- * timetracker start list; the file is kept (still loaded) for future front terms.
- */
+ * racetrack plugin - languages/English/English_front.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // pretek.php (race landing) - heading above the track's category list.
+    // pretek.php (track page) - heading above the track's category list.
     'LAN_RT_PRETEK_CATEGORIES' => 'List of categories',
 
-    // page_archive.php (frozen archive front view).
+    // page_archive.php (public archive page).
     'LAN_RT_ARCHIVE_TITLE'     => 'Archive',
     'LAN_RT_ARCHIVE_NOT_FOUND' => 'Archive not found.',
 );

@@ -2,27 +2,24 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - navigation (sitelink) check page.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Sitelinks may carry a link_function of the form "plugin::method"; e107
- * dispatches it as {plugin}_sitelink::method() (see e107_handlers/
- * sitelinks_class.php). The plugin is resolved from the part BEFORE "::",
- * never from link_owner. When a feature moves between plugins but the
- * navigation item is not updated, the top-level link still shows yet its
- * dropdown is dead, and nothing warns about it.
+ * raceevent plugin - admin/admin_checklinks.php
  *
- * This page lists every function-driven sitelink, flags the broken ones
- * (missing plugin, missing method, malformed function) and the merely
- * suspicious ones (owner does not match the called plugin), and lets the
- * organizer HIDE a broken link by setting its userclass to "nobody"
- * (e_UC_NOBODY) - a reversible change. It never deletes rows; deletion stays
- * in the core Site Links admin, reachable here via an Edit link.
+*/
+
+/*
+ * Navigation check screen (statuses and actions: docs/plugins/raceevent.md,
+ * "Navigation check").
  *
- * This is a custom controller screen: the default action 'check' is served by
- * the controller method checkPage() (e107's admin action->method convention),
- * with an EMPTY $table/$pid (no DB-table CRUD), exactly like the plugin's
- * prefs / maintenance controllers. Bootstrap mirrors admin_config.php. The
- * existing maintenance (udrzba) code is not touched.
+ * A sitelink's link_function "plugin::method" is dispatched by e107 as
+ * {plugin}_sitelink::method() (e107_handlers/sitelinks_class.php); the plugin is
+ * resolved from the part BEFORE "::", never from link_owner. Hiding sets
+ * link_class to e_UC_NOBODY; rows are never deleted here.
+ *
+ * Custom controller screen: action 'check' -> checkPage(), no DB table.
  */
 
 require_once("../../../class2.php");

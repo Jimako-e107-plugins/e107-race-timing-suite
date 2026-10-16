@@ -2,11 +2,17 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - front templates.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Loaded via e107::getTemplate('raceevent', null, '<key>'), which reads this
- * file and the $RACEEVENT_TEMPLATE array. Templates use {SHORTCODE} placeholders
- * resolved by raceevent/e_shortcode.php (class raceevent_shortcodes).
+ * raceevent plugin - templates/raceevent_template.php
+ *
+*/
+
+/*
+ * Front templates, loaded via e107::getTemplate('raceevent', null, '<key>').
+ * The {RACEEVENT_*} placeholders are resolved by e_shortcode.php.
  */
 
 if (!defined('e107_INIT'))
@@ -14,9 +20,9 @@ if (!defined('e107_INIT'))
 	exit;
 }
 
-// Welcome menu template. Kept deliberately simple/extensible: add more event
-// fields later by adding their shortcode placeholders here (e.g.
-// {RACEEVENT_EVENT_DATE}, {RACEEVENT_EVENT_CITY}, ...).
+// Welcome menu template. Only {RACEEVENT_EVENT_NAME} and
+// {RACEEVENT_EVENT_DESCRIPTION} exist; another event field needs a new sc_*
+// method in e_shortcode.php before it can be placed here.
 $RACEEVENT_TEMPLATE['welcome'] = '
 <div class="raceevent-welcome">
 	<h2 class="raceevent-welcome-title">{RACEEVENT_EVENT_NAME}</h2>

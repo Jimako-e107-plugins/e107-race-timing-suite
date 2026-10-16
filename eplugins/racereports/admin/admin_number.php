@@ -2,22 +2,16 @@
 /*
  * e107 website system
  *
- * racereports plugin - NUMBER (racer progression) report area (mode 'number').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the NUMBER screen only - ONE
- * screen listing EVERY bib (one row per #racer, ordered by racer_number), each a
- * LINK to the single-racer whole-course report (report_number.php?n=<bib>) opened
- * in a NEW TAB. It is a navigation list only - NO export buttons. The name is
- * built with the shared race_report::getRacerName (the single name-composition
- * place, identical to every other report). Exposed the SAME way as the
- * online/point/stu screens.
+ * racereports plugin - admin/admin_number.php
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base + the shared report helper (for getRacerName), then gate the whole
- * screen on the plugin's OWN admin permission with getperms('P'). The dispatcher
- * routes here for mode=number (admin_menu.php $adminMenu 'number/number' url points
- * at this file).
+*/
+
+/*
+ * Racer progression link screen (docs/plugins/racereports.md, "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -37,10 +31,8 @@ if (!getperms('P'))
 
 
 /**
- * NUMBER area: ONE screen listing every bib -> a link to the single-racer
- * whole-course report (report_number.php?n=<bib>), opened in a new tab. Exposed
- * natively the SAME way as the stu screen; the name is composed via the shared
- * race_report::getRacerName and the row by the base's renderNumberLink().
+ * Racer progression area: one link per bib; the name comes from the shared
+ * race_report::getRacerName(), the row from renderNumberLink().
  */
 class racereports_number_ui extends racereports_reports_ui
 {

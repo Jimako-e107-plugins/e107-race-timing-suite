@@ -2,37 +2,19 @@
 /*
  * e107 website system
  *
- * racereports plugin - NUMBER (single-racer progression) report.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * How ONE racer passed the WHOLE course: start -> checkpoints -> finish, ONE row
- * per point in race_point ORDER (start/finish INCLUDED - this report WANTS them,
- * unlike the point/dobeh boards). Input is a single bib (?n=<bib>); the racer's
- * ONE track (racer.racer_race_id) - and therefore its checkpoint set - follows
- * from the bib alone, so there is NO race param, NO komplet, NO track param.
+ * racereports plugin - report_number.php
  *
- * Columns (per point):
- *   Kontrola  - the checkpoint name (race_point_name).
- *   Čas dňa   - arrival WALL-CLOCK = race_clock::timeOfDay(bib, code) formatted by
- *               race_clock::formatTimeOfDay(epoch, $resDec); blank if no crossing.
- *   Medzičas  - elapsed START -> this point = race_clock::elapsedRaw(bib, code)
- *               formatted by race_format::formatElapsed(., $resDec); blank for the
- *               start row and where there is no usable crossing.
- *   Úsek      - segment from the PREVIOUS point the racer was actually SEEN at (the
- *               last point IN ORDER with a crossing, so a missed checkpoint does not
- *               blank every following segment) = race_clock::elapsedBetween(bib,
- *               prevSeen, thisCode) formatted by formatElapsed(., $resDec); blank for
- *               the first point and where elapsedBetween returns null.
- *
- * All time math comes from the racetiming engine (race_clock + race_format); this
- * page does ONLY presentation. NO DataTables, NO export, NO komplet, NO links to
- * other reports. DNF/DSQ: the points the racer reached are rendered as-is; if the
- * engine flags him ended, a status note (DNF/DSQ, with the marker point when known)
- * is shown - no times are fabricated for points he never reached. A missing crossing
- * at a point -> blank cells (—), never zero, never an error.
- *
- * SECURITY: ?n goes through $tp->toDB(); the bib/start number stays a STRING (never
- * (int)-cast - leading zeros are data) and the #racer lookup is parametrised; race
- * id is (int)-cast; every output cell is escaped (toHTML/toAttribute). No extract().
+*/
+
+/*
+ * Racer progression (docs/plugins/racereports.md, "Racer progression").
+ * Query: ?n=<bib>; the racer's track (racer_race_id) and therefore its checkpoints
+ * follow from the bib. All time math comes from the racetiming engine (timeOfDay /
+ * elapsedRaw / elapsedBetween).
  */
 
 if (!defined('e107_INIT'))
@@ -59,8 +41,7 @@ if (!defined('LAN_RACEREPORTS_NUM_COL_SEGMENT'))    define('LAN_RACEREPORTS_NUM_
 if (!defined('LAN_RACEREPORTS_NUM_DNF'))            define('LAN_RACEREPORTS_NUM_DNF', 'DNF');
 if (!defined('LAN_RACEREPORTS_NUM_DSQ'))            define('LAN_RACEREPORTS_NUM_DSQ', 'DSQ');
 
-// Engine (racetiming) + shared report helper. Loaded by path so no <dependency>
-// on racetiming is required (the skeleton deps are left unchanged).
+// Engine (racetiming) + shared report helper.
 require_once(e_PLUGIN . 'racetiming/includes/race_clock.php');
 require_once(e_PLUGIN . 'racetiming/includes/race_format.php');
 require_once(e_PLUGIN . 'racereports/includes/race_report.php');
@@ -81,7 +62,7 @@ if ($bib === '')
 	exit;
 }
 
-// Parametrised #racer lookup by bib (string, quoted - never cast).
+// #racer lookup by bib: toDB()-escaped string, quoted - never cast.
 $racerRow = e107::getDb()->retrieve(
 	"SELECT * FROM " . MPREFIX . "racer WHERE racer_number = '" . $bib . "'"
 );
@@ -93,25 +74,21 @@ if (empty($racerRow))
 	exit;
 }
 
-// HEADING: "<bib> — <name>", the name via the SHARED getRacerName (the one place,
-// so team/local prefs render identically to every other report). getRacerName
-// returns already-safe HTML; the bib is escaped here.
+// Heading "<bib> — <name>": getRacerName() returns safe HTML; the bib is escaped
+// here.
 $heading = "<strong>" . $tp->toHTML($bib, false) . "</strong> — " . $report->getRacerName($racerRow);
 echo "<h2>" . $heading . "</h2>";
 
 $raceId = (int) $racerRow['racer_race_id'];
 
-// Checkpoints in race_point ORDER (start -> finish). fetchCheckpoints() returns
-// race_point_order DESC (finish-first, the online bucketing order); this report
-// walks the course forwards, so re-sort ASCENDING by race_point_order.
+// fetchCheckpoints() is DESC; walk the course forwards, so re-sort ASC.
 $points = $report->fetchCheckpoints($raceId);
 usort($points, function ($a, $b)
 {
 	return (int) $a['race_point_order'] <=> (int) $b['race_point_order'];
 });
 
-// result_decimals: these ARE result times (truncated, display-only). Central pref,
-// default 2 (the same as the other result reports).
+// result_decimals (display-only, truncates).
 $resDec = (int) e107::getPlugConfig('racereports')->get('result_decimals', 2);
 
 $blank = '—';
@@ -126,9 +103,8 @@ echo "<th>" . $tp->toHTML(LAN_RACEREPORTS_NUM_COL_SPLIT, false) . "</th>";
 echo "<th>" . $tp->toHTML(LAN_RACEREPORTS_NUM_COL_SEGMENT, false) . "</th>";
 echo "</tr></thead><tbody>";
 
-// "Previous point" for the segment column = the last point IN ORDER the racer was
-// actually SEEN at (has a usable crossing), so a missed checkpoint does not blank
-// every following segment - the segment is from the last point he WAS at.
+// Segment column: measured from the last point the racer was actually SEEN at,
+// so a missed checkpoint does not blank every following segment.
 $prevSeen = null;
 $first    = true;
 
@@ -137,14 +113,13 @@ foreach ($points as $point)
 	$code = (string) $point['race_point_code'];
 	$name = $tp->toHTML($point['race_point_name'], false, 'TITLE');
 
-	// Col 2 - Čas dňa: arrival wall-clock; blank if no usable crossing here.
+	// Time of day: blank if no usable crossing here.
 	$tod     = $clock->timeOfDay($bib, $code);
 	$todText = ($tod !== null) ? race_clock::formatTimeOfDay($tod, $resDec) : '';
 
-	// Col 3 - Medzičas: elapsed start->this point. Blank for the start row (elapsed
-	// 0 / not meaningful) and where there is no usable crossing. elapsedRaw() is the
-	// pure subtraction (it shows the time at points the racer reached even if he is
-	// flagged ended elsewhere later).
+	// Split: elapsed start -> this point; blank for the start row and with no
+	// crossing. elapsedRaw() is a pure subtraction, so it still shows points
+	// reached before a later DNF/DSQ.
 	$splitText = '';
 	if ($code !== 'start')
 	{
@@ -152,8 +127,8 @@ foreach ($points as $point)
 		$splitText = ($split !== null) ? race_format::formatElapsed($split, $resDec) : '';
 	}
 
-	// Col 4 - Úsek: segment from the last SEEN point to this one. Blank for the first
-	// point and where either crossing is missing (elapsedBetween returns null).
+	// Segment: from the last SEEN point; blank for the first point and when
+	// elapsedBetween() returns null.
 	$segText = '';
 	if (!$first && $prevSeen !== null)
 	{
@@ -180,10 +155,7 @@ foreach ($points as $point)
 echo "</tbody></table>";
 echo "</div>";
 
-// DNF/DSQ: if the engine flags the racer ended, show a status note (with the marker
-// point when the engine can resolve it). DSQ takes precedence over DNF. No times are
-// fabricated for points he never reached - the table above already shows blanks (—)
-// where he has no crossing.
+// DNF/DSQ status note (with the marker point when known); DSQ takes precedence.
 $statusLabel = '';
 $statusFlag  = '';
 if ($clock->isDsq($bib))

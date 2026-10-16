@@ -2,19 +2,19 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2013 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Terminovka.sk plugin - diagnostic test tool
+ * terminovka plugin - terminovka_test.php
  *
- * Internal admin tool for manually verifying a single racer's export.
- * Accepts ?n=<racer_extid> or ?n=test. Use ?force=1 to resend a result
- * that was already marked as sent.
- *
- * No public URL alias - this is meant to be accessed directly by admins
- * by typing the plugin path.
 */
+
+/*
+ * Configuration test / single-racer send (docs/plugins/terminovka.md,
+ * "Configuration test and single-racer send"). No URL alias - admins open the
+ * plugin path directly.
+ */
 
 if (!defined('e107_INIT'))
 {
@@ -117,8 +117,8 @@ if (count($racers) > 1)
 $racer_number = $racers[0]['racer_number'];
 $mes->addSuccess(LAN_TERMINOVKA_TEST_RACER_FOUND . $tp->toHTML($racer_number));
 
-// Look up existing result row. The start number is a string that may carry
-// leading zeros, so it must be quoted via toDB() rather than (int)-cast.
+// Look up the existing result row. The start number may carry leading zeros,
+// so it is quoted via toDB() rather than (int)-cast.
 $result = e107::getDb()->retrieve('race_result', '*',
     " WHERE race_result_number = '" . $tp->toDB($racer_number) . "'");
 
@@ -152,7 +152,7 @@ else
     $mes->addInfo(LAN_TERMINOVKA_TEST_SENDING);
 }
 
-// Build the payload (identical shape to what the trigger path uses).
+// Build the payload (same shape as e_event.php sendAndLog()).
 $data = array(
     'race_result_number'   => $racer_number,
     'race_result_time'     => $result['race_result_time'],

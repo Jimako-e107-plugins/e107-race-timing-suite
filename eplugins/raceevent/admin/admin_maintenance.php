@@ -2,18 +2,19 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - season maintenance page (udrzba).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Maintenance is a cross-plugin, season-lifecycle operation: cleaning the
- * previous season's data (results, times, racers, ...) when a new event/season
- * is set up. That belongs in the base plugin, not in timetracker. The page
- * references timing/results tables by name across plugins - acceptable for a
- * base-level season hub.
+ * raceevent plugin - admin/admin_maintenance.php
  *
- * This is a custom controller screen: the default action 'udrzba' is served by
- * the controller method udrzbaPage() (e107's admin action->method convention),
- * with an EMPTY $table/$pid (no DB-table CRUD), exactly like the plugin's prefs
- * controllers (admin/admin_config.php). Bootstrap mirrors admin_config.php.
+*/
+
+/*
+ * Season maintenance screen (what it shows and does: docs/plugins/raceevent.md,
+ * "Maintenance"). It references tables of other plugins by name, which is
+ * acceptable for a base-level season tool. Custom controller screen: action
+ * 'udrzba' -> udrzbaPage(), no DB table.
  */
 
 require_once("../../../class2.php");
@@ -112,8 +113,7 @@ private function processMaintenanceActions($sql, $frm)
     }
 
     // Active tables. Keys come from the getActiveMaintenanceTables() whitelist;
-    // the identifier check is kept as defence in depth (folded in from the old
-    // dead delete helper).
+    // the identifier check is defence in depth.
     $activeTables = $this->getActiveMaintenanceTables();
     foreach ($activeTables as $table => $label) {
 
@@ -130,10 +130,8 @@ private function processMaintenanceActions($sql, $frm)
                 continue;
             }
 
-            // Clean by table name, not by plugin dependency. Some targets are
-            // owned by optional plugins (e.g. race_tracking belongs to racerfid),
-            // so skip silently when the table is absent - a no-op rather than an
-            // error when that plugin is not installed.
+            // Clean by table name, not by plugin dependency: a table of an
+            // optional plugin that is not installed is skipped silently.
             if (!$sql->isTable($table)) {
                 continue;
             }
@@ -180,11 +178,9 @@ private function processMaintenanceActions($sql, $frm)
 
 /**
  * Identifier whitelist for maintenance targets - only our own race* tables
- * (race, racer, race_category, race_result, race_time, race_tracking,
- * race_racer). Folded in from the removed dead delete helper; generalized
- * from the original ^race_[a-z_]+$ so it also accepts the legitimate `race`
- * and `racer` tables. Defence in depth - $table already comes from the
- * getActiveMaintenanceTables()/getLegacyTables() whitelists.
+ * (^race[a-z_]*$, so `race` and `racer` match too). Defence in depth - $table
+ * already comes from the getActiveMaintenanceTables()/getLegacyTables()
+ * whitelists.
  *
  * @param string $table
  * @return bool
@@ -471,9 +467,8 @@ private function renderPluginsCheckSection()
 
 private function getRequiredPlugins()
 {
-    // Mandatory: timetracker, race, racers. Optional: racerfid,
-    // terminovka, and registracia (planned, not yet built - listed so the
-    // check shows it as not-installed rather than a missing dependency).
+    // Plugins listed on the "Required plugins" check; 'mandatory' only drives
+    // the Yes/No label (racetiming and raceevent itself are not listed).
     return [
         'racereports' => [
             'title'       => LAN_TR_PLUG_RACEREPORTS,

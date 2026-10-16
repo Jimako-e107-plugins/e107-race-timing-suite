@@ -2,18 +2,17 @@
 /*
  * e107 website system
  *
- * racereports plugin - SUT (per-track finishers) report area (mode 'stu').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the SUT screen only - ONE
- * screen listing one link per race(track) to the per-track finishers-only
- * results list (report_stu.php), built natively via the shared base's
- * renderStuLink(). Exposed the SAME way as the online/point screens.
+ * racereports plugin - admin/admin_stu.php
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=stu (admin_menu.php
- * $adminMenu 'stu/stu' url points at this file).
+*/
+
+/*
+ * Results (SUT) link screen with CSV/XLS buttons (docs/plugins/racereports.md,
+ * "Report screens").
  */
 
 require_once("../../../class2.php");
@@ -32,10 +31,7 @@ if (!getperms('P'))
 
 
 /**
- * SUT area: ONE screen listing per-track finishers-only results links - one link
- * per race(track) to report_stu.php. Exposed natively the SAME way as the
- * online/point screens (its own dispatcher mode/screen), sharing the base's
- * renderStuLink().
+ * SUT area: one row per track (link + CSV/XLS), via renderStuLink().
  */
 class racereports_stu_ui extends racereports_reports_ui
 {
@@ -52,8 +48,7 @@ class racereports_stu_ui extends racereports_reports_ui
 				. $tp->toHTML(LAN_ADMIN_RACEREPORTS_010, false) . "</div>";
 		}
 
-		// One panel, one link per track (stu is per-track only - no komplet /
-		// category / checkpoint sub-links).
+		// One panel, one row per track (SUT is per track only).
 		$items = '';
 		foreach ($races as $race)
 		{

@@ -1,13 +1,14 @@
 <?php
-
-/**
+/*
  * e107 website system
  *
- * Copyright (C) 2008-2016 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- */
+ * racerfid plugin - e_cron.php
+ *
+*/
 
 e107::lan('racerfid', true, true);
 
@@ -35,8 +36,7 @@ class racerfid_cron       // plugin-folder name + '_cron'.
     {
         $plugPrefs = e107::pref('racerfid');
 
-        // Cron kill-switch: if disabled, return quietly without an error so
-        // the scheduled task can stay registered while doing nothing.
+        // "Cron disabled" - see docs/plugins/racerfid.md, "Plugin settings".
         if (!empty($plugPrefs['cron_disabled']))
         {
             return '';

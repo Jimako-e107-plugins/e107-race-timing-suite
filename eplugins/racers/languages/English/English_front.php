@@ -1,4 +1,15 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - languages/English/English_front.php
+ *
+*/
+
 if (!defined('e107_INIT')) { exit; }
 
 return array(
@@ -26,7 +37,7 @@ return array(
     'LAN_RACERS_FRONT_021' => 'Which track they will run on',
     'LAN_RACERS_FRONT_022' => 'Not yet assigned',
     'LAN_RACERS_FRONT_023' => 'Bib number',
-    // start list (already in use by startlist.php)
+    // start list (startlist.php)
     'LAN_RACERS_STARTLIST_CAPTION'   => 'Start list',
     'LAN_RACERS_STARTLIST_ALL'       => 'All',
     'LAN_RACERS_STARTLIST_NUMBER'    => 'Bib no.',

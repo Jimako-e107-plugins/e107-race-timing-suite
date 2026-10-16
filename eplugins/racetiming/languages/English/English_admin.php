@@ -2,21 +2,18 @@
 /*
  * e107 website system
  *
- * racetiming plugin - English admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetiming', true, true).
- * Array-style is used on purpose: e107's includeLan() only applies the per-key
- * English fallback for missing translations when the language file RETURNS an
- * array, so a partial Slovak file (languages/Slovak/Slovak_admin.php) degrades
- * cleanly to these English strings instead of leaving constants undefined. This
- * file is the canonical, complete set; the Slovak file overrides per key.
- */
+ * racetiming plugin - languages/English/English_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Admin placeholder screen (admin/admin_config.php).
-    // Admin permission label.
+    // Currently unused.
     'LAN_ADMIN_RACETIMING_003' => 'Race timing administration',
 
     // --- race_time CRUD admin (admin/admin_config.php) ---
@@ -36,7 +33,7 @@ return array(
     'LAN_ADMIN_RACETIMING_029' => 'Updated',
 
     // --- bulk start-generation (admin/admin_generujstart.php) ---
-    // Relocated from timetracker (LAN_TR_* there). 040 = prefs tab label,
+    // 040 = prefs tab label,
     // 041/042 = the `starttime` pref title/help, 043 = generation page menu,
     // 044-051 = the generation form + result strings, 052 = prefs page menu,
     // 053 = warning shown when the form is submitted with no track selected.

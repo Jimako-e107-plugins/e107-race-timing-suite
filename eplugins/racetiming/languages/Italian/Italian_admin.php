@@ -2,21 +2,18 @@
 /*
  * e107 website system
  *
- * racetiming plugin - Italian admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetiming', true, true).
- * Array-style is used on purpose: e107's includeLan() only applies the per-key
- * English fallback for missing translations when the language file RETURNS an
- * array, so a partial Slovak file (languages/Slovak/Slovak_admin.php) degrades
- * cleanly to these English strings instead of leaving constants undefined. This
- * file is the canonical, complete set; the Slovak file overrides per key.
- */
+ * racetiming plugin - languages/Italian/Italian_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Schermata segnaposto amministratore (admin/admin_config.php).
-    // Etichetta dei permessi amministratore.
+    // Currently unused.
     'LAN_ADMIN_RACETIMING_003' => 'Amministrazione cronometraggio gara',
 
     // --- race_time CRUD admin (admin/admin_config.php) ---
@@ -36,7 +33,7 @@ return array(
     'LAN_ADMIN_RACETIMING_029' => 'Aggiornato',
 
     // --- generazione massiva partenze (admin/admin_generujstart.php) ---
-    // Spostato da timetracker (ex LAN_TR_*). 040 = etichetta scheda preferenze,
+    // 040 = etichetta scheda preferenze,
     // 041/042 = titolo/aiuto preferenza `starttime`, 043 = menu pagina generazione,
     // 044-051 = modulo di generazione + stringhe dei risultati, 052 = menu pagina preferenze,
     // 053 = avviso mostrato quando il modulo viene inviato senza alcun percorso selezionato.

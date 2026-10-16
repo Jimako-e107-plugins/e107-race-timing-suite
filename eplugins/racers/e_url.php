@@ -1,33 +1,25 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - e_url.php
+ *
+*/
 
+/*
+ * SEF routes (URLs: docs/plugins/racers.md, "Front-end"). Route keys are
+ * plugin-scoped (e107::url('racers', 'startlist', ...)).
+ */
 
 class racers_url // plugin-folder + '_url'
 {
 	function config() 
 	{
 		$config = array();
-
-		// $config['index'] = array(
-		// 	'alias'         => 'preteky',                            // default alias '_blank'. {alias} is substituted with this value below. Allows for customization within the admin area.
-		// 	'regex'			=> '^{alias}\/$', 						// matched against url, and if true, redirected to 'redirect' below.
-		// 	'sef'			=> '{alias}/', 							// used by e107::url(); to create a url from the db table.
-		// 	'redirect'		=> '{e_PLUGIN}timetracker/index.php', 		// file-path of what to load when the regex returns true.
-
-		// );
-
-		// $config['racers'] = array(
-		// 	'alias'         => 'racers',                         
-		// 	'regex'			=> '^{alias}\/(.*)\/(.*)\/$',
-		// 	'sef'			=> '{alias}/{race_sef}/{race_category_sef}/', 	
-		// 	'redirect'		=> '{e_PLUGIN}racers/timetracker_racers.php?r=$1&c=$2', 
-		// );
-
-		// $config['number'] = array(
-		// 	'alias'         => 'racers',
-		// 	'regex'			=> '^{alias}\/(.*)\/(.*)\/(.*)$',
-		// 	'sef'			=> '{alias}/number/{racer_starter_number}/',
-		// 	'redirect'		=> '{e_PLUGIN}timetracker/timetracker_racers.php?r=number&c=$2',
-		// );
 
 		$config['registracia'] = array(
 			'alias'         => 'racers',
@@ -38,8 +30,7 @@ class racers_url // plugin-folder + '_url'
 		);
 
 
-		// Public start list (štartovacia listina, roaster) by track + category. Kept after
-		// the more specific 'registracia' and 'index' routes so they match first.
+		// Public start list by track + category ('all' = every track / category).
 		$config['startlist'] = array(
 			'alias'         => 'startlist',
 			'regex'			=> '^{alias}\/(.*)\/(.*)\/$',

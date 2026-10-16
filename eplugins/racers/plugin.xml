@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e107Plugin name="Racers" lan="LAN_RACERS_GLOBAL_001" version="1.0" date="2025-01-28" compatibility="2.4" installRequired="true" >
+<e107Plugin name="Racers" lan="LAN_RACERS_GLOBAL_001" version="1.1.1" date="2026-10-16" compatibility="2.4" installRequired="true" >
 	<author name="Jimako" url="e107sk.com" />
 	<summary lan="LAN_RACERS_GLOBAL_002">Competitors, categories and start lists</summary>
 	<description lan="LAN_RACERS_GLOBAL_003">Competitors and categories for the race-timing suite. Manages the competitor roster (one competitor = one track + one category), the categories, and the start lists grouped by track and category. Includes an on-site registration screen for race-day check-in. Requires raceevent and racetrack.</description>
@@ -25,6 +25,10 @@
 		<pref name='states'>SVK,CZE,POL,HUN,RUS,AUS,USA,FRA,AUT,UKR</pref>	
 		<pref name='startforage'>today</pref>
 		<pref name='manualinput'>1</pref>
+		<pref name='display_flag'>0</pref>
+		<pref name='flag_position'>after</pref>
+		<pref name='flag_size'>16</pref>
+		<pref name='flag_map'>{"AUS":"AU","AUT":"AT","CZE":"CZ","FRA":"FR","GER":"DE","HUN":"HU","IND":"IN","NED":"NL","POL":"PL","RUS":"RU","SUI":"CH","SVK":"SK","UKR":"UA","USA":"US"}</pref>
 	</pluginPrefs>
 </e107Plugin>
  

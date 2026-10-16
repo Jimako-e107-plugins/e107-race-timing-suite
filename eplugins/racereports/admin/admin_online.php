@@ -2,17 +2,16 @@
 /*
  * e107 website system
  *
- * racereports plugin - Online report area (mode 'online').
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE admin file per report area: this file owns the online-links screen only -
- * per race, the Online report links (komplet + one per category tied to the
- * race), built natively via the shared base's renderOnlineLinks().
+ * racereports plugin - admin/admin_online.php
  *
- * Bootstrap: load the framework, load the LAN (so the dispatcher captions and the
- * pluginTitle constants resolve), require the shared dispatcher + the shared
- * report base, then gate the whole screen on the plugin's OWN admin permission
- * with getperms('P'). The dispatcher routes here for mode=online (admin_menu.php
- * $adminMenu 'online/online' url points at this file).
+*/
+
+/*
+ * Online results link screen (docs/plugins/racereports.md, "Report screens").
  */
 
 require_once("../../../class2.php");

@@ -1,12 +1,21 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racetrack plugin - admin/admin_config.php
+ *
+*/
 
-// Generated e107 Plugin Admin Area
-//
-// racetrack admin ENTRY POINT and the `main` mode (tracks / race CRUD). The
-// checkpoint (`control`) and price-tier (`prices`) areas live in their own entry
-// files (admin_points.php / admin_prices.php), each reached via its $adminMenu
-// 'url' - mirroring racetiming's one-file-per-area layout. The shared dispatcher
-// (admin_menu.php) loads the LAN and is required by every area entry file.
+/*
+ * Track list screen (fields, warnings, buttons: docs/plugins/racetrack.md,
+ * "Track list"). Also the plugin's admin entry point (plugin.xml adminLinks).
+ * The other areas have their own entry files; admin_menu.php is the shared
+ * dispatcher.
+ */
 
 require_once('../../../class2.php');
 
@@ -19,17 +28,12 @@ if (!getperms('P'))
 }
 
 e107::lan('racetrack', true, true);
-// _global is loaded automatically by the core on every page via the
-// lan_global_list pref, so no manual 'global' load is needed here.
+// _global is loaded by the core on every page (lan_global_list pref).
 e107::coreLan('user');
 e107::coreLan('users', true);
 e107::coreLan('date');
 
-// Shared archive generate routine + its e_token/message trigger wrapper
-// (racetrack_archive_generate / racetrack_archive_trigger). race_ui's "Archivovat"
-// race-row button below needs racetrack_archive_trigger(), so the helper is loaded
-// here. The archive admin itself lives in its OWN entry file (admin_archive.php),
-// reached via the 'archive' $adminMenu 'url' - admin_config.php no longer serves it.
+// racetrack_archive_trigger() for the Archive row button below.
 require_once(e_PLUGIN . 'racetrack/includes/race_archive_generate.php');
 
 
@@ -38,9 +42,8 @@ class racetrack_ui extends e_admin_ui
 
 	protected $pluginTitle		= LAN_GLOBAL_RACE_001;
 	protected $pluginName		= 'racetrack';
-	// Event name MUST be set so e_admin.php addons can target this UI via
-	// $ui->getEventName() (issue #34). Optional plugins hook the track edit
-	// form through this name without race referencing them.
+	// Required: e_admin.php addons (terminovka) target this form via
+	// $ui->getEventName() === 'race'.
 	protected $eventName		= 'race';
 	protected $table			= 'race';
 	protected $pid				= 'race_id';
@@ -53,10 +56,8 @@ class racetrack_ui extends e_admin_ui
 	//	protected $sortParent      = 'somefield_parent';
 	//	protected $treePrefix      = 'somefield_title';
 
-	// Track edit form tabs (issue #34). Optional plugins may add more tabs via
-	// an e_admin.php addon (core merges $config['tabs'] into this array). Every
-	// editable field below carries 'tab' => 'race' so nothing renders into a
-	// broken/empty layout once tabs are active.
+	// e_admin.php addons may add tabs (core merges $config['tabs'] into this
+	// array), so every editable field needs an explicit 'tab'.
 	protected $tabs				= array('race' => LAN_ADMIN_RACE_TAB_TRACK);
 
 	//	protected $listQry      	= "SELECT * FROM `#tableName` WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
@@ -109,10 +110,7 @@ class racetrack_ui extends e_admin_ui
 
 		),
 
-		// Registration settings (race_capacity, race_unlimited_capacity,
-		// race_requires_approval, race_registration_closed) are NOT defined here.
-		// They are merged in init() with 'tab' => 'registracia' only when racereg
-		// is installed (opt-in Registration tab) - see addRegistrationFields().
+		// The registration fields are added by addRegistrationFields().
 
 		'options' => array(
 			'title' => LAN_OPTIONS,
@@ -135,20 +133,14 @@ class racetrack_ui extends e_admin_ui
 
 	public function init()
 	{
-		// "Archivovat" race-row button (token-protected POST from
-		// racetrack_form_ui::options). This is the ONLY place to create an archive
-		// for a race that has none yet; on an already-archived race it overwrites
-		// (count() in the shared generate decides) - identical to "Pregenerovat".
+		// Archive row button (token-protected POST from racetrack_form_ui::options).
 		if (!empty($_POST['racetrack_archivovat']))
 		{
 			racetrack_archive_trigger((int) varset($_POST['racetrack_archive_race'], 0));
 		}
  
-		// Opt-in Registration tab: the four registration-config fields exist only
-		// when racereg (their sole consumer) is installed. This is a runtime guard,
-		// NOT a plugin dependency - racetrack never depends on racereg (the correct
-		// direction is racereg -> racetrack). When racereg is absent the track form
-		// stays registration-agnostic (single Track tab, no fields, no warnings).
+		// Runtime guard, not a dependency: racereg depends on racetrack, never
+		// the other way round.
 		if (e107::isInstalled('racereg'))
 		{
 			$this->addRegistrationFields();
@@ -157,12 +149,8 @@ class racetrack_ui extends e_admin_ui
 
 
 	/**
-	 * Merge the registration-config fields onto a dedicated "Registration" tab.
-	 * Called from init() ONLY when racereg is installed (opt-in). The columns
-	 * still live on the `race` table; only their admin-form visibility is gated.
-	 *
-	 * Field definitions are verbatim from the pre-split inline $fields array, with
-	 * 'tab' => 'registracia' so they render on the new tab.
+	 * Add the Registration tab and its fields. The columns always exist on the
+	 * `race` table; only their visibility in the form is gated on racereg.
 	 */
 	protected function addRegistrationFields()
 	{
@@ -205,29 +193,19 @@ class racetrack_ui extends e_admin_ui
 
 
 	/**
-	 * Soft, non-blocking warnings when saving a track (issue #47).
-	 *
-	 * The save is always allowed to proceed (we never return false here); these
-	 * are heads-up warnings for a track that is OPEN for registration
-	 * (race_registration_closed = 0) but configured so that the registration flow
-	 * cannot behave as the organizer probably expects:
-	 *   - finite capacity of 0 (and not unlimited) -> nobody can be placed;
-	 *   - no price tier -> the sign-up is treated as free ("bez poplatku").
+	 * Save-time warnings (docs/plugins/racetrack.md, "Warnings on save"). Never
+	 * returns false, so the save always proceeds.
 	 *
 	 * @param array $data  posted track row (e_admin_ui field keys, already toDB'd)
 	 * @param int   $raceId existing race_id on update, 0 on create
 	 */
 	protected function warnOpenTrackConfig($data, $raceId)
 	{
-		// Registration heads-up warnings only apply when racereg is installed -
-		// the registration fields exist on the track form solely in that case.
-		// Without racereg the track form is registration-agnostic (no warnings).
 		if (!e107::isInstalled('racereg'))
 		{
 			return;
 		}
 
-		// Only relevant for tracks that are open for sign-up.
 		if (!empty($data['race_registration_closed']))
 		{
 			return;
@@ -241,9 +219,8 @@ class racetrack_ui extends e_admin_ui
 			e107::getMessage()->addWarning(LAN_ADMIN_RACE_CAP_WARN);
 		}
 
-		// Price tiers live in the child table `race_price` keyed by race_price_race
-		// = race_id. On create there is no id yet, so there cannot be any tier.
-		// Parameterised int only - no string-built SQL.
+		// race_price.race_price_race = race_id. On create there is no id yet, so
+		// no tier. The id is int-cast before it goes into the WHERE.
 		$raceId = (int) $raceId;
 		$tiers  = ($raceId > 0)
 			? (int) e107::getDb()->count('race_price', '(*)', 'race_price_race=' . $raceId)
@@ -274,7 +251,7 @@ class racetrack_ui extends e_admin_ui
 	}
 
 
-	// left-panel help menu area. (replaces e_help.php used in old plugins)
+	// Left-panel help.
 	public function renderHelp()
 	{
 		$caption = LAN_HELP;
@@ -296,13 +273,12 @@ class racetrack_form_ui extends e_admin_form_ui
 
 			$data = $this->getController()->getListModel()->getData();
 
-			// Both buttons are links into the subordinate plugins - racetrack only
-			// manages tracks and renders no racer/time data of its own.
-			// Detail: the per-track public start list (štartovacia listina) owned
-			// by the racers plugin (race_category_sef = all = every category).
+			// Start list of this track (racers 'startlist' route). Note:
+			// racers/startlist.php treats only 'all' as "every category"; with
+			// 'komplet' it matches no category and lists nobody.
 			$url = e107::url('racers', 'startlist', array('race_sef' => $data['race_sef'], 'race_category_sef' => 'komplet'), ['mode' => 'full']);
  
-			// STU: canonical timing report owned by timetracker (link, not embed).
+			// SUT results of this track (racereports 'stu' route).
 			$url1 = e107::url('racereports', 'stu', $data, ['mode' => 'full']);
 
 
@@ -312,9 +288,8 @@ class racetrack_form_ui extends e_admin_form_ui
 
 			$text .= "<a target='_blank' title='SUT' class='btn btn-default' href='" . $url1 . "'>" . ADMIN_EXECUTE_ICON. "</a>";
 
-			// "Archivovat" - token-protected POST to the list page; racetrack_ui::init
-			// runs the shared generate for this race (insert or overwrite). This is
-			// the only entry that can create an archive for a race that has none.
+			// Archive - token-protected POST to the list page, handled in
+			// racetrack_ui::init().
 			$tp     = e107::getParser();
 			$raceId = (int) $data['race_id'];
 			$text .= "<form method='post' action='" . e_SELF . "?mode=main&action=list' style='display:inline'>";

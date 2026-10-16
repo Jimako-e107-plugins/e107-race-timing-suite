@@ -1,4 +1,15 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - languages/Slovak/Slovak_admin.php
+ *
+*/
+
 if (!defined('e107_INIT')) { exit; }
 
 return array(
@@ -38,12 +49,12 @@ return array(
     'LAN_RACERS_ADMIN_028'      => 'Dnes',
     'LAN_RACERS_ADMIN_029'      => 'K 1.1.',
     'LAN_RACERS_ADMIN_030'      => 'Povoliť manuálne zadávanie účastníkov.',
-    // admin-scoped duplicates of LAN_RACERS_FRONT_001/002 (admin_config.php renderHelp)
+    // admin-scoped duplicates of LAN_RACERS_FRONT_001/002 (admin_registration.php)
     'LAN_RACERS_ADMIN_031'      => 'Manuálne zadávanie účastníkov nie je povolené.',
     'LAN_RACERS_ADMIN_032'      => 'Pozor, manuálne zadávanie účastníkov bez kontroly prístupu je povolené.',
     // racers/list page (racers.php) tablerender heading
     'LAN_RACERS_ADMIN_033'      => 'Zoznam pretekárov',
-    // Štartovacie listiny (admin_startlists.php) + prehľad pretekárov (admin_racerlist.php)
+    // Start-lists (admin_startlists.php) + racer-overview (admin_racerlist.php) screens
     'LAN_RACERS_ADMIN_034'      => 'Štartovacie listiny',
     'LAN_RACERS_ADMIN_035'      => 'Prehľad pretekárov',
     'LAN_RACERS_ADMIN_036'      => 'Všetky trate (všetky kategórie)',
@@ -54,8 +65,24 @@ return array(
     'LAN_RACERS_ADMIN_041'      => 'Štartovacie listiny podľa trate a kategórie',
     'LAN_RACERS_ADMIN_042'      => 'Otvoriť prehľad pretekárov',
     'LAN_RACERS_ADMIN_043'      => 'Registrácia na mieste',
+    'LAN_RACERS_ADMIN_044'      => 'Zobraziť vlajku krajiny pri mene?',
+    'LAN_RACERS_ADMIN_044_HELP' => 'Pri mene zobrazí vlajku podľa národnosti pretekára, podľa prevodnej tabuľky kódov IOC na ISO nižšie. Pretekári, ktorých národnosť v tabuľke nie je, vlajku nemajú.',
+    'LAN_RACERS_ADMIN_045'      => 'Umiestnenie vlajky',
+    'LAN_RACERS_ADMIN_045_HELP' => 'Pred priezviskom, alebo hneď za „priezvisko meno“ (pred štartovým číslom, textom pre domáceho a tímom).',
+    'LAN_RACERS_ADMIN_046'      => 'Pred menom',
+    'LAN_RACERS_ADMIN_047'      => 'Za menom',
+    'LAN_RACERS_ADMIN_048'      => 'Veľkosť vlajky',
+    'LAN_RACERS_ADMIN_048_HELP' => 'Veľkosť vlajky v pixeloch (8 až 64).',
+    'LAN_RACERS_ADMIN_049'      => 'Prevod národnosti na vlajku',
+    'LAN_RACERS_ADMIN_049_HELP' => 'Ako vyplniť: ľavé pole je kód z poľa Národnosť (IOC, 3 písmená, napr. GER), pravé pole je kód krajiny, podľa ktorého sa kreslí vlajka (ISO, 2 písmená, napr. DE). Dvojicu nájdete v „Prehľade kódov IOC → ISO“ nižšie; oba kódy prepíšte do prázdneho riadku. Vymazaním oboch polí riadok odstránite.',
+    'LAN_RACERS_ADMIN_050'      => 'Tieto riadky prevodnej tabuľky vlajok sa neuložili (IOC musí mať 3 písmená, ISO 2 písmená): [x]',
+    'LAN_RACERS_ADMIN_051'      => 'Kód IOC',
+    'LAN_RACERS_ADMIN_052'      => 'Kód ISO',
+    'LAN_RACERS_ADMIN_053'      => 'Vlajky krajín',
+    'LAN_RACERS_ADMIN_054'      => 'Prehľad kódov IOC → ISO (kliknutím otvoríte)',
+    'LAN_RACERS_ADMIN_055'      => 'Krajina',
+    'LAN_RACERS_ADMIN_056'      => 'Tieto kódy z „Kódy štátov“ (karta Nastavenie) zatiaľ nemajú vlajku – doplňte ich do tabuľky: [x]',
     'LAN_RACERS_ADMIN_CATEGORIES'     => 'Zoznam kategórií',
     'LAN_RACERS_ADMIN_CATEGORIES_ADD' => 'Pridať kategóriu',
-    // Skratky medzi pluginmi presunuté do raceevent_admin_links
-    // (popisy: LAN_RACEEVENT_LINK_*).
+    // Cross-plugin admin-menu shortcuts: raceevent_admin_links (LAN_RACEEVENT_LINK_*).
 );

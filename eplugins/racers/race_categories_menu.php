@@ -1,17 +1,19 @@
 <?php
-
-/**
+/*
  * e107 website system
  *
- * Copyright (C) 2008-2016 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
+ * racers plugin - race_categories_menu.php
+ *
+*/
+
+/*
+ * Categories menu: one tile per (track x category) with links to the start
+ * list and the finish report (docs/plugins/racers.md, "Front-end").
  */
-
-
-// news item rewrite for v2.x
-
 
 if (!defined('e107_INIT'))
 {
@@ -23,19 +25,15 @@ $caption = '';
 
 $text = '';
 
-// The single event is owned by the raceevent plugin (prefs) now (#49). Read the
-// event description from raceevent and escape it on output: it is HTML from a
-// textarea, so it is rendered via $tp->toHTML() (never echoed raw).
+// Event description from raceevent (HTML from a textarea, so rendered via
+// toHTML(), never raw). Note: $text is overwritten below, so it is not shown.
 $text = e107::getParser()->toHTML(e107::getPlugConfig('raceevent')->get('event_description'), true, 'BODY');
 
-// Caption can be sourced from raceevent's event_name (escape via toAttribute());
-// left disabled to preserve the existing menu behaviour.
+// Optional caption from raceevent's event_name (escape via toAttribute()); disabled.
 //$caption = e107::getParser()->toAttribute(e107::getPlugConfig('raceevent')->get('event_name'));
 
 
-// Category x track join now lives in racers itself (B3 de-coupling): the menu no
-// longer reads timetracker_class::$racecats. Load the racers class the racers way
-// (mirrors startlist.php) and pull the same (track x category) rows.
+// One row per (track x category): plugin_racers_racers::getCategoriesWithTracks().
 e107::getSingleton('plugin_racers_racers', e_PLUGIN . 'racers/includes/racers.php');
 
 

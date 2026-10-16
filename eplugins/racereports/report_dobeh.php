@@ -2,36 +2,21 @@
 /*
  * e107 website system
  *
- * racereports plugin - DOBEH (checkpoint arrivals board) report, the clean
- * equivalent of timetracker/timetracker_dobeh.php.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * A LIVE board for checkpoint staff / a big-screen display: the racers who have a
- * valid crossing at ONE checkpoint, sorted by ARRIVAL (latest crossing first), the
- * rank column counting DOWN (newest row = current total, first arrival = 1). Each
- * row's category cell shows "<category> — <Nth>", where Nth is the racer's rank
- * WITHIN their category by ELAPSED time at this checkpoint (NOT arrival order), so
- * it is stable regardless of the display sort. This is distinct from the finish /
- * online reports (which sort by elapsed and count UP).
+ * racereports plugin - report_dobeh.php
  *
- * All time math comes from the racetiming engine (race_clock + race_format); this
- * page does ONLY presentation: fetch racers, read the checkpoint, keep the ones
- * with a valid crossing here, sort by arrival DESC, rank within category by elapsed
- * and render. NO export, NO DataTables - it is a live, auto-refreshing board.
- *
- *   ?r=<race_sef>&p=<race_point_sef>
- *   r=komplet -> every race, each of its checkpoints (skipping start/finish).
- *   p=komplet -> every checkpoint of the race (skipping start/finish).
- *
- *   Arrival sort key  : race_clock::timeOfDay($number,$point) - the ABSOLUTE
- *                       wall-clock crossing epoch (legacy sorted on the same
- *                       race_savedtime); no engine change was needed (see NOTES.md).
- *   Time cell         : elapsed start->point, formatted like the / point report
- *                       (race_report::diffOnPoint at the central result_decimals
- *                       pref, default 2; see NOTES.md).
- *
- * SECURITY: r/p go through $tp->toDB(); race id is (int)-cast; the bib/start number
- * stays a STRING (never cast - leading zeros are data); every output cell is
- * escaped (text via toHTML, the category colour via toAttribute). No extract().
+*/
+
+/*
+ * Arrivals board (docs/plugins/racereports.md, "Arrivals board"). Query:
+ * ?r=<race_sef>&p=<race_point_sef>, komplet allowed for both.
+ * Display order = arrival (race_clock::timeOfDay, the absolute crossing time) DESC;
+ * the in-category rank uses the ELAPSED time, so it does not depend on the display
+ * order. Time cell = race_report::diffOnPoint at result_decimals, as in the
+ * checkpoint report.
  */
 
 if (!defined('e107_INIT'))
@@ -46,16 +31,9 @@ $style = '
 e107::css('inline', $style);
 define('e_IFRAME', true);
 
-// Auto-refresh resolution (live board): the ?refresh= URL param ALWAYS wins over
-// the pref, even ?refresh=0 (which means "disable on THIS window", NOT "fall back to
-// the pref") - hence the isset() distinction, not ?:. When no ?refresh is present we
-// fall back to the plugin's OWN dobeh_refresh_interval pref (a racereports pref - NOT
-// timetracker's/racerfid's refresh_interval the legacy page read). Default 0 = no
-// auto-refresh. The dobeh board gets its OWN refresh pref (separate from the online
-// report's online_refresh_interval) because the two are independent live surfaces an
-// operator may pace differently - matching the per-report pref convention (see NOTES).
-// e107::meta() MUST run BEFORE the header (HEADERF) renders, or the
-// <meta http-equiv="refresh"> never lands in <head> - keep it in this pre-HEADERF spot.
+// Auto-refresh (docs/plugins/racereports.md, "Tab: Refresh"): ?refresh wins even
+// when 0 ("off for this window"), hence isset(), not ?:. e107::meta() MUST run
+// before HEADERF, or the refresh meta never reaches <head>.
 $refresh = isset($_GET['refresh'])
 	? (int) e107::getParser()->filter($_GET['refresh'], 'int')                   // URL present -> wins, even 0
 	: (int) e107::getPlugConfig('racereports')->get('dobeh_refresh_interval', 0); // else pref
@@ -76,8 +54,7 @@ if (!defined('LAN_RACEREPORTS_COL_NAME'))     define('LAN_RACEREPORTS_COL_NAME',
 if (!defined('LAN_RACEREPORTS_COL_CATEGORY')) define('LAN_RACEREPORTS_COL_CATEGORY', 'Category');
 if (!defined('LAN_RACEREPORTS_COL_TIME'))     define('LAN_RACEREPORTS_COL_TIME', 'Time');
 
-// Engine (racetiming) + shared report helper. Loaded by path so no <dependency>
-// on racetiming is required (the skeleton deps are left unchanged).
+// Engine (racetiming) + shared report helper.
 require_once(e_PLUGIN . 'racetiming/includes/race_clock.php');
 require_once(e_PLUGIN . 'racetiming/includes/race_format.php');
 require_once(e_PLUGIN . 'racereports/includes/race_report.php');
@@ -100,9 +77,7 @@ if ($raceSef === '')
 
 if ($raceSef === 'komplet')
 {
-	// Every race, each of its checkpoints (skipping start/finish) - one live arrival
-	// board per checkpoint. e_IFRAME is already defined above, so this all-view
-	// renders without the site chrome, the same as a single board.
+	// Every race, one board per checkpoint (skipping start/finish).
 	foreach ($report->fetchAllRaces() as $race)
 	{
 		$raceId = (int) $race['race_id'];
@@ -169,14 +144,9 @@ else
 }
 
 /**
- * Render one checkpoint ARRIVALS board for a race+point.
- *
- * Keep the racers with a valid crossing at the point (the legacy "arrived" set:
- * isRanked - a usable, non-ended crossing here), rank each WITHIN their category by
- * ELAPSED time ascending (compute_category_ranks parity), then DISPLAY-sort by
- * arrival (absolute crossing time) DESCENDING and render with the rank column
- * counting DOWN (newest row = total, oldest = 1). Reproduces legacy
- * timetracker_dobeh.php::display_point_list().
+ * Render one checkpoint ARRIVALS board: racers with a valid crossing here
+ * (isRanked), in-category rank by ELAPSED time, display sorted by arrival DESC,
+ * # column counting down.
  *
  * @param race_report $report
  * @param race_clock  $clock
@@ -188,8 +158,7 @@ function render_dobeh_list($report, $clock, $raceId, $point)
 	$tp      = e107::getParser();
 	$pointId = (string) $point['race_point_code'];
 
-	// Central RESULT-time precision (DISPLAY-ONLY, truncates). Default 2 enforced
-	// here at the consumer; passed explicitly to diffOnPoint (helper default left 1).
+	// result_decimals (display-only, truncates), passed explicitly to diffOnPoint.
 	$resDec = (int) e107::getPlugConfig('racereports')->get('result_decimals', 2);
 
 	$racers  = $report->fetchRacers($raceId); // keyed by bib string
@@ -202,20 +171,18 @@ function render_dobeh_list($report, $clock, $raceId, $point)
 
 		$diff = $report->diffOnPoint($clock, $number, $pointId, $resDec);
 
-		// "Arrived": a valid, non-ended crossing here (legacy test
-		// time>0 && text!='' && ended=='' -> race_report::isRanked).
+		// "Arrived": a valid, non-ended crossing here.
 		if (!$report->isRanked($diff))
 		{
 			continue;
 		}
 
 		$racer['difftime'] = $diff['time'];
-		// Legacy dobeh time cell = text . " " . ended (trailing space when no flag;
-		// arrived rows carry no ended flag) - reproduced for parity.
+		// Time cell = text . " " . ended (always empty here; the trailing space is
+		// kept from the old timetracker output).
 		$racer['difftext'] = $diff['text'] . " " . $diff['ended'];
-		// Arrival sort key: the ABSOLUTE wall-clock crossing epoch (legacy sorted on
-		// race_savedtime). timeOfDay() returns exactly that; a valid crossing here
-		// guarantees it is non-null.
+		// Arrival sort key: the absolute crossing epoch; non-null for a valid
+		// crossing.
 		$racer['crossed_at'] = (float) $clock->timeOfDay($number, $pointId);
 
 		$arrived[] = $racer;
@@ -256,9 +223,8 @@ function render_dobeh_list($report, $clock, $raceId, $point)
 }
 
 /**
- * Map racer_number => rank within its category, ranked by ELAPSED time at the point
- * ascending (fastest = 1st). Reproduces legacy compute_category_ranks(): group the
- * arrived racers by category id, sort each group by difftime ascending, number 1..N.
+ * Map racer_number => rank within its category, by ELAPSED time at the point
+ * ascending (fastest = 1st).
  *
  * @param array $arrived arrived racers, each carrying 'difftime' + 'racer_category_id'
  * @return array [racer_number(string) => int rank]
@@ -292,12 +258,8 @@ function dobeh_compute_category_ranks(array $arrived)
 }
 
 /**
- * Render one arrival row: rank-down # | bib | name | "Category — Nth" | time.
- *
- * The category cell shows the category name plus the racer's in-category rank (from
- * dobeh_compute_category_ranks) as " — N." (legacy em-dash + trailing dot). The row
- * is coloured by the category colour, exactly as the legacy dobeh page (every arrived
- * row carries a category background). The bib stays a STRING; every cell is escaped.
+ * Render one arrival row: # | bib | name | "Category — N." | time, coloured by
+ * category. The bib stays a STRING; every cell is escaped.
  *
  * @param e_parse $tp
  * @param array   $racer         arrived racer row (racer_name, difftext, category id)
@@ -313,7 +275,6 @@ function render_dobeh_row($tp, $racer, $categoryRanks, $displayOrder)
 	$catCell = $tp->toHTML($cat['name'], false, 'TITLE');
 	if (isset($categoryRanks[$number]))
 	{
-		// Legacy: htmlspecialchars(name) . ' — ' . rank . '.'
 		$catCell .= ' — ' . (int) $categoryRanks[$number] . '.';
 	}
 
@@ -329,9 +290,7 @@ function render_dobeh_row($tp, $racer, $categoryRanks, $displayOrder)
 }
 
 /**
- * Category name + colour for a category id, looked up the same way the legacy page
- * did (timetracker::$cats[id] -> race_category_name / race_category_color). Read once
- * (static cache) to keep the engine free of presentation concerns.
+ * Category name + colour for a category id (static cache for the request).
  *
  * @param int $catId
  * @return array ['name' => string, 'color' => string]

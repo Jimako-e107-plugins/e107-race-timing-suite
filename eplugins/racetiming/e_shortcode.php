@@ -1,17 +1,20 @@
 <?php
 /*
-* Copyright (c) e107 Inc e107.org, Licensed under GNU GPL (http://www.gnu.org/licenses/gpl.txt)
-*
-* racetiming shortcode batch class - shortcodes available site-wide.
-*
-* Hosts the manual passing-entry "keypad app" link list. The TAG NAME
-* {TIMETRACKER_VSTUP} is INTENTIONALLY KEPT (not renamed to RACETIMING_*) for
-* backward compatibility: existing and archived event-pages contain the literal
-* {TIMETRACKER_VSTUP} in their body, so renaming would break them. Only the
-* plugin that REGISTERS the tag moved (timetracker -> racetiming); the rendered
-* checkpoint links resolve through racetiming's `kontrola` route, producing the
-* byte-identical /kontrola/CODE/PASS/ public URL.
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racetiming plugin - e_shortcode.php
+ *
 */
+
+/*
+ * {TIMETRACKER_VSTUP} - see docs/plugins/racetiming.md, "Shortcode". The tag name
+ * is kept because existing pages contain it literally. The links are built through
+ * the 'kontrola' route (e_url.php).
+ */
 
 if(!defined('e107_INIT'))
 {
@@ -25,7 +28,7 @@ class racetiming_shortcodes extends e_shortcode
 	public $override = false; // when set to true, existing core/plugin shortcodes matching methods below will be overridden.
 
 	// /* {TIMETRACKER_VSTUP} */
-	function sc_timetracker_vstup($parm = null)  // Naming:  "sc_" + [plugin-directory] + '_uniquename'
+	function sc_timetracker_vstup($parm = null)
 	{
         $query = "SELECT * FROM  #race AS r,  #race_point AS rc
         WHERE FIND_IN_SET(r.race_id, rc.race_point_race) ORDER BY race_point_order";

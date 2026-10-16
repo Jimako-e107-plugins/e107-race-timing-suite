@@ -1,4 +1,19 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racerfid plugin - citacka.php
+ *
+*/
+
+/*
+ * Manual import page (user view: docs/plugins/racerfid.md, "The import itself").
+ * Re-runs the import every refresh_interval seconds via an HTTP Refresh header.
+ */
 
 require_once('../../class2.php');
 if (!getperms('P'))

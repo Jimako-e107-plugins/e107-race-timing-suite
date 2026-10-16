@@ -2,45 +2,35 @@
 /*
  * e107 website system
  *
- * racetiming plugin - elapsed-duration formatter (PART A, presentation-free).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Single canonical formatter for an elapsed race duration. It replaces the
- * legacy timetracker formatter `secondsToTime()`
- * (timetracker/classes/timetracker_class.php:516-535) together with the per-call
- * `substr()` truncation that every legacy consumer applied on top of it
- * (e.g. timetracker_class.php:271 `substr($diff['text'], 0, 10)`).
+ * racetiming plugin - includes/race_format.php
  *
- * PARITY MANDATE: this reproduces the legacy displayed string BYTE-FOR-BYTE.
- * The legacy chain is `secondsToTime($s)` then `substr(..., 0, 10)`; here that is
- * `formatElapsed($s, 1)` (decimals = 1 -> 10-char cut). The known legacy quirks
- * (rtrim of trailing ms zeros; hours via integer truncation without %24/%60) are
- * deliberately preserved - see racetiming/NOTES.md for the post-parity
- * intentional-fix candidates. This class does NO computation that affects sort
- * order: $decimals is DISPLAY-ONLY.
+*/
+
+/*
+ * Elapsed-duration formatter. Pure: no DB, no e107 singletons, no superglobals.
  *
- * Pure: no DB, no e107 singletons, no superglobals.
+ * The output keeps the legacy quirks on purpose (trailing millisecond zeros
+ * trimmed, hours not wrapped, negative durations malformed) - see
+ * racetiming-NOTES.md in the repo root, "Intentional-fix candidates".
+ * $decimals is display-only and never affects sort order.
  */
 
 class race_format
 {
 	/**
-	 * Format an elapsed duration (seconds, with a fractional part) as a
-	 * truncated HH:MM:SS[.fff] string.
+	 * Format an elapsed duration (seconds, with a fractional part) as
+	 * HH:MM:SS[.fff], TRUNCATED (never rounded) to $decimals fractional digits,
+	 * e.g. .700 shows as ".7" at $decimals = 1.
 	 *
-	 * The value is formatted to the full legacy `HH:MM:SS.mmm` representation
-	 * and then TRUNCATED (never rounded) to exactly $decimals fractional digits.
-	 * Truncation reproduces the legacy `substr()` cut so that, e.g., a stored
-	 * millisecond value of .700 displays as ".7" at $decimals = 1 - the live
-	 * "tenths" precision of the online/point reports.
-	 *
-	 * $decimals is a DISPLAY-ONLY parameter. It MUST NOT be used anywhere a sort
-	 * key or a computation is derived; rank by the full-precision float from
-	 * race_clock::elapsedToPoint(), format with this method only for output.
-	 *
-	 * Legacy mapping: formatElapsed($s, 1) === substr(secondsToTime($s), 0, 10).
+	 * Display only: rank by the full-precision float from
+	 * race_clock::elapsedToPoint(), never by this string.
 	 *
 	 * @param float|int|string $seconds  elapsed seconds (already round(...,3) upstream)
-	 * @param int              $decimals displayed fractional digits (default 1 = legacy)
+	 * @param int              $decimals displayed fractional digits (default 1)
 	 * @return string
 	 */
 	public static function formatElapsed($seconds, $decimals = 1)
@@ -59,23 +49,16 @@ class race_format
 			$decimals = 0;
 		}
 
-		// "HH:MM:SS" = 8 chars; + "." + N fractional digits. With $decimals = 1
-		// this is substr(..., 0, 10), the legacy online/point cut.
+		// "HH:MM:SS" = 8 chars; + "." + N fractional digits.
 		$len = 8 + ($decimals > 0 ? 1 + $decimals : 0);
 
 		return substr($full, 0, $len);
 	}
 
 	/**
-	 * Reproduce the legacy `secondsToTime()` body byte-for-byte
-	 * (timetracker_class.php:516-535), producing `HH:MM:SS.mmm` with the legacy
-	 * rtrim-of-trailing-zeros quirk and the ".000" branch for whole seconds.
-	 *
-	 * PHP-8 hardening only: the integer field computations use intdiv()/% on an
-	 * explicit int instead of the legacy float-into-%02d, which yields IDENTICAL
-	 * output for non-negative durations while avoiding the implicit
-	 * float-to-int deprecation notices. (Negative durations remain malformed in
-	 * both - see NOTES.md D-11, intentional-fix candidate.)
+	 * HH:MM:SS.mmm with trailing millisecond zeros trimmed and ".000" for whole
+	 * seconds. intdiv()/% on an int avoid PHP 8 float-to-int deprecation notices.
+	 * Negative durations come out malformed (racetiming-NOTES.md, D-11).
 	 *
 	 * @param float $militime
 	 * @return string

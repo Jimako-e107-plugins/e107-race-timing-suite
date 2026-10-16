@@ -2,21 +2,17 @@
 /*
  * e107 website system
  *
- * racetiming plugin - Italian front language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * racetiming's FIRST front LAN, added with the manual passing-entry "keypad app"
- * (vstup.php) + {TIMETRACKER_VSTUP} shortcode + `kontrola` route relocated here
- * from timetracker.
+ * racetiming plugin - languages/Italian/Italian_front.php
  *
- * Array-style LAN file loaded on the front-end via e107::lan('racetiming', '',
- * true). Canonical, complete set; the Slovak file
- * (languages/Slovak/Slovak_front.php) overrides per key and falls back here for
- * any missing term. LAN key pattern: LAN_FRONT_RACETIMING_<NAME>.
- *
- * NOTE: per the faithful 1:1 relocation, the keypad glyphs, header caption and
- * operator notices in vstup.php are intentionally LEFT HARDCODED (Slovak) and
- * are NOT wired to these keys (see NOTES.md). These strings are the canonical
- * EN/SK set for racetiming's first front route, ready for a later i18n pass.
+*/
+
+/*
+ * vstup.php does not use these keys yet: the keypad texts are still hardcoded in
+ * Slovak.
  */
 
 if (!defined('e107_INIT')) { exit; }

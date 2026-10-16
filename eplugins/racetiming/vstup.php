@@ -2,26 +2,26 @@
 /*
  * e107 website system
  *
- * Copyright (C) 2008-2013 e107 Inc (e107.org)
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * e107 Blank Plugin
+ * racetiming plugin - vstup.php
  *
 */
+
+/*
+ * Checkpoint keypad - see docs/plugins/racetiming.md, "The checkpoint keypad".
+ * Reached through the 'kontrola' route (e_url.php).
+ */
 if (!defined('e107_INIT'))
 {
     require_once(__DIR__ . '/../../class2.php');
 }
 
-// Front LAN domain for the manual passing-entry "keypad app" (relocated here
-// from timetracker). NOTE: the keypad UI, header caption and operator notices
-// below are intentionally LEFT HARDCODED (faithful 1:1 relocation — see
-// NOTES.md); this loader makes racetiming's first front route LAN-ready and
-// exposes the LAN_FRONT_RACETIMING_* set (languages/<Lang>/<Lang>_front.php).
-// This is a FRONT page, so it loads ONLY racetiming's _front domain; _global is
-// loaded automatically by the core (lan_global_list) and _admin is never used
-// here (the only non-front constants referenced are core e107 strings).
+// Front page: load only racetiming's _front LAN (_global is loaded by the core
+// via lan_global_list). The keypad texts below are still hardcoded in Slovak;
+// the LAN_FRONT_RACETIMING_* keys are not used yet.
 e107::lan('racetiming', '', true);
 
 /**
@@ -188,47 +188,64 @@ require_once(HEADERF);                     // render the header (everything befo
 
 $frm = e107::getForm();
 
-/*
-ak existuje záznam a snaží sa poslať SEND - záznam s časom, vypíše, že už existuje 
-ak existuje záznam a snaží sa poslať DNF, DSQ - záznam uloží, pôvodný čas neprepíše a pridá údaj DNF, DSQ 
-ak už má akýkoľvek záznam s DNQ, DNS, ..  , tak vypíše že už skončil a záznam nepridá
-*/
+// Save rules: docs/plugins/racetiming.md, "The checkpoint keypad" and
+// "The three statuses".
  
 
-if($_POST['submit']) {
+$tp = e107::getParser();
+$message = '';
+
+if(!empty($_POST['submit'])) {
  
-    $racer_number = trim($_POST['number']);
-    $race_point_sef = trim($_POST['race_time_point']);
+    // Bib and checkpoint code are TEXT (never cast to int). Every value placed
+    // in hand-written SQL goes through $tp->toDB(); insert() binds its values.
+    // Raw input echoed back in messages is escaped with htmlspecialchars().
+    $racer_number = trim((string) varset($_POST['number'], ''));
+    $race_point_sef = trim((string) varset($_POST['race_time_point'], ''));
+
+    // Normalise the bib BEFORE the duplicate / ended-early checks, so they
+    // compare the same text that is stored. Digit input: drop extra leading
+    // zeros and pad to at least 4 characters (the same result as the former
+    // sprintf("%04d"), done on the text - the bib is never cast to a number).
+    // Any other input is used as typed.
+    if ($racer_number === '' || ctype_digit($racer_number))
+    {
+        $racer_number = str_pad(ltrim($racer_number, '0'), 4, '0', STR_PAD_LEFT);
+    }
+
+    $numberDb = $tp->toDB($racer_number);
+    $pointDb  = $tp->toDB($race_point_sef);
+    $race_time_id = 0;
  
     $ended = '';
     if ($_POST['submit'] == "endeddnf") $ended = "DNF";
 	if ($_POST['submit'] == "endeddsq") $ended = "DSQ";
 
-    $query = "SELECT *  FROM " . MPREFIX . "race_time WHERE race_time_point LIKE '{$race_point_sef}' 
-        AND race_time_racer_number LIKE '{$racer_number}' LIMIT 1";
+    $query = "SELECT *  FROM " . MPREFIX . "race_time WHERE race_time_point LIKE '{$pointDb}' 
+        AND race_time_racer_number LIKE '{$numberDb}' LIMIT 1";
  
     $exist = e107::getDb()->retrieve($query);
 
 	if($exist) {
-		$race_time_id = $exist['race_time_id'];
+		$race_time_id = (int) $exist['race_time_id'];
 	 
 	}
  
 	if ($exist && $ended == "")
 	{
 
-		$message = "<span class='bg-danger text-white'>Pretekár č. {$racer_number} je už na {$race_point_sef} zapísaný</span>";
+		$message = "<span class='bg-danger text-white'>Pretekár č. " . htmlspecialchars($racer_number, ENT_QUOTES, 'UTF-8') . " je už na " . htmlspecialchars($race_point_sef, ENT_QUOTES, 'UTF-8') . " zapísaný</span>";
 	}
     else {
 
-		/* skontroluj ci predcasne neskoncil */
-		$query2 = "SELECT *  FROM " . MPREFIX . "race_time WHERE race_time_racer_number LIKE '{$racer_number}'  AND race_time_ended != '' LIMIT 1";
+		/* Refuse if the racer already has a DNF/DSQ/DNS row anywhere. */
+		$query2 = "SELECT *  FROM " . MPREFIX . "race_time WHERE race_time_racer_number LIKE '{$numberDb}'  AND race_time_ended != '' LIMIT 1";
  
 		$exist2 = e107::getDb()->retrieve($query2);
 
 		if($exist2) {
 
-			$message = "<span class='bg-danger text-white'>Pretekár {$racer_number} už predčasne skončil</span>";
+			$message = "<span class='bg-danger text-white'>Pretekár " . htmlspecialchars($racer_number, ENT_QUOTES, 'UTF-8') . " už predčasne skončil</span>";
 		}
 		else {
 
@@ -236,22 +253,16 @@ if($_POST['submit']) {
 			// $current_time = microtime(true);
 				$displayedtime = getFormattedCurrentDateTime();
 				echo $displayedtime; 
-				$racer_number = sprintf("%04d", $racer_number);
 
 
 				if($race_time_id) {
-					/*
-					UPDATE table_name
-						SET column1 = value1, column2 = value2, ...
-					WHERE condition;
-					*/
 					if($ended) {
-						$sql = "UPDATE " . MPREFIX . "race_time  SET race_time_point = '" . $race_point_sef . "', race_time_racer_number = '" . $racer_number . "', 
+						$sql = "UPDATE " . MPREFIX . "race_time  SET race_time_point = '" . $pointDb . "', race_time_racer_number = '" . $numberDb . "', 
 						 race_time_ended = '" . $ended . "', race_time_updated = " . time() .
 							" WHERE race_time_id = " . $race_time_id;
 					}
 					else {
-						$sql = "UPDATE " . MPREFIX . "race_time  SET race_time_point = '" . $race_point_sef . "', race_time_racer_number = '" . $racer_number . "', 
+						$sql = "UPDATE " . MPREFIX . "race_time  SET race_time_point = '" . $pointDb . "', race_time_racer_number = '" . $numberDb . "', 
 						race_time_time = '" . $displayedtime . "', race_time_ended = '" . $ended . "', race_time_updated = " . time() .
 							" WHERE race_time_id = " . $race_time_id;
 					}
@@ -284,36 +295,25 @@ if($_POST['submit']) {
  
 }
 
-$race_point_sef = $_GET['k'];
+$race_point_sef = (string) varset($_GET['k'], '');
+$pointDb = $tp->toDB($race_point_sef);
 
 $query = "SELECT * FROM " . MPREFIX . "race_point AS rp
-            WHERE race_point_code = '{$race_point_sef}'";
+            WHERE race_point_code = '{$pointDb}'";
 
 $point_data = e107::getDb()->retrieve($query );
 
 
-$where = " race_time_point = '". $race_point_sef."' "; 
-$query = "SELECT * FROM  " . MPREFIX . "race_time AS rt WHERE race_time_point = '" . $race_point_sef . "' ORDER BY `race_time_id` DESC ";
+$query = "SELECT * FROM  " . MPREFIX . "race_time AS rt WHERE race_time_point = '" . $pointDb . "' ORDER BY `race_time_id` DESC ";
 $time_data = e107::getDb()->retrieve($query, true);
 
 $count = count($time_data);
-$last_number = $time_data[0]['race_time_racer_number'];
+$last_number = isset($time_data[0]['race_time_racer_number']) ? htmlspecialchars((string) $time_data[0]['race_time_racer_number'], ENT_QUOTES, 'UTF-8') : '';
+$point_name  = isset($point_data['race_point_name']) ? $tp->toHTML($point_data['race_point_name'], false, 'TITLE') : '';
 
 $caption = 
-"<b>".$point_data['race_point_name'] . ": poradie {$count} - predošlé číslo: {$last_number} </b>". $message;
+"<b>". $point_name . ": poradie {$count} - predošlé číslo: {$last_number} </b>". $message;
  
-/*
-CREATE TABLE `race_time` (
-`race_time_id` int NOT NULL AUTO_INCREMENT,
-`race_time_racer_number` VARCHAR(11) NOT NULL,
-`race_time_point` VARCHAR(11) NOT NULL ,
-`race_time_time` VARCHAR(100) NOT NULL ,
-`race_time_ended` VARCHAR(3) NOT NULL DEFAULT '',
-`race_time_created` int NOT NULL,
-`race_time_updated` int NOT NULL,
-PRIMARY KEY (`race_time_id`)
-) ENGINE=MyISAM;
-*/
 
 $start = '<div class="tracker mb-3" > '; 
 $end = '</div>';

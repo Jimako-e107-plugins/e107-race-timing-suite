@@ -2,20 +2,18 @@
 /*
  * e107 website system
  *
- * racereports plugin - Italian admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racereports', true, true).
- * Array-style is used on purpose: e107's includeLan() only applies the per-key
- * English fallback for missing translations when the language file RETURNS an
- * array, so a partial Slovak file (languages/Slovak/Slovak_admin.php) degrades
- * cleanly to these English strings instead of leaving constants undefined. This
- * file is the canonical, complete set; the Slovak file overrides per key.
- */
+ * racereports plugin - languages/Italian/Italian_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Schermata principale amministratore (admin/admin_config.php).
+    // Settings screen (admin/admin_config.php) - menu caption.
     'LAN_ADMIN_RACEREPORTS_003' => 'Amministrazione dei resoconti di gara',
 
     // Voci del menu di navigazione sinistro + intestazioni di pagina.
@@ -29,7 +27,7 @@ return array(
     'LAN_ADMIN_RACEREPORTS_107' => 'Arrivi (dobeh)',
     'LAN_ADMIN_RACEREPORTS_116' => 'Progressione del corridore',
 
-    // Link ai resoconti nella pagina principale.
+    // Report screens: empty notices and link labels.
     'LAN_ADMIN_RACEREPORTS_010' => 'Nessuna gara presente.',
     'LAN_ADMIN_RACEREPORTS_011' => 'Nessuna categoria presente.',
     'LAN_ADMIN_RACEREPORTS_012' => 'Nessun punto di controllo presente.',
@@ -38,12 +36,12 @@ return array(
     'LAN_ADMIN_RACEREPORTS_030' => 'Tempi dopo i punti di controllo',
     'LAN_ADMIN_RACEREPORTS_031' => 'online - tutti i punti di controllo',
 
-    // Schermata panoramica: elenco informativo dei tipi di resoconto supportati.
+    // Overview screen (old admin/admin_reports.php only): info-only list.
     'LAN_ADMIN_RACEREPORTS_050' => 'Tipi di risultati supportati',
     'LAN_ADMIN_RACEREPORTS_051' => 'Online',
     'LAN_ADMIN_RACEREPORTS_052' => 'Tempi ai punti di controllo',
 
-    // Schermata SUT: risultati per percorso riservati ai soli atleti che hanno terminato la gara.
+    // SUT screen.
     'LAN_ADMIN_RACEREPORTS_060' => 'Risultati per percorso (solo arrivati)',
 
     // Schermata NUMERO: progressione del corridore - per ogni pettorale -> resoconto del singolo corridore su tutto il percorso.
@@ -89,9 +87,7 @@ return array(
     'LAN_ADMIN_RACEREPORTS_096' => 'Disattivato (predefinito) = nessuna colonna per la categoria. Attivato = mostra una colonna con il nome della categoria nell\'elenco del traguardo (risultati) e nella relativa esportazione CSV/XLS.',
     'LAN_ADMIN_RACEREPORTS_110' => 'Risultati - cifre decimali inferiori al secondo',
     'LAN_ADMIN_RACEREPORTS_111' => '0-3. Si applica ai resoconti dei risultati (online, punti di controllo, traguardo, partenza, segmento, arrivi). I dati sono sempre memorizzati a 3 decimali (ms); questo valore influisce solo sulla visualizzazione (troncata, non arrotondata). Il SUT ha una propria impostazione; il resoconto Aktuálne (panoramica) non è gestito da questa opzione.',
-    // Intestazioni delle schede di preferenza nella schermata delle impostazioni (e_admin_ui $preftabs). 
-    // Le chiavi delle schede stringa (dec/colors/refresh/custom) associano ogni preferenza all'identità di una scheda; 
-    // il riordinamento dell'elenco delle schede non influisce mai sulle preferenze.
+    // Settings tab captions ($preftabs).
     'LAN_ADMIN_RACEREPORTS_112' => 'Decimali',
     'LAN_ADMIN_RACEREPORTS_113' => 'Colorazione',
     'LAN_ADMIN_RACEREPORTS_114' => 'Aggiornamento',

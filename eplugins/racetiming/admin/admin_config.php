@@ -2,24 +2,22 @@
 /*
  * e107 website system
  *
- * racetiming plugin - race_time table administration.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * This is the race_time CRUD admin (list / create / edit / delete), extracted
- * verbatim from timetracker/admin/admin_timetracker.php as part of the strangler
- * decomposition of timetracker. racetiming OWNS the race_time table; the bulk
- * start-generation feature STAYS in timetracker (it depends on timetracker prefs)
- * and is moved separately later.
+ * racetiming plugin - admin/admin_config.php
  *
- * SECURITY / conventions (native e107 only):
- *   - Bootstrap via class2.php, gate the whole screen on this plugin's OWN admin
- *     permission with getperms('P').
- *   - e_admin_ui handles CSRF via e_token; input goes through $tp->toDB() and
- *     output through $tp->toHTML()/toAttribute(); all queries are parameterized
- *     through the db class. No raw SQL.
- *   - start number (race_time_racer_number) is a STRING (4-char, leading zeros),
- *     never an integer; race_time_time is a plain text field holding the exact
- *     `Y-m-d H:i:s.v` millisecond string (VARCHAR(100)), never a datestamp field
- *     type - that would convert to/from a unix int and destroy ms precision.
+*/
+
+/*
+ * race_time CRUD: Time Entries / Add Time Entry (docs/plugins/racetiming.md).
+ *
+ * - race_time_racer_number is a string (leading zeros are data), never an int.
+ * - race_time_time is a plain text field holding the 'Y-m-d H:i:s.v' millisecond
+ *   string - never a datestamp type, which would convert it to a unix int and
+ *   lose the milliseconds.
+ * - Queries go through the db class; e_admin_ui handles the e_token (CSRF).
  */
 
 require_once("../../../class2.php");
@@ -156,11 +154,9 @@ class race_time_ui extends e_admin_ui
 			$data['race_result_updated'] = time();
 			$data['race_result_sent'] = 0;
 
-			// race_time CRUD only writes the result row (race_result_sent = 0);
-			// the race_result sync still runs through timetracker's e_event.php
-			// handlers (terminovka_saveresult / terminovka_deleteresult) during
-			// the strangler interim - event names are kept verbatim so behaviour
-			// is unchanged. Sending to the API is handled by the terminovka plugin.
+			// The terminovka_* events are handled by terminovka/e_event.php (only
+			// when terminovka is installed); sending to the API is done by the
+			// terminovka batch page. See docs, "The three statuses".
 			e107::getEvent()->trigger('terminovka_saveresult', $data);
 		}
 	}

@@ -2,26 +2,17 @@
 /*
  * e107 website system
  *
- * racereports plugin - ONLINE report (clean equivalent of
- * timetracker_online.php).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Online overall standings. Racers are bucketed by the FURTHEST checkpoint they
- * have reached (checkpoints walked finish-first = race_point_order DESC), each
- * racer consumed at that furthest point, then sorted by elapsed start->that
- * checkpoint ASCENDING within the bucket. Rank is a cumulative counter across
- * buckets, except the finish bucket which shows its local 1..N.
+ * racereports plugin - report_online.php
  *
- * All time math comes from the racetiming engine; this page does ONLY the
- * fetch / bucket / rank / render. Output is escaped.
- *
- *   Columns: rank, bib (string), name+club, nationality, time, checkpoint-code.
- *   r=komplet -> all races, DESC order.  c=komplet -> all categories, ASC.
- *   Auto-refresh: ?refresh=<int> in the URL wins (even 0 = off); otherwise the
- *   plugin's own online_refresh_interval pref (default 0 = no auto-refresh).
- *
- * SCOPE: this is a pure live READ. The legacy online page could also fire the
- * result-freeze / terminovka send when genresults=1; that already works and is
- * OUT OF SCOPE - it is NOT replicated or moved here.
+*/
+
+/*
+ * Online results (docs/plugins/racereports.md, "Online results"). All time math comes
+ * from the racetiming engine; this page only fetches, buckets, ranks and renders.
  */
 
 if (!defined('e107_INIT'))
@@ -36,19 +27,9 @@ $style = '
 e107::css('inline', $style);
 define('e_IFRAME', true);
 
-// Auto-refresh resolution: the ?refresh= URL param ALWAYS wins over the pref,
-// even ?refresh=0 (which means "disable on THIS window", NOT "fall back to the
-// pref") - hence the isset() distinction, not ?:. When no ?refresh is present we
-// fall back to the plugin's OWN online_refresh_interval pref (racereports' own
-// pref - NOT timetracker's refresh_interval). Default 0 = no auto-refresh, so an
-// unset pref + no URL param reproduces today's behaviour exactly.
-//   ?refresh=10 (any pref)  -> 10s   (pref ignored)
-//   ?refresh=0  (any pref)  -> none  (pref ignored)
-//   no ?refresh, pref=30    -> 30s
-//   no ?refresh, pref=0/unset -> none
-// e107::meta() MUST run BEFORE the header (require_once HEADERF) renders, or the
-// <meta http-equiv="refresh"> never lands in <head> - keep it in this pre-HEADERF
-// spot. (This is exactly why a later e107::meta() call would silently no-op.)
+// Auto-refresh (docs/plugins/racereports.md, "Tab: Refresh"): ?refresh wins even
+// when 0 ("off for this window"), hence isset(), not ?:. e107::meta() MUST run
+// before HEADERF, or the refresh meta never reaches <head>.
 $refresh = isset($_GET['refresh'])
 	? (int) e107::getParser()->filter($_GET['refresh'], 'int')                    // URL present -> wins, even 0
 	: (int) e107::getPlugConfig('racereports')->get('online_refresh_interval', 0); // else pref
@@ -68,12 +49,9 @@ if (!defined('LAN_RACEREPORTS_ALL_CATEGORIES')) define('LAN_RACEREPORTS_ALL_CATE
 if (!defined('LAN_RACEREPORTS_HELP_REFRESH_TITLE')) define('LAN_RACEREPORTS_HELP_REFRESH_TITLE', 'Online results — automatic refresh');
 if (!defined('LAN_RACEREPORTS_HELP_REFRESH_BODY'))  define('LAN_RACEREPORTS_HELP_REFRESH_BODY', '');
 
-// Page help: a short collapsible note at the top explaining the auto-refresh
-// behaviour (default pref + ?refresh override). No JS needed - native <details>.
-// The BODY is a trusted, static LAN string (HTML markup), so it is echoed RAW;
-// the TITLE goes through toHTML(). Skipped if the body LAN failed to load.
-// ADMIN-ONLY: this is operator help, not visitor content - regular visitors see
-// the live board with no help text. The refresh BEHAVIOUR above is unaffected.
+// Admin-only help note (native <details>). The BODY is a trusted static LAN
+// string with HTML markup, so it is echoed RAW; the TITLE goes through toHTML().
+// Skipped if the body LAN failed to load.
 if (ADMIN && LAN_RACEREPORTS_HELP_REFRESH_BODY !== '')
 {
 	echo "<div class='container'><details class='racereports-help' style='margin:8px 0;'>"
@@ -103,7 +81,7 @@ if ($raceSef === '')
 
 if ($raceSef === 'komplet')
 {
-	// All races, all categories, DESC order.
+	// All races, all categories, DESC order (slowest first).
 	echo "<div class='container'><div class='row'>";
 	foreach ($report->fetchAllRaces() as $race)
 	{
@@ -168,7 +146,7 @@ function racereports_finish_list($report, $clock, $race, $category = null, $orde
 	$checkpoints = $report->fetchCheckpoints($raceId);    // race_point_order DESC
 
 	// Working pool of racer numbers that have any crossing row, consumed as each
-	// is bucketed at its furthest point (mirrors legacy array_diff_key on $points).
+	// is bucketed at its furthest point.
 	$pool = array();
 	foreach ($clock->racerNumbers() as $num)
 	{
@@ -208,9 +186,8 @@ function racereports_finish_list($report, $clock, $race, $category = null, $orde
 }
 
 /**
- * Render one furthest-point bucket: split NORMAL (ranked, elapsed ASC/DESC) and
- * ENDED (DNF/DSQ/DNS/no-time, rendered after, non-ranked), assigning the
- * cumulative/local rank exactly as the legacy vypluj_point() (online.php:210).
+ * Render one furthest-point bucket: NORMAL (ranked, elapsed ASC/DESC), then ENDED
+ * (DNF/DSQ/DNS/no time, non-ranked), with the cumulative / local rank.
  *
  * @return int the updated cumulative global rank
  */
@@ -218,9 +195,8 @@ function racereports_vypluj_point($report, $clock, $bucket, $globalOrder, $order
 {
 	$tp = e107::getParser();
 
-	// Central RESULT-time precision (DISPLAY-ONLY, truncates). Default 2 enforced
-	// here at the consumer; passed explicitly to diffOnPoint so the engine helper
-	// stays pref-agnostic (its own default is left at 1).
+	// result_decimals (display-only, truncates), passed explicitly so diffOnPoint
+	// stays pref-agnostic.
 	$resDec = (int) e107::getPlugConfig('racereports')->get('result_decimals', 2);
 
 	$normal = array();
@@ -235,10 +211,8 @@ function racereports_vypluj_point($report, $clock, $bucket, $globalOrder, $order
 		$racer['racer_name']  = $report->getRacerName($racer);
 		$racer['point_code']  = $code;
 
-		// DNS bucket: this report treats an un-marked racer (racer_active = false,
-		// the manual bib-collection flag, source = racer table) as DNS. That is a
-		// report-level reading of the flag, NOT a claim that racer_active == DNS;
-		// the two are different concepts (see racereports/NOTES.md terminology note).
+		// DNS = racer_active not set: a report-level reading of the flag, not its
+		// meaning (racereports-NOTES.md, "Terminology: racer_active vs DNS").
 		if (empty($racer['racer_active']))
 		{
 			$racer['difftext'] = 'DNS';
@@ -257,7 +231,8 @@ function racereports_vypluj_point($report, $clock, $bucket, $globalOrder, $order
 		}
 		else
 		{
-			// Online ENDED difftext rules (online.php:254-265).
+			// Not ranked: show the text only for a flagged result (time -1), plus
+			// the ended marker when one is stamped here.
 			if ($diff['time'] == -1)
 			{
 				$racer['difftext'] = $diff['text'];
@@ -320,8 +295,6 @@ function racereports_vypluj_point($report, $clock, $bucket, $globalOrder, $order
 	foreach ($ended as $racer)
 	{
 		$pointCode = isset($racer['point_code']) ? $racer['point_code'] : '';
-		// ENDED racers (DNF/DSQ/DNS) are NOT colored - only ranked/normal racers
-		// get the per-category background, matching legacy timetracker online.
 		echo "<tr>";
 		echo "<td></td>";
 		echo "<td>" . $tp->toHTML($racer['racer_number'], false, 'TITLE') . "</td>";
@@ -336,8 +309,8 @@ function racereports_vypluj_point($report, $clock, $bucket, $globalOrder, $order
 }
 
 /**
- * Per-category row background colour (race_category.race_category_color), looked
- * up the same way the legacy page did. Static cache for the request.
+ * Per-category row background colour (race_category.race_category_color), static
+ * cache for the request. Each report page defines its own copy.
  */
 function race_report_color($clock, $racer)
 {

@@ -2,15 +2,18 @@
 /*
  * e107 website system
  *
- * race plugin - English admin language file (issue #37).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file (returns the terms) loaded via
- * e107::lan('racetrack', true, true). Array-style is used on purpose: e107's
- * includeLan() only applies the per-key English fallback for missing
- * translations when the language file RETURNS an array, so a partial Slovak
- * file (languages/Slovak/Slovak_admin.php) degrades cleanly to these English
- * strings instead of leaving constants undefined. This file is the canonical,
- * complete set; the Slovak file overrides per key.
+ * racetrack plugin - languages/English/English_admin.php
+ *
+*/
+
+/*
+ * Array-style LAN file on purpose: e107's includeLan() applies the per-key
+ * English fallback only when the file returns an array. The English files
+ * are the complete base set; the other languages override per key.
  */
 
 if (!defined('e107_INIT')) { exit; }
@@ -28,17 +31,17 @@ return array(
     'LAN_ADMIN_POINTS'        => 'Checkpoints',
     'LAN_ADMIN_POINTS_ADD'    => 'Add checkpoint',
 
-    // --- Archive admin (race_archive) + race-row "Archive" button ------------
+    // --- Archive screen + Track list "Archive" button ------------------------
     'LAN_ADMIN_ARCHIVE'            => 'Archive',
     'LAN_ADMIN_ARCHIVE_ADD'        => 'Add archive',
     'LAN_ADMIN_ARCHIVE_TRACK'      => 'Track',
     'LAN_ADMIN_ARCHIVE_UNLINKED'  => 'Unlinked archive',
     'LAN_ADMIN_ARCHIVE_CREATED'   => 'Created',
     'LAN_ADMIN_ARCHIVE_UPDATED'   => 'Updated',
-    // Button captions (Slovak terms kept verbatim per the product wording).
+    // Button captions.
     'LAN_ADMIN_ARCHIVE_ARCHIVOVAT' => 'Archive',          // race-row button
-    'LAN_ADMIN_ARCHIVE_REGENERATE' => 'Regenerate',       // archive-row button (Pregenerovat)
-    'LAN_ADMIN_ARCHIVE_VIEW'       => 'View',             // archive-row quick view (Zobrazit)
+    'LAN_ADMIN_ARCHIVE_REGENERATE' => 'Regenerate',       // archive-row button
+    'LAN_ADMIN_ARCHIVE_VIEW'       => 'View',             // archive-row button
     // Generate result / guard messages.
     'LAN_ADMIN_ARCHIVE_MSG_CREATED'  => 'Archive created',
     'LAN_ADMIN_ARCHIVE_MSG_UPDATED'  => 'Archive updated',
@@ -48,12 +51,12 @@ return array(
     'LAN_ADMIN_ARCHIVE_MSG_BAD_TOKEN' => 'Invalid security token - the request was ignored.',
     'LAN_ADMIN_ARCHIVE_NOTE'         => 'A linked archive (Track set) can be regenerated with the Regenerate button. View always shows the frozen snapshot and never regenerates. Unlinking (Track = Unlinked archive) keeps the row but hides Regenerate.',
 
-    // Track edit form tab label (issue #34).
+    // Track edit form tab label.
     'LAN_ADMIN_RACE_TAB_TRACK' => 'Track',
-    // Opt-in Registration tab label (shown only when racereg is installed).
+    // Registration tab (shown only when racereg is installed).
     'LAN_ADMIN_RACE_TAB_REG'   => 'Registration',
 
-    // --- Registration-config + price-tier admin strings (issue #30) ----------
+    // --- Registration settings + price tiers ---------------------------------
     // Track registration flags + capacity.
     'LAN_ADMIN_RACE_CAPACITY'       => 'Capacity',
     'LAN_ADMIN_RACE_CAPACITY_HELP'  => 'Maximum number of racers on the start list. Ignored when unlimited capacity is on.',
@@ -64,7 +67,7 @@ return array(
     'LAN_ADMIN_RACE_CLOSED'         => 'Registration closed',
     'LAN_ADMIN_RACE_CLOSED_HELP'    => 'When on, this track cannot be signed up for.',
 
-    // Date-tiered price tiers (child table).
+    // Date-tiered price tiers.
     'LAN_ADMIN_PRICES'              => 'Price tiers',
     'LAN_ADMIN_PRICES_ADD'          => 'Add price tier',
     'LAN_ADMIN_PRICE_TRACK'         => 'Track',
@@ -73,13 +76,12 @@ return array(
     'LAN_ADMIN_PRICE_FROM'          => 'Valid from',
     'LAN_ADMIN_PRICE_FROM_HELP'     => 'Date and time from which this price applies. The tier with the latest date that is <= the current time applies to a sign-up.',
 
-    // --- Save-time warnings for an open track (issue #47) --------------------
+    // --- Save-time warnings for an open track -------------------------------
     'LAN_ADMIN_RACE_CAP_WARN'  => 'This track is open for registration but its capacity is 0 and it is not set to unlimited - nobody can be placed on the start list. Set a capacity or turn on unlimited capacity.',
     'LAN_ADMIN_RACE_FREE_WARN' => 'This track is open for registration but has no price tier - sign-ups will be treated as free ("bez poplatku"). Add a price tier if a fee should be charged.',
 
-    // --- Cross-plugin admin-menu shortcuts + not-installed warnings ----------
  
-    // --- Track-config help page (issue #47) ----------------------------------
+    // --- Track list help panel ----------------------------------------------
     'LAN_ADMIN_RACE_TRACK_HELP' =>
         '<strong>Registration settings per track</strong><br>'
         . '<strong>Capacity</strong> - maximum number of racers on the start list. '

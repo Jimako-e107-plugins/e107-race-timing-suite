@@ -2,20 +2,18 @@
 /*
  * e107 website system
  *
- * raceevent base plugin - EVENT OVERVIEW front page.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Public front page for the cross-suite link directory. Served via the
- * e107::url('raceevent', 'index', ...) route (SEF alias 'preteky', the original
- * alias - see e_url.php). This is the strangler replacement for the legacy
- * hand-made timetracker/index.php overview; timetracker's own 'index'/'preteky'
- * route stays commented as a trace.
+ * raceevent plugin - page_overview.php
  *
- * The link list itself lives in ONE shared include
- * (includes/event_overview.php) so this page and the admin "Prehľad preteku"
- * screen render identically. This file only adds the front chrome
- * (HEADERF/FOOTERF + tablerender) around the include's returned HTML.
- *
- * READ-ONLY: the include does db reads + link building only, no writes.
+*/
+
+/*
+ * Public event overview page. The link list is built by the shared include
+ * includes/event_overview.php (also used by admin/admin_overview.php); this file
+ * only adds the front chrome (HEADERF/FOOTERF + tablerender).
  */
 
 if (!defined('e107_INIT'))

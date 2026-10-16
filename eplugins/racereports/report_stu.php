@@ -2,37 +2,19 @@
 /*
  * e107 website system
  *
- * racereports plugin - SUT report (clean equivalent of timetracker/stu.php).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Per-TRACK results list, produced for central reporting after a race closes.
- * ONE final time per racer = elapsed start->finish. Finishers (clean finish =
- * engine status OK at the 'finish' checkpoint) are listed FIRST, sorted by final
- * time ASCENDING and ranked 1..N. After them, the DNF and DSQ racers are appended
- * (Time cell shows "DNF"/"DSQ" instead of a time), continuing the running rank -
- * exactly like the legacy stu page. A racer with neither a clean finish nor a
- * DNF/DSQ marker (e.g. DNS / no usable crossing) is not listed.
+ * racereports plugin - report_stu.php
  *
- * Legacy contract mirrored: ?p selects a TRACK by race_id (timetracker/stu.php:36
- * `WHERE race_id=$_GET['p']`; timetracker/e_url.php 'stu' sef `{alias}/{race_id}/`).
- *
- * All time math comes from the racetiming engine (race_clock::elapsedToPoint +
- * race_format::formatElapsed) - NO new engine ops are added; this page does ONLY
- * presentation: fetch racers, ask the engine for the finish elapsed, sort, render.
- * Output is escaped.
- *
- * Columns (legacy stu order, timetrackerStu_class.php:234-253 / :269-290):
- *   Ranking | Time | Family Name | First Name | Gender | Birthdate | Nationality
- *   | Bibnumber(string)
- *
- * Coloring: per-category row background is OPT-IN via the stu_colors pref
- * (default OFF = clean list). When ON, ranked/normal racers get the per-category
- * background via the shared race_report_color() path (same as report_online.php /
- * report_point.php). Every row here is a finisher, hence ranked, hence colorable.
- *
- * SECURITY: the legacy raw-$_GET-into-SQL pattern is NOT carried over - ?p is
- * (int)-cast (it is a race_id), every SQL value goes through $tp->toDB() in the
- * shared helper, the bib stays a quoted string, and output is escaped via
- * $tp->toHTML()/toAttribute(). No writes, no result-freeze (out of scope).
+*/
+
+/*
+ * Results - SUT (docs/plugins/racereports.md, "Results — SUT"). ?p selects the track by
+ * race_id. All time math comes from the racetiming engine
+ * (race_clock::elapsedToPoint + race_format::formatElapsed); the page and the
+ * ?export=csv|xls download render from ONE row structure (stu_build_rows()).
  */
 
 if (!defined('e107_INIT'))
@@ -73,19 +55,15 @@ $report = new race_report();
 $clock = new race_clock();
 $clock->build(); // one read of race_time -> split map + DNF/DSQ sets
 
-// ?p selects a TRACK by race_id (legacy parity). It is an int, so (int)-cast.
+// ?p selects a TRACK by race_id, (int)-cast.
 $raceId = isset($_GET['p']) ? (int) $_GET['p'] : 0;
 $race   = $raceId > 0 ? $report->fetchRaceById($raceId) : false;
 
-// Build the neutral structure ONCE (headers + display-formatted rows + the
-// text-protected column indices) and feed BOTH the export and the HTML table from
-// it - there is no second, divergent row set. Only built when a race resolves.
+// Build the row structure ONCE and feed both the export and the HTML table from
+// it. Only built when a race resolves.
 $built = !empty($race) ? stu_build_rows($report, $clock, $raceId) : null;
 
-// EXPORT BRANCH: stream and exit BEFORE HEADERF / any output. The cells are exactly
-// what the HTML table shows (same start-number string, same time string), so the
-// file is byte-identical to the page. The start number (leading zeros) and the time
-// string are marked as text columns so spreadsheets do not mangle them.
+// EXPORT BRANCH: stream and exit BEFORE HEADERF / any output.
 $export = isset($_GET['export']) ? (string) $_GET['export'] : '';
 if ($built !== null && ($export === 'csv' || $export === 'xls'))
 {
@@ -112,10 +90,8 @@ e107::css('inline', $style);
 
 require_once(HEADERF);
 
-// Sortable columns for the finishers table. CENTRAL opt-in loader (one call);
-// the assets + init are registered once in includes/race_report.php. stu is the
-// only report enabling DataTables today (online is live/auto-refresh; point left
-// as-is). The Time column sorts by a NUMERIC data-order key, see below.
+// Sortable columns (DataTables, see race_report_load_datatables()). The Time
+// column sorts by a NUMERIC data-order key, see below.
 race_report_load_datatables();
 
 if (empty($race))
@@ -131,11 +107,8 @@ echo "<h2>" . $tp->toHTML($race['race_name'], false, 'TITLE')
 render_stu_list($built, $raceId);
 
 /**
- * Build the per-track results for one track as a NEUTRAL structure that both the
- * HTML table and the CSV/XLS export render from. Finishers (clean finish at
- * 'finish' -> elapsedToPoint returns a float) come first, sorted by that elapsed
- * ASC and ranked 1..N; then the DNF and DSQ racers are appended (Time cell = the
- * "DNF"/"DSQ" marker), continuing the running rank - the legacy stu ordering.
+ * Build the results of one track as a NEUTRAL structure that both the HTML table
+ * and the CSV/XLS export render from (row order: docs, "Results — SUT").
  *
  * Returns:
  *   headers   : ordered display labels (the report's own column labels)
@@ -146,7 +119,7 @@ render_stu_list($built, $raceId);
  *                 order = raw elapsed seconds (DataTables numeric sort key; DNF/DSQ
  *                         rows get a large sentinel so they sort AFTER finishers)
  *                 color = per-category background ('' when colours off; always ''
- *                         for DNF/DSQ - ended rows are never coloured, legacy rule)
+ *                         for DNF/DSQ - ended rows are never coloured)
  *   useColors : whether the per-category row background is on
  *
  * @param race_report $report
@@ -156,15 +129,10 @@ render_stu_list($built, $raceId);
  */
 function stu_build_rows($report, $clock, $raceId)
 {
-	// Finish-time decimal places, from the plugin prefs (admin SETTINGS page).
-	// Unset/absent pref => 0 => formatElapsed cuts to whole seconds (HH:MM:SS),
-	// byte-for-byte the legacy render. max(0, …) guards a stray negative value.
+	// stu_decimals (default 0 = HH:MM:SS); max(0, …) guards a stray negative value.
 	$dec = max(0, (int) e107::getPlugConfig('racereports')->get('stu_decimals', 0));
 
-	// Per-category row coloring toggle (admin SETTINGS page). Default 0 = OFF is
-	// enforced HERE at the consumer (not in the $prefs definition), so the report
-	// renders clean - no category backgrounds - before the admin ever opens
-	// settings. ON restores the per-category background via race_report_color().
+	// stu_colors, default 0 (off) applied here at the consumer.
 	$useColors = (int) e107::getPlugConfig('racereports')->get('stu_colors', 0);
 
 	$racers = $report->fetchRacers($raceId); // keyed by bib string
@@ -174,17 +142,14 @@ function stu_build_rows($report, $clock, $raceId)
 
 	foreach ($racers as $number => $racer)
 	{
-		// Legacy stu lists only racer_active racers (timetrackerStu_class.php:48).
+		// Only racer_active racers are listed.
 		if (empty($racer['racer_active']))
 		{
 			continue;
 		}
 
-		// The engine's ranking-safe total elapsed start->finish. null = no clean
-		// finish (no start, no finish crossing, or DNF/DSQ/DNS). Clean finishers are
-		// collected here; DNF/DSQ racers are appended in a second pass below (they
-		// have no clean finish so they land here as null). NO new engine op is
-		// introduced (elapsedToPoint already exists).
+		// The engine's ranking-safe elapsed start->finish; null = no clean finish
+		// (DNF/DSQ racers are appended in the second pass below).
 		$elapsed = $clock->elapsedToPoint($number, 'finish');
 		if ($elapsed === null)
 		{
@@ -193,12 +158,8 @@ function stu_build_rows($report, $clock, $raceId)
 
 		$finished[(string) $number] = true;
 
-		// Time cell mirrors legacy stu byte-for-byte: legacy took
-		// substr(secondsToTime(elapsed), 0, 8) = "HH:MM:SS"
-		// (timetrackerStu_class.php:221 over get_racer_time_on_point 'archive').
-		// formatElapsed(elapsed, 0) is exactly that 8-char cut. Display-only; the
-		// sort key stays the full-precision float. $dec defaults to 0 (unset pref)
-		// so the render is byte-for-byte the legacy cut unless the organizer opts in.
+		// Display-only (truncated to $dec digits); the sort key stays the
+		// full-precision float.
 		$racer['stu_time'] = race_format::formatElapsed($elapsed, $dec);
 		$racer['stu_sort'] = $elapsed;
 
@@ -211,12 +172,8 @@ function stu_build_rows($report, $clock, $raceId)
 		return $a['stu_sort'] <=> $b['stu_sort'];
 	});
 
-	// SECOND PASS - DNF/DSQ. After the ranked finishers, the legacy stu appended the
-	// racers who ended DNF then DSQ (Time cell = the marker, not a time), continuing
-	// the running rank. Collect them from the engine's ended sets (isDnf/isDsq),
-	// skipping anyone already listed as a clean finisher. DNF first, then DSQ - each
-	// in fetchRacers() order (bib order), matching the legacy blocks. racer_active
-	// only, same as the finishers pass.
+	// SECOND PASS - DNF, then DSQ (engine isDnf/isDsq), each in fetchRacers() order,
+	// skipping clean finishers. racer_active only, as above.
 	$dnfRacers = array();
 	$dsqRacers = array();
 
@@ -268,8 +225,7 @@ function stu_build_rows($report, $clock, $raceId)
 		$rank++;
 
 		// The SINGLE formatted cell set, consumed verbatim by both HTML and export.
-		// The bib stays a string (leading zeros preserved); the time is the already
-		// formatted string; the birthdate goes through the legacy normalisation.
+		// The bib stays a string (leading zeros preserved).
 		$rows[] = array(
 			$rank,                                                                          // 0 rank
 			$racer['stu_time'],                                                             // 1 time (TEXT col)
@@ -289,11 +245,8 @@ function stu_build_rows($report, $clock, $raceId)
 		);
 	}
 
-	// DNF/DSQ rows follow the finishers, continuing the running rank. The Time cell
-	// holds the "DNF"/"DSQ" marker instead of a time; there is no elapsed to sort by,
-	// so the DataTables numeric sort key is a large sentinel (PHP_INT_MAX) that keeps
-	// these rows AFTER every finisher when the Time column is sorted. Ended rows are
-	// NEVER coloured (legacy rule), so 'color' stays '' regardless of the toggle.
+	// DNF/DSQ rows: no elapsed to sort by, so the DataTables sort key is a sentinel
+	// (PHP_INT_MAX) that keeps them after every finisher; never coloured.
 	foreach ($ended as $racer)
 	{
 		$rank++;
@@ -311,7 +264,7 @@ function stu_build_rows($report, $clock, $raceId)
 
 		$meta[] = array(
 			'order' => PHP_INT_MAX, // no time -> always sort after finishers
-			'color' => '',          // ended rows are never coloured (legacy rule)
+			'color' => '',          // ended rows are never coloured
 		);
 	}
 
@@ -327,11 +280,9 @@ function stu_build_rows($report, $clock, $raceId)
 }
 
 /**
- * Render the finishers-only results table for one track from the neutral structure
- * built by stu_build_rows(). The cells are the SAME ones the export streams; this
- * function only adds the HTML decoration (DataTables data-order sort key, optional
- * per-category row background, the export button group). The visible table cells
- * are byte-for-byte the pre-refactor output.
+ * Render the results table of one track from stu_build_rows(). The cells are the
+ * SAME ones the export streams; this only adds the HTML decoration (data-order
+ * sort key, optional row colour, the export buttons).
  *
  * @param array $built  the stu_build_rows() structure
  * @param int   $raceId for the export button URLs
@@ -345,10 +296,7 @@ function render_stu_list($built, $raceId)
 	$meta      = $built['meta'];
 	$useColors = $built['useColors'];
 
-	// Export button group above the table (HTML view only). Links re-request THIS
-	// report with &export=csv / &export=xls appended; the plugin path keeps both the
-	// ?p (track) and ?export params regardless of SEF. btn-csv / btn-excel mirror the
-	// users.php export-button look.
+	// Export buttons: plugin path, so ?p and ?export survive regardless of SEF.
 	$base   = e_PLUGIN_ABS . 'racereports/report_stu.php?p=' . (int) $raceId;
 	$csvUrl = $base . '&export=csv';
 	$xlsUrl = $base . '&export=xls';
@@ -361,9 +309,7 @@ function render_stu_list($built, $raceId)
 	echo "</div>";
 
 	echo '<div class="table-responsive">';
-	// Stable hook (#report_stu) + race-report class for the central DataTables init
-	// (assets/datatables/init.js targets #report_stu). thead/tbody are the existing
-	// 8-col structure - only the hook is added.
+	// Stable hook #report_stu for assets/datatables/init.js.
 	echo "<table id='report_stu' class='table table-striped table-bordered table-hover race-report'>";
 
 	echo "<thead><tr>";
@@ -381,11 +327,7 @@ function render_stu_list($built, $raceId)
 
 	foreach ($rows as $i => $row)
 	{
-		// Finisher rows are colorable; DNF/DSQ rows are not (their meta color is
-		// forced to '' upstream - the "ended rows never coloured" legacy rule).
-		// Per-category background is opt-in via the stu_colors pref (default OFF =
-		// clean table). When ON, the same race_report_color() path as the online/
-		// point reports applies to the finisher rows.
+		// Row colour only when stu_colors is on (DNF/DSQ rows carry '').
 		if ($useColors)
 		{
 			$color = isset($meta[$i]['color']) ? $meta[$i]['color'] : '';
@@ -396,14 +338,9 @@ function render_stu_list($built, $raceId)
 			echo "<tr>";
 		}
 		echo "<td>" . (int) $row[0] . "</td>";
-		// Time column: DISPLAY the formatted HH:MM:SS[.mmm] cell, but make DataTables
-		// SORT by a numeric key via native data-order = the raw full-precision elapsed
-		// seconds (the engine float in meta['order']). Lexicographic sort of the formatted
-		// string breaks once widths differ (stu_decimals>0, or sub/over-hour lengths);
-		// sorting by seconds keeps the row order identical regardless of stu_decimals.
-		// (float) cast guarantees a numeric attribute value - no escaping needed.
-		// DNF/DSQ rows carry a large sentinel (PHP_INT_MAX) as their order key, so
-		// they always sort AFTER the finishers when the Time column is sorted.
+		// Time column: display the formatted cell, but let DataTables sort by
+		// data-order = raw elapsed seconds (a string sort breaks once widths differ,
+		// e.g. stu_decimals > 0). The (float) cast makes escaping unnecessary.
 		$rawSeconds = isset($meta[$i]['order']) ? (float) $meta[$i]['order'] : PHP_INT_MAX;
 		echo "<td data-order='" . $rawSeconds . "'>" . $tp->toHTML($row[1], false, 'TITLE') . "</td>";
 		echo "<td>" . $tp->toHTML($row[2], false, 'TITLE') . "</td>";
@@ -420,11 +357,9 @@ function render_stu_list($built, $raceId)
 }
 
 /**
- * Reproduce the legacy stu birthdate normalisation
- * (timetrackerStu_class.php:110-122): a stored "19.2.1996" (dotted, possibly with
- * spaces) is rendered as "1996-02-19". On an unparseable value the legacy emitted
- * the literal "Zlý formát"; here the original string is passed through unchanged
- * (escaped at output) rather than a hardcoded marker - presentation-only.
+ * Birthdate normalisation: a stored "19.2.1996" (dotted, spaces allowed) becomes
+ * "1996-02-19"; an unparseable value is passed through unchanged (escaped at
+ * output).
  *
  * @param string $birthday raw racer_birthday
  * @return string normalised Y-m-d, or the original string when unparseable
@@ -450,9 +385,8 @@ function stu_format_birthdate($birthday)
 }
 
 /**
- * Per-category row background colour (race_category.race_category_color), looked
- * up the same way the legacy pages did. Static cache for the request. Identical
- * to the helper in report_online.php / report_point.php.
+ * Per-category row background colour (race_category.race_category_color), static
+ * cache for the request. Each report page defines its own copy.
  */
 function race_report_color($clock, $racer)
 {

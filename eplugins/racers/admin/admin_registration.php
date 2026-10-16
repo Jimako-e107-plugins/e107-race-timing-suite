@@ -2,26 +2,17 @@
 /*
  * e107 website system
  *
- * racers plugin - REGISTRÁCIA NA MIESTE (on-site registration reach-link) admin screen.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * ONE output = ONE admin file, mirroring admin_racerlist.php: a single info/link screen.
- * The on-site registration info used to clutter the prefs page help box (admin_config.php
- * renderHelp()); it now has its OWN clean admin item. The content is conditional on the
- * racers/manualinput pref:
- *   * manualinput == 1 -> the "enabled" caution text (LAN_RACERS_ADMIN_032) plus a NEW-TAB
- *     link button to racers' OWN 'registracia' e_url route (registracia.php), captioned
- *     LAN_RACERS_GLOBAL_029 ("Registrácia na mieste"). Built with e107::url() so SEF and
- *     non-SEF installs both resolve.
- *   * else -> the "not enabled" text (LAN_RACERS_ADMIN_031).
- * The message LAN constants are REUSED from the old renderHelp() block; only the menu-item
- * caption (LAN_RACERS_ADMIN_043) is new.
+ * racers plugin - admin/admin_registration.php
  *
- * Routing the racers way: this file is a self-contained admin ENTRY POINT (mirroring the
- * sibling area files and the racetrack archive fix): it bootstraps class2, requires the
- * shared dispatcher (admin_menu.php, which loads class2 + the admin LAN), gates on the
- * plugin's OWN admin permission, defines this area's controller + form classes, then runs
- * the page. racers' admin_menu.php routes the 'registration' mode straight here via its
- * $adminMenu 'url' => 'admin_registration.php'.
+*/
+
+/*
+ * On-site registration screen (docs/plugins/racers.md, "On-site registration"):
+ * content depends on the manualinput pref.
  */
 
 require_once("../../../class2.php");
@@ -35,11 +26,6 @@ if (!getperms('P'))
 }
 
 
-/**
- * On-site-registration area: a single screen rendering the conditional registration
- * info/link, driven by the racers/manualinput pref. Extends e_admin_ui as a custom
- * controller screen (no DB-table CRUD).
- */
 class racers_registration_ui extends e_admin_ui
 {
 	protected $pluginTitle = LAN_RACERS_ADMIN_043;
@@ -52,9 +38,8 @@ class racers_registration_ui extends e_admin_ui
 	protected $defaultAction = 'registration';
 
 	/**
-	 * The on-site registration screen: when manual input is enabled, the caution text
-	 * plus a new-tab link to the registracia front page; otherwise the "not enabled"
-	 * notice. Reuses the same LAN constants the old renderHelp() block used.
+	 * Caution text + new-tab link to the registracia page when manualinput is 1,
+	 * otherwise the "not enabled" notice.
 	 *
 	 * @return string
 	 */

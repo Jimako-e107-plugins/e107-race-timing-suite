@@ -2,21 +2,19 @@
 /*
  * e107 website system
  *
- * racetiming plugin - simple-mode URL (SEF) configuration.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * racetiming's FIRST front route. Serves the manual passing-entry "keypad app"
- * (vstup.php) relocated here from timetracker together with the
- * {TIMETRACKER_VSTUP} shortcode (see e_shortcode.php) and this `kontrola` route.
+ * racetiming plugin - e_url.php
  *
- * The `kontrola` key is MOVED verbatim from timetracker/e_url.php (and from
- * racetrack/e_url.php, which held a duplicate of it). The PUBLIC SEF URL is
- * byte-identical - /kontrola/{race_point_code}/{race_point_password}/ - because
- * the alias, regex and sef are unchanged; ONLY the owning plugin and the
- * redirect file-path moved. The checkpoint links are already distributed in the
- * field, so this must not change. GET params k and p are preserved.
- *
- * racetiming OWNS race_time and this feature writes raw passings into race_time,
- * so the route belongs here.
+*/
+
+/*
+ * SEF routes - listed in docs/reference/routes.md. 'kontrola' is the checkpoint
+ * keypad URL (vstup.php). Those links are handed out to marshals before the race,
+ * so alias, regex and sef must not change. The redirect passes k = checkpoint code
+ * and p = checkpoint password.
  */
 
 class racetiming_url // plugin-folder + '_url'

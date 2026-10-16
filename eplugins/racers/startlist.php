@@ -2,30 +2,26 @@
 /*
  * e107 website system
  *
- * racers - public start list (štartovacia listina).
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Lists ALL registered competitors for a track (race_sef) + category
- * (race_category_sef), before the start. The "Čas štartu" column shows the
- * start time only for racers who already started; an empty cell flags who is
- * still missing at the start.
+ * racers plugin - startlist.php
  *
- * The start time is read from the timing layer via the racetiming engine
- * (race_clock::timeOfDay at the race_time point 'start', formatted with
- * formatTimeOfDay). The read is GUARDED by isInstalled('racetiming'); when
- * racetiming is absent the cell is empty (racer not started). This decouples
- * the start list from timetracker - the previously deliberate, temporary
- * timetracker coupling is now done (see NOTES.md).
+*/
+
+/*
+ * Public start list (docs/plugins/racers.md, "Start list page"). The start time
+ * is read from the racetiming engine (race_clock, point 'start'), guarded by
+ * isInstalled('racetiming'), so racetiming is not a hard dependency.
  */
 if (!defined('e107_INIT'))
 {
     require_once(__DIR__ . '/../../class2.php');
 }
 
-// Register the compact-row rule BEFORE HEADERF: require_once(HEADERF) renders the
-// document <head> and flushes all registered CSS (incl. 'inline') into it, so any
-// e107::css() call AFTER it never reaches the head. The racereports report pages
-// (report_point/online/finish/stu.php) all register this exact rule before HEADERF
-// - matched here so the rows render with the same compact padding.
+// Register CSS BEFORE HEADERF: HEADERF flushes registered CSS into <head>, later
+// e107::css() calls never reach it. Same compact-row rule as the racereports pages.
 $style = '
 .table td, .table th {
     padding: 3px!important;
@@ -37,19 +33,15 @@ require_once(HEADERF);
 $tp  = e107::getParser();
 $sql = e107::getDb();
 
-e107::lan('racers', '', true);     // racers front strings (array form, EN + SK)
-// raceevent's _front was loaded here previously but this page references no
-// raceevent strings (only LAN_RACERS_STARTLIST_*), so that dead load was removed.
+e107::lan('racers', '', true);     // racers front strings
 
 $paramRaceSef  = $tp->filter(varset($_GET['r'], ''));
 $paramCategSef = $tp->filter(varset($_GET['c'], ''));
 
-// racers' own name renderer (canonical) - not racetrack/functions.php.
+// Name via getRacerName() -> racers_name::build().
 $rr = e107::getSingleton('plugin_racers_racers', e_PLUGIN . 'racers/includes/racers.php');
 
-// Start-time source: the racetiming engine (race_clock), guarded by
-// isInstalled('racetiming'). When racetiming is absent the start cell is empty
-// (racer not started). One build() loads every crossing once for the page.
+// Start-time source (optional racetiming). One build() loads every crossing once.
 $rtInstalled = e107::isInstalled('racetiming');
 $clock = null;
 if ($rtInstalled)
@@ -96,8 +88,7 @@ $navCategSef = ($paramCategSef !== '') ? $paramCategSef : 'all';
 $nav  = "<a target='_blank' class='btn btn-default' href='" . e107::url('racers', 'startlist', array('race_sef' => 'all', 'race_category_sef' => 'all')) . "'>" . LAN_RACERS_STARTLIST_ALL . "</a>";
 foreach ($allRaceData as $race)
 {
-    // Carry the CURRENT category across track tabs so switching tracks keeps the
-    // chosen category (the ALL tab still resets both to 'all').
+    // Track tabs keep the current category; the ALL tab resets both to 'all'.
     $url  = e107::url('racers', 'startlist', array('race_sef' => $race['race_sef'], 'race_category_sef' => $navCategSef));
     $nav .= "<a target='_blank' class='btn btn-default' href='" . $url . "'>" . $tp->toHTML($race['race_name'], false, 'TITLE') . "</a>";
 }
@@ -128,10 +119,8 @@ if (!empty($raceIds) && !empty($categIds))
         $number    = $racer['racer_number']; // string - never (int)
         $racerName = $rr->getRacerName($racer);
 
-        // Start time: filled from the racetiming engine when installed, otherwise
-        // empty. An empty cell means the racer has not started yet. The displayed
-        // form is the wall-clock TIME-OF-DAY (HH:MM:SS.mmm) - formatTimeOfDay at 3
-        // decimals reproduces the legacy microtimeToSeconds string exactly.
+        // Start time as wall-clock time of day (formatTimeOfDay, 3 decimals); empty
+        // when there is no start crossing or racetiming is not installed.
         $racerTime = "";
         if ($rtInstalled)
         {

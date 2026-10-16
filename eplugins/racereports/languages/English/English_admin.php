@@ -2,21 +2,18 @@
 /*
  * e107 website system
  *
- * racereports plugin - English admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racereports', true, true).
- * Array-style is used on purpose: e107's includeLan() only applies the per-key
- * English fallback for missing translations when the language file RETURNS an
- * array, so a partial Slovak file (languages/Slovak/Slovak_admin.php) degrades
- * cleanly to these English strings instead of leaving constants undefined. This
- * file is the canonical, complete set; the Slovak file overrides per key.
- */
+ * racereports plugin - languages/English/English_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
 return array(
-    // Admin landing screen (admin/admin_config.php).
-    // Admin permission label.
+    // Settings screen (admin/admin_config.php) - menu caption.
     'LAN_ADMIN_RACEREPORTS_003' => 'Race reports administration',
 
     // Left admin-nav menu items + page captions.
@@ -30,7 +27,7 @@ return array(
     'LAN_ADMIN_RACEREPORTS_107' => 'Arrivals (dobeh)',
     'LAN_ADMIN_RACEREPORTS_116' => 'Racer progression',
 
-    // Landing-page report links.
+    // Report screens: empty notices and link labels.
     'LAN_ADMIN_RACEREPORTS_010' => 'No races yet.',
     'LAN_ADMIN_RACEREPORTS_011' => 'No categories yet.',
     'LAN_ADMIN_RACEREPORTS_012' => 'No checkpoints yet.',
@@ -39,12 +36,12 @@ return array(
     'LAN_ADMIN_RACEREPORTS_030' => 'Times after checkpoints',
     'LAN_ADMIN_RACEREPORTS_031' => 'online - all checkpoints',
 
-    // Overview screen: info-only list of the supported report types.
+    // Overview screen (old admin/admin_reports.php only): info-only list.
     'LAN_ADMIN_RACEREPORTS_050' => 'Supported result types',
     'LAN_ADMIN_RACEREPORTS_051' => 'Online',
     'LAN_ADMIN_RACEREPORTS_052' => 'Checkpoint times',
 
-    // SUT screen: per-track finishers-only results.
+    // SUT screen.
     'LAN_ADMIN_RACEREPORTS_060' => 'Per-track results (finishers)',
 
     // NUMBER screen: racer progression - every bib -> single-racer whole-course report.
@@ -90,9 +87,7 @@ return array(
     'LAN_ADMIN_RACEREPORTS_096' => 'Off (default) = no category column. On = show a column with the category name in the finish (results) list and its CSV/XLS export.',
     'LAN_ADMIN_RACEREPORTS_110' => 'Results - sub-second decimal places',
     'LAN_ADMIN_RACEREPORTS_111' => '0-3. Applies to the result reports (online, checkpoints, finish, start, segment, arrivals). The data is always stored at 3 decimals (ms); this is display only (truncated, not rounded). SUT has its own setting; the Aktuálne (overview) report is not governed by this.',
-    // Settings-screen prefs-tab captions (e_admin_ui $preftabs). String tab keys
-    // (dec/colors/refresh/custom) bind each pref to a tab identity; reordering the
-    // tab list never touches the prefs.
+    // Settings tab captions ($preftabs).
     'LAN_ADMIN_RACEREPORTS_112' => 'Decimals',
     'LAN_ADMIN_RACEREPORTS_113' => 'Coloring',
     'LAN_ADMIN_RACEREPORTS_114' => 'Refresh',

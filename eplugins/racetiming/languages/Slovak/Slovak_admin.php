@@ -2,11 +2,13 @@
 /*
  * e107 website system
  *
- * racetiming plugin - Slovak admin language file.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Array-style LAN file loaded via e107::lan('racetiming', true, true). Overrides
- * the English_admin.php base per key; missing terms fall back to English.
- */
+ * racetiming plugin - languages/Slovak/Slovak_admin.php
+ *
+*/
 
 if (!defined('e107_INIT')) { exit; }
 
@@ -28,8 +30,7 @@ return array(
 	'LAN_ADMIN_RACETIMING_029' => 'Aktualizované',
 
 	// --- bulk start-generation (admin/admin_generujstart.php) ---
-	// Relocated from timetracker (LAN_TR_* there). Slovak overrides; any missing
-	// key falls back to the English_admin.php base.
+	// Any missing key falls back to the English_admin.php base.
 	'LAN_ADMIN_RACETIMING_040' => 'Generovanie štartu',
 	'LAN_ADMIN_RACETIMING_041' => 'Predvolený čas štartu',
 	'LAN_ADMIN_RACETIMING_042' => 'Použije sa ako predvolená hodnota pri generovaní štartu.',

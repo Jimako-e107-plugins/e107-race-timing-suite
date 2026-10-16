@@ -2,36 +2,23 @@
 /*
  * e107 website system
  *
- * racetiming plugin - bulk start-generation admin.
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Relocated verbatim (behaviour-preserving) from timetracker's
- * admin/admin_timetracker.php (mode=tracker action=generujStart) +
- * admin/includes/generujstart.php as part of the strangler decommission of
- * timetracker. racetiming OWNS the race_time table, and start-generation writes
- * `start` passings into race_time, so the feature belongs here.
+ * racetiming plugin - admin/admin_generujstart.php
  *
- * It hosts two things:
- *   1. the `starttime` plugin pref (datetime STRING, seconds precision) - the
- *      default value pre-filled into the generation form. Read/written via
- *      e107::getPlugConfig('racetiming'). NOTE: `generujStart` was never a pref
- *      in timetracker (only a mode/action/button name) - there is nothing to
- *      register for it.
- *   2. the bulk start-generation page (generujStartPage / action=generujStart):
- *      select tracks + a start time, then insert one `start` race_time row per
- *      active racer that does not already have one.
+*/
+
+/*
+ * Start time setting (the 'starttime' pref) and Generate Start
+ * (docs/plugins/racetiming.md).
  *
- * SECURITY / conventions (native e107 only):
- *   - Bootstrap via class2.php, gate the whole screen on this plugin's OWN admin
- *     permission with getperms('P').
- *   - e_admin_ui handles CSRF via e_token; the custom generation form is opened
- *     with e107::getForm()->open() (carries the form token). Input is read
- *     through $tp->toDB(); output through $tp->toHTML()/toAttribute(); all
- *     queries go through the db class - the existence lookup is parameterised
- *     via $tp->toDB() (the legacy code concatenated the bib number raw - fixed
- *     here without changing behaviour).
- *   - starttime is a datetime STRING (seconds precision), NEVER an int/datestamp.
- *   - the start/bib number (race_time_racer_number) is a STRING (4-char, leading
- *     zeros), never cast to int.
+ * - 'starttime' is a datetime string with seconds precision, never an
+ *   int/datestamp.
+ * - The bib (race_time_racer_number) is a string, never cast to int.
+ * - The custom form is opened with e107::getForm()->open(), which carries the
+ *   e_token (CSRF).
  */
 
 require_once("../../../class2.php");
@@ -50,19 +37,16 @@ class race_generate_ui extends e_admin_ui
 	protected $pluginTitle		= LAN_GLOBAL_RACETIMING_001;
 	protected $pluginName		= 'racetiming';
 
-	// $table is required by e_admin_ui plumbing for the prefs page and the
-	// custom generation page; no race_time CRUD is exposed from this controller
-	// (that lives in admin_config.php). Every standard CRUD action is blocked -
-	// the custom generujStart page is unaffected by $disallow.
+	// $table is required by the e_admin_ui plumbing; the race_time CRUD itself
+	// lives in admin_config.php. $disallow blocks every standard CRUD action; the
+	// custom generujStart page is unaffected.
 	protected $table			= 'race_time';
 	protected $pid				= 'race_time_id';
 
 	protected $disallow = array('list', 'grid', 'create', 'edit', 'delete', 'copy', 'batch', 'inline', 'sort');
 
-	// Single prefs tab holding the start-generation default time. starttime is a
-	// plain text field carrying a datetime STRING (e.g. "2024-10-08 07:00:00",
-	// seconds precision) - never an int/datestamp type, which would convert
-	// to/from a unix int.
+	// starttime: plain text field with a datetime string (e.g.
+	// "2024-10-08 07:00:00") - never an int/datestamp type.
 	protected $preftabs		= array(LAN_ADMIN_RACETIMING_040);
 	protected $prefs = array(
 		'starttime' => array(
@@ -84,23 +68,21 @@ class race_generate_ui extends e_admin_ui
 	{
 		$tp = e107::getParser();
 
-		$text = ''; // pre istotu vyčistíme premennú
+		$text = '';
 
 		if (array_key_exists('GenerujStartTrate', $_POST))
 		{
 			$checkedRaces = $_POST['race_id'] ?? [];
 
-			// Keep only actually-selected tracks (checkbox value === 1). Submitting
-			// the form with no track checked must NOT echo an empty results page.
+			// Only the ticked tracks (checkbox value 1).
 			$selected = array_filter($checkedRaces, static function ($v) {
 				return (int) $v === 1;
 			});
 
 			if (empty($selected))
 			{
-				// No track selected: warn and re-render the selection form so the
-				// admin can retry, instead of producing a blank page. render() the
-				// message stack explicitly since this page echoes its own markup.
+				// No track selected: warn and show the form again. render() the
+				// message stack explicitly because this page echoes its own markup.
 				e107::getMessage()->addWarning(LAN_ADMIN_RACETIMING_053);
 				$text .= e107::getMessage()->render();
 				$text .= $this->renderTrackSelectionForm();
@@ -128,15 +110,14 @@ class race_generate_ui extends e_admin_ui
 
 					foreach ($racers as $racer)
 					{
-						// race_time_racer_number is a STRING (4-char, leading zeros) - never cast to int.
+						// Bib stays a string.
 						$racer_number = $racer['racer_number'];
 
 						$text_tmp .= '<tr><td>' . $racer['racer_number'] . ' ' . $racer['racer_surname'] . '</td><td>';
 
-						if (!empty($racer['racer_active'])) // predpokladám, že pole sa volá racer_active
+						if (!empty($racer['racer_active'])) // inactive = did not start
 						{
-							// SECURITY: the bib number is escaped via $tp->toDB() before being
-							// embedded in the existence lookup (legacy code concatenated it raw).
+							// SECURITY: escape the bib before embedding it in the lookup.
 							$racer_number_db = $tp->toDB($racer_number);
 
 							$query2 = "SELECT race_time_id FROM " . MPREFIX . "race_time
@@ -152,8 +133,8 @@ class race_generate_ui extends e_admin_ui
 							}
 							else
 							{
-								// Values are escaped by the db class on insert (parameterised
-								// path) - the start time is kept as the exact datetime STRING.
+								// The db class escapes the values on insert; the start time is
+								// stored as the exact datetime string.
 								$insert = [
 									'race_time_point'        => 'start',
 									'race_time_racer_number' => $racer_number,
@@ -202,11 +183,8 @@ class race_generate_ui extends e_admin_ui
 	}
 
 	/**
-	 * Build the track-selection + start-time form (the generation form).
-	 *
-	 * Extracted so it can be re-rendered when the form is submitted with no
-	 * track selected, in addition to the initial page load. Behaviour-preserving:
-	 * the markup is identical to the original else-branch.
+	 * Track selection + start time form. Also shown again after a submit with no
+	 * track selected.
 	 */
 	protected function renderTrackSelectionForm()
 	{
@@ -240,8 +218,7 @@ class race_generate_ui extends e_admin_ui
 
 		$vf .= e107::getForm()->renderElement('race_id', null, $field);
 
-		// Default start time comes from the racetiming `starttime` pref
-		// (datetime STRING). NOT read from timetracker prefs any more.
+		// Pre-filled from the 'starttime' pref; the current time if it is unset.
 		$time = e107::getPlugConfig('racetiming')->get('starttime', date('Y-m-d H:i:s'));
 
 

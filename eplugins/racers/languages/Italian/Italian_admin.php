@@ -1,4 +1,15 @@
 <?php
+/*
+ * e107 website system
+ *
+ * Copyright (C) 2008-2015 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ * racers plugin - languages/Italian/Italian_admin.php
+ *
+*/
+
 if (!defined('e107_INIT')) { exit; }
 
 return array(
@@ -38,13 +49,12 @@ return array(
     'LAN_RACERS_ADMIN_028'      => 'Oggi',
     'LAN_RACERS_ADMIN_029'      => 'Al 1° gennaio',
     'LAN_RACERS_ADMIN_030'      => 'Consenti l\'inserimento manuale dei partecipanti.',
-    // duplicati con ambito amministrativo di LAN_RACERS_FRONT_001/002 (admin_config.php renderHelp)
+    // admin-scoped duplicates of LAN_RACERS_FRONT_001/002 (admin_registration.php)
     'LAN_RACERS_ADMIN_031'      => 'L\'inserimento manuale dei partecipanti non è consentito.',
     'LAN_RACERS_ADMIN_032'      => 'Attenzione: è consentito l\'inserimento manuale dei partecipanti senza controllo degli accessi.',
-    // pagina elenco concorrenti (racers.php) intestazione tablerender
+    // racers/list page (racers.php) tablerender heading
     'LAN_RACERS_ADMIN_033'      => 'Elenco concorrenti',
-    // didascalie del menu amministrativo delle categorie (di proprietà di racers, precedentemente mutuate da timetracker)
-    // schermate liste di partenza (admin_startlists.php) + panoramica concorrenti (admin_racerlist.php)
+    // Start-lists (admin_startlists.php) + racer-overview (admin_racerlist.php) screens
     'LAN_RACERS_ADMIN_034'      => 'Liste di partenza',
     'LAN_RACERS_ADMIN_035'      => 'Panoramica concorrenti',
     'LAN_RACERS_ADMIN_036'      => 'Tutti i percorsi (tutte le categorie)',
@@ -57,6 +67,5 @@ return array(
     'LAN_RACERS_ADMIN_043'      => 'Iscrizione sul posto',
     'LAN_RACERS_ADMIN_CATEGORIES'     => 'Elenco categorie',
     'LAN_RACERS_ADMIN_CATEGORIES_ADD' => 'Aggiungi categoria',
-    // Scorciatoie del menu amministrativo cross-plugin spostate in raceevent_admin_links
-    // (didascalie: LAN_RACEEVENT_LINK_*).
+    // Cross-plugin admin-menu shortcuts: raceevent_admin_links (LAN_RACEEVENT_LINK_*).
 );
